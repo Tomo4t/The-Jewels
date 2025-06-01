@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    // Apply theme before rendering
+    const theme = localStorage.getItem('theme');
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Jewels</title>
+  <link rel="stylesheet" href="css/navbar.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&family=Noto+Sans+Arabic&family=Noto+Sans+JP&display=swap" rel="stylesheet" />
+</head>
+
+<body style="display: none">
+  <div id="bg-image">
+    <img src="images/HomeBackground.png" alt="Background" />
+  </div>
+  <canvas id="particle-canvas"></canvas>
+  <div id="gradient-overlay"></div>
+
+  <header class="navbar">
+    <div class="nav-left">
+      <button class="icon-btn" data-page="home" title="Go Home">
+        <img src="images/home.svg" alt="Home" />
+      </button>
+      <button class="icon-btn" data-page="chapters" title="All Chapters">
+        <img src="images/chapters.svg" alt="Chapters" />
+      </button>
+      <button class="icon-btn" data-page="contact" title="Contact Me">
+        <img src="images/contact.svg" alt="Contact" />
+      </button>
+    </div>
+
+    <div class="nav-title">
+      <span class="nav-title" data-i18n="title">The Jewels</span>
+    </div>
+
+    <div class="nav-right">
+      <div class="dropdown">
+        <button class="icon-btn" id="language-toggle" title="Language"
+          onclick="const s=new Audio('audio/click.mp3'); s.volume=0.3; if(localStorage.getItem('sound')!=='off') s.play()">
+          <img src="images/language.svg" alt="Language" />
+        </button>
+        <ul class="dropdown-menu" id="language-menu">
+          <li><a href="#" data-lang="en" data-sound="slide">English</a></li>
+          <li><a href="#" data-lang="ar" data-sound="slide">العربية</a></li>
+          <li><a href="#" data-lang="ja" data-sound="slide">日本語</a></li>
+        </ul>
+      </div>
+
+      <button class="icon-btn" id="theme-toggle" title="Toggle Theme" aria-label="Toggle Theme">
+        <svg id="theme-icon" viewBox="0 0 100 60" width="48" height="32" xmlns="http://www.w3.org/2000/svg">
+          <rect class="switch-bg" x="5" y="10" rx="15" ry="15" width="90" height="40" />
+          <circle class="switch-knob" cx="30" cy="30" r="10" />
+        </svg>
+      </button>
+
+      <button class="icon-btn" title="Toggle Sound" id="sound-toggle">
+        <img src="images/sound.svg" alt="Sound" />
+      </button>
+    </div>
+  </header>
+
+  <main id="page-content" class="page-hidden"></main>
+
+  <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/router.js"></script>
+  <script>
+    // Prevent flicker until fully ready
+    window.addEventListener('DOMContentLoaded', () => {
+      document.body.style.display = 'block';
+    });
+  </script>
+</body>
+</html>
