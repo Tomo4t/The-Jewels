@@ -1,0 +1,547 @@
+
+:root {
+  /* Gradients */
+  --gradient-home: linear-gradient(135deg, #d4af37, #a471c2); /* gold to violet */
+  --gradient-contact: linear-gradient(135deg, #a471c2, #40e0d0); /* violet to turquoise */
+  --gradient-chapters: linear-gradient(135deg, #a471c2, #d4af37); /* gold to violet */
+  --gradient-default: linear-gradient(135deg, #f9f5ec, #a471c2); /* soft beige to violet */
+}
+
+html.dark {
+  --gradient-home: linear-gradient(135deg, #7a4fcf, #3ccfcf); /* violet to turquoise */
+  --gradient-contact: linear-gradient(135deg, #7a4fcf, #c19c52); /* violet to soft gold */
+  --gradient-chapters: linear-gradient(135deg, #5784be, #be3ccf); /* gold to turquoise */
+  --gradient-default: linear-gradient(135deg, #1c1b22, #7a4fcf); /* near-black to violet */
+}
+
+
+
+:root {
+  /* Base Colors (Light Mode) */
+  --color-bg: #fdf9ef;
+  --color-surface: #f5f0e6;
+  --color-text: #2c1e00;
+  --color-text-muted: #7a5f30;
+
+  --color-updates-heading: #000000;
+  --color-updates-text: #000000;
+
+  --color-selection: #d8882c ;
+  --color-selection-text: #ffffff ;
+  
+  /* Navbar */
+  /* Navbar */
+  --color-navbar: #b18e3c;
+  --color-title-bg: #d4af37;
+  --color-title-text: #faf6e9;
+
+  /* Buttons & Icons */
+  --color-icon: brightness(0) invert(1);
+  --color-icon-hover: brightness(0) invert(0.4);
+  --color-sound-muted: brightness(0) invert(0.6);
+
+  /* Dropdown */
+  --color-dropdown-bg: #f1e7c8;
+  --color-dropdown-border: #b48e2c;
+  --color-dropdown-hover: #dfc167;
+
+  /* Footer */
+  --color-footer-bg: #eae1d0;
+  --color-footer-text: #7e673c;
+  --color-footer-link: #a4823f;
+  --color-footer-link-hover: #40e0d0; /* subtle turquoise touch */
+
+  /* Accent / UI Highlights */
+  --color-accent: #d4af37;
+  --color-accent-hover: #40e0d0; /* turquoise accent on hover only */
+}
+
+body.dark {
+  --color-bg: #1f1a27;
+  --color-surface: #5f3e7a;
+  --color-text: #000000;
+  --color-text-muted: #453055;
+
+ --color-selection: #d82cd8 ;
+  --color-selection-text: #020202 ;
+
+  --color-updates-heading: #fff;
+  --color-updates-text: #fff;
+
+  --color-navbar: #5f3e7a;
+  --color-title-bg: #38275c;
+  --color-title-text: #ffffff;
+
+  --color-icon: brightness(0) invert(0.1);
+  --color-icon-hover: brightness(0) invert(0.85);
+  --color-sound-muted: brightness(0.1) invert(0.25);
+
+  --color-dropdown-bg: #3a2e4e;
+  --color-dropdown-border: #654f80;
+  --color-dropdown-hover: #8365b3;
+
+  --color-footer-bg: #2c223a;
+  --color-footer-text: #c7b0e2;
+  --color-footer-link: #b699dd;
+  --color-footer-link-hover: #40e0d0; /* small turquoise pop */
+
+  --color-accent: #a471c2;
+  --color-accent-hover: #40e0d0; /* turquoise just on hover */
+}
+
+a {
+  text-decoration: none;
+}
+@keyframes fadeInSmooth {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeInSmooth 0.6s ease-out forwards;
+}
+.animate-click {
+  animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+  0%   { transform: rotate(0); }
+  25%  { transform: rotate(5deg); }
+  50%  { transform: rotate(-5deg); }
+  75%  { transform: rotate(3deg); }
+  100% { transform: rotate(0); }
+}
+html {
+  overflow-y: scroll;   
+  scrollbar-width: none; 
+}
+
+body::-webkit-scrollbar {
+  display: none;        
+}
+
+#particle-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  display: block;
+}
+
+#gradient-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  display: grid;
+}
+
+.gradient-layer {
+  position: absolute;
+  inset: 0;
+  transition: opacity 1s ease;
+  opacity: 0;
+  z-index: 0;
+}
+
+.gradient-layer.active {
+  opacity: 1;
+  z-index: 1;
+}
+
+
+/* RESET + BASE */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+/* SVG respects palette-based coloring */
+#theme-icon .switch-bg {
+  fill: var(--color-navbar);
+  stroke: var(--color-bg);
+  stroke-width: 8;
+  transition: all 0.3s ease;
+}
+
+#theme-icon .switch-knob {
+  fill: var(--color-bg);
+  transition: all 0.3s ease;
+}
+
+/* Animate knob position and recolor on dark mode */
+body.dark #theme-icon .switch-knob {
+  cx: 70;
+  fill: var(--color-text);
+}
+
+body.dark #theme-icon .switch-bg {
+  fill: var(--color-surface);
+  stroke: var(--color-text);
+}
+body {
+  overflow-x: hidden;
+  font-family: 'Noto Sans Rounded', 'Noto Sans Arabic', 'Noto Sans JP', sans-serif;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* Smooth transition for theme toggle */
+body {
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+.navbar,
+.nav-title,
+.dropdown-menu,
+footer,
+.button-accent {
+  transition: background-color 0.4s ease, color 0.4s ease, filter 0.4s ease;
+}
+
+.icon-btn img {
+  transition: transform 0.2s ease, filter 0.4s ease;
+}
+
+.navbar {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--color-navbar);
+  padding: 10px 20px;
+  height: 60px;
+
+  /* prevent squeeze causing misalignment */
+  min-width: 0;
+  
+}
+
+
+
+.nav-left,
+.nav-right {
+  display: flex;
+  gap: 14px;
+}
+
+.nav-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  background-color: var(--color-title-bg);
+  color: var(--color-title-text);
+  padding: 0 12px;
+  border-radius: 5px;
+  white-space: nowrap;
+  
+  display: flex;
+  align-items: center;
+
+  flex-shrink: 0;
+  max-width: 100%;
+  margin: 0 auto; /* <--- Center it between the left/right sections */
+}
+
+
+/* ICON BUTTONS */
+.icon-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+}
+
+.icon-btn img {
+  width: 32px;
+  height: 32px;
+  filter: var(--color-icon);
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.icon-btn:hover img {
+  transform: scale(1.1);
+  filter: var(--color-icon-hover);
+}
+
+/* DROPDOWN */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  z-index: 999;
+  min-width: 140px;
+
+  padding: 6px 0;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  background-color: rgba(30, 30, 30, 0.6); /* translucent dark */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  transition: opacity 0.3s ease, transform 0.2s ease;
+
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+}
+
+.dropdown.show .dropdown-menu {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.dropdown-menu li {
+  list-style: none;
+}
+
+.dropdown-menu li a {
+  display: block;
+  padding: 10px 16px;
+  color: white;
+  text-decoration: none;
+  font-size: 0.95rem;
+  text-align: left;
+  transition: background 0.2s ease;
+}
+
+.dropdown-menu li a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* SOUND TOGGLE */
+#sound-toggle.active img {
+  filter: var(--color-sound-muted);
+}
+
+/* FOOTER (if used) */
+footer {
+  background-color: var(--color-footer-bg);
+  color: var(--color-footer-text);
+  padding: 20px;
+  text-align: center;
+}
+
+footer a {
+  color: var(--color-footer-link);
+  text-decoration: none;
+}
+
+footer a:hover {
+  color: var(--color-footer-link-hover);
+}
+
+/* ACCENT BUTTON (if used) */
+.button-accent {
+  background-color: var(--color-accent);
+  color: #000;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 4px;
+}
+
+.button-accent:hover {
+  background-color: var(--color-accent-hover);
+}
+
+/* Shake animation for the mute button */
+@keyframes shake {
+  0% { transform: translate(0); }
+  25% { transform: translate(2px, 1px); }
+  50% { transform: translate(-2px, -1px); }
+  75% { transform: translate(2px, 2px); }
+  100% { transform: translate(0); }
+}
+
+#sound-toggle.animate-click {
+  animation: shake 0.2s ease;
+}
+
+/* Press-in and spring-out animation for other buttons */
+.icon-btn:active {
+  transform: scale(0.95);
+  transition: transform 0.1s ease;
+}
+
+.icon-btn.release-pop {
+  transform: scale(1.05);
+  transition: transform 0.1s ease;
+}
+
+.icon-btn {
+  position: relative;
+  transition: transform 0.1s ease;
+}
+
+#language-toggle.disabled {
+  opacity: 0.3;
+  pointer-events: auto;
+  animation: shake 0.2s ease;
+}
+
+#background-layer {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+}
+
+#particles {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+#bg-image {
+  position: fixed;
+  inset: 0;
+  z-index: -3; /* Behind particles and gradient */
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#bg-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.6; /* Optional: blend with gradient */
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html, body {
+    cursor: url('../images/cursor.svg'), default;
+  }
+
+  a, button, .icon-btn, .chapter-box {
+    cursor: url('../images/cursor-pointer.svg'), pointer;
+  }
+
+ input, textarea, [contenteditable="true"], 
+  ::selection, 
+  ::-moz-selection {
+    cursor: url('../images/cursor-text.svg'), text !important;
+  }
+::selection {
+  background: var(--color-selection);
+  color:var(--color-selection-text);
+}
+  body.loading,
+  html.loading {
+    cursor: url('../images/cursor-loading.svg'), progress !important;
+  }
+}
+
+html {
+  font-size: 16px;
+}
+@media (max-width: 768px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 600px) {
+  .navbar {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 8px 12px;
+  }
+
+  
+  .nav-title {
+    height: 100%;
+    font-size: 1.4rem;
+    padding: 3px 8px;
+  }
+
+  .nav-left,
+  .nav-right {
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .icon-btn img {
+    width: 35px;
+  }
+
+  .dropdown-menu {
+    min-width: 100%;
+    right: 0;
+    left: auto;
+  }
+
+  .reader-toggle {
+    flex-direction: row;
+    gap: 6px;
+    justify-content: center;
+    max-width: 100%;
+  }
+
+  .mode-btn {
+    width: 30px;
+    height: 30px;
+  }
+
+  
+}
+
+
+@media (max-width: 480px) {
+  html {
+    font-size: 14px;
+  }
+
+    .icon-btn img {
+    width: 27px;
+  }
+}
+
+@media (max-width: 400px) {
+  .nav-title {
+    font-size: 1.2rem;
+    padding: 0 8px;
+  }
+    .icon-btn img {
+    width: 24px;
+  }
+  .nav-left,
+  .nav-right {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 360px) {
+  .nav-title {
+    font-size: 0.9rem;
+    padding: 0 6px;
+  }
+   .icon-btn img {
+    width: 20px;
+  }
+  .nav-left,
+  .nav-right {
+    gap: 4px;
+  }
+}
