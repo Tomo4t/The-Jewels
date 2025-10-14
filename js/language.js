@@ -1,4 +1,5 @@
 import { loadUpdates } from './updates.js';
+import { refreshHomeDynamicSections } from './pages/home.js';
 
 export async function initLanguageSelector() {
   const dropdown = document.querySelector('.dropdown');
@@ -44,6 +45,12 @@ export async function initLanguageSelector() {
 
       applyLanguage(lang);
       dropdown.classList.remove('show');
+      const navRight = document.querySelector('.nav-right');
+      if (navRight?.classList.contains('open')) {
+        navRight.classList.remove('open');
+        document.getElementById('nav-right-menu')?.setAttribute('aria-expanded', 'false');
+      }
+      window.dispatchEvent(new Event('resize'));
     });
   });
 
@@ -69,6 +76,10 @@ async function applyLanguage(lang) {
     loadUpdates(null, lang);
   } catch (err) {
     console.error(`Could not load lang/${lang}.json`, err);
+  }
+  const currentPage = location.hash ? location.hash.replace(/^#/, '').split('?')[0] : 'home';
+  if (!currentPage || currentPage === 'home') {
+    refreshHomeDynamicSections(lang);
   }
   if (location.hash === '#chapters') {
   const content = document.getElementById('page-content');
