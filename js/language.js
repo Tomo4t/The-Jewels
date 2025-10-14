@@ -14,14 +14,22 @@ export async function initLanguageSelector() {
 
   updatedToggle.addEventListener('click', (e) => {
     e.stopPropagation();
+    document.querySelectorAll('.language-dropdown.show').forEach(openDropdown => {
+      if (openDropdown !== dropdown) {
+        openDropdown.classList.remove('show');
+      }
+    });
     dropdown.classList.toggle('show');
-    window.dispatchEvent(new Event('navbar:invalidate'));
   });
 
-  document.addEventListener('click', () => {
-    dropdown.classList.remove('show');
-    window.dispatchEvent(new Event('navbar:invalidate'));
-  });
+  if (!document.body.dataset.languageDismissBound) {
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.language-dropdown.show').forEach(openDropdown => {
+        openDropdown.classList.remove('show');
+      });
+    });
+    document.body.dataset.languageDismissBound = 'true';
+  }
 
   // Bind links after cloning
   const langLinks = document.querySelectorAll('#language-menu a');

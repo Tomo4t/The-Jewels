@@ -131,28 +131,24 @@ function setupOverflow(navbar, navRight, overflowToggle) {
   const evaluateOverflow = () => {
     if (!overflowToggle) return;
 
+    const wasOpen = navRight.classList.contains('open');
+
     // Reset layout so measurements are accurate
     restoreInline();
     navbar.classList.remove('nav-collapsed');
-    navRight.classList.remove('open');
-    overflowToggle.setAttribute('aria-expanded', 'false');
+    overflowToggle.setAttribute('aria-expanded', wasOpen ? 'true' : 'false');
     overflowToggle.setAttribute('aria-hidden', 'true');
     overflowToggle.hidden = true;
     overflowList.setAttribute('aria-hidden', 'true');
 
     const navRect = navbar.getBoundingClientRect();
     const styles = getComputedStyle(navbar);
-    const paddingLeft = parseFloat(styles.paddingLeft || '0');
     const paddingRight = parseFloat(styles.paddingRight || '0');
 
-    const navLeftWidth = navLeft ? navLeft.getBoundingClientRect().width : 0;
-    const navTitleWidth = navTitle ? navTitle.getBoundingClientRect().width : 0;
-    const controlsWidth = inlineList.getBoundingClientRect().width;
-
-    const availableWidth = navRect.width - paddingLeft - paddingRight - navLeftWidth - navTitleWidth;
+    const inlineRect = inlineList.getBoundingClientRect();
+    const availableRight = navRect.right - paddingRight;
     const inlineOverflow = inlineList.scrollWidth - inlineList.clientWidth > 1;
-
-    const collapsed = inlineOverflow || controlsWidth - availableWidth > 1;
+    const collapsed = inlineOverflow || inlineRect.right - availableRight > 1;
     isCollapsed = collapsed;
     navbar.classList.toggle('nav-collapsed', collapsed);
 
@@ -162,11 +158,11 @@ function setupOverflow(navbar, navRight, overflowToggle) {
 
     if (collapsed) {
       moveToOverflow();
+      if (wasOpen) {
+        navRight.classList.add('open');
+      }
     } else {
       restoreInline();
-    }
-
-    if (!collapsed) {
       navRight.classList.remove('open');
     }
 
