@@ -140,17 +140,19 @@ function setupOverflow(navbar, navRight, overflowToggle) {
     overflowToggle.hidden = true;
     overflowList.setAttribute('aria-hidden', 'true');
 
+    const navRect = navbar.getBoundingClientRect();
     const styles = getComputedStyle(navbar);
-    const horizontalPadding = parseFloat(styles.paddingLeft || '0') + parseFloat(styles.paddingRight || '0');
+    const paddingLeft = parseFloat(styles.paddingLeft || '0');
+    const paddingRight = parseFloat(styles.paddingRight || '0');
 
-    const controlsWidth = inlineList.scrollWidth || inlineList.offsetWidth || 0;
-    const totalWidth =
-      (navLeft?.offsetWidth || 0) +
-      (navTitle?.offsetWidth || 0) +
-      controlsWidth +
-      horizontalPadding;
+    const navLeftWidth = navLeft ? navLeft.getBoundingClientRect().width : 0;
+    const navTitleWidth = navTitle ? navTitle.getBoundingClientRect().width : 0;
+    const controlsWidth = inlineList.getBoundingClientRect().width;
 
-    const collapsed = Math.ceil(totalWidth) > Math.floor(navbar.clientWidth);
+    const availableWidth = navRect.width - paddingLeft - paddingRight - navLeftWidth - navTitleWidth;
+    const inlineOverflow = inlineList.scrollWidth - inlineList.clientWidth > 1;
+
+    const collapsed = inlineOverflow || controlsWidth - availableWidth > 1;
     isCollapsed = collapsed;
     navbar.classList.toggle('nav-collapsed', collapsed);
 
