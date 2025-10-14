@@ -66,7 +66,7 @@ async function applyLanguage(lang) {
 
     document.documentElement.setAttribute('lang', lang);
     localStorage.setItem('language', lang);
-    loadUpdates(1, lang);
+    loadUpdates(null, lang);
   } catch (err) {
     console.error(`Could not load lang/${lang}.json`, err);
   }

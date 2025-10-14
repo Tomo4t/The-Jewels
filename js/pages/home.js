@@ -1,3 +1,9 @@
+const LATEST_CHAPTER_LABELS = {
+  en: 'Latest Chapter',
+  ar: 'أحدث فصل',
+  ja: '最新話'
+};
+
 export default function renderHome() {
   setTimeout(() => {
     const lang = localStorage.getItem('language') || 'en';
@@ -5,7 +11,7 @@ export default function renderHome() {
     loadContinuePreview(lang);
   }, 0);
 
-return `
+  return `
   <div class="home-layout" style="opacity: 0;">
     <section id="updates" class="updates-box">
       <h3 data-i18n="updatesTitle">Updates</h3>
@@ -45,10 +51,12 @@ async function loadLatestChapter(lang) {
 
     const meta = await fetch(`chapters/${lang}/chapter${latest}/meta.json`).then(r => r.json());
 
+    const label = LATEST_CHAPTER_LABELS[lang] || LATEST_CHAPTER_LABELS.en;
+
     document.getElementById('latest').innerHTML = `
       <a href="#reader?lang=${lang}&chapter=${latest}&page=0" class="latest-cover-link">
         <img src="chapters/${lang}/chapter${latest}/page0.jpg" alt="${meta.title}" class="cover-img">
-        <div class="cover-title">${meta.title}</div>
+        <div class="cover-title"><span data-i18n="latestChapterLabel">${label}</span>: ${meta.title}</div>
       </a>
     `;
   } catch (e) {

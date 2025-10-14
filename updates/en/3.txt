@@ -1,0 +1,3 @@
+2024-06-01
+Reader refresh: flip, scroll, and card modes now share the same navigation controls.
+Your preferred viewing style and last-read page are saved per language.
