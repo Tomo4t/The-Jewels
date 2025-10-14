@@ -7,13 +7,57 @@ clickSound.volume = 0.3;
 export function initNavbar() {
   const themeBtn = document.getElementById("theme-toggle");
   const soundBtn = document.getElementById("sound-toggle");
-  const langBtn = document.getElementById("language-toggle");
+  const navRight = document.querySelector(".nav-right");
+  const navRightActions = document.getElementById("nav-right-actions");
+  const navMenuBtn = document.getElementById("nav-right-menu");
+  const navDropdown = document.querySelector(".nav-right .dropdown");
+  let closeNavMenu = null;
 
   if (!themeBtn || !soundBtn) return;
+
+  if (navRight && navRightActions && navMenuBtn && !navMenuBtn.dataset.bound) {
+    const closeMenu = () => {
+      navRight.classList.remove("open");
+      navMenuBtn.setAttribute("aria-expanded", "false");
+      navDropdown?.classList.remove("show");
+    };
+    closeNavMenu = closeMenu;
+
+    navMenuBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const willOpen = !navRight.classList.contains("open");
+      navRight.classList.toggle("open", willOpen);
+      navMenuBtn.setAttribute("aria-expanded", willOpen ? "true" : "false");
+      if (!willOpen) {
+        navDropdown?.classList.remove("show");
+      }
+    });
+
+    navRightActions.addEventListener("click", (event) => {
+      if (navRight.classList.contains("open")) {
+        event.stopPropagation();
+      }
+    });
+
+    document.addEventListener("click", () => {
+      if (navRight.classList.contains("open")) {
+        closeMenu();
+      }
+    });
+
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 720 && navRight.classList.contains("open")) {
+        closeMenu();
+      }
+    });
+
+    navMenuBtn.dataset.bound = "true";
+  }
 
   // === Theme Toggle ===
   if (!themeBtn.dataset.bound) {
     themeBtn.addEventListener("click", () => {
+      closeNavMenu?.();
       document.body.classList.add("transition-gradient");
 
       setTimeout(() => {
@@ -56,6 +100,7 @@ export function initNavbar() {
       }
 
       bindButtonEffects(); // Re-bind with updated state
+      closeNavMenu?.();
     });
 
     soundBtn.dataset.bound = "true";

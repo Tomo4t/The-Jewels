@@ -234,7 +234,18 @@ footer,
 .nav-left,
 .nav-right {
   display: flex;
+  align-items: center;
   gap: 14px;
+}
+
+.nav-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.nav-right-menu {
+  display: none;
 }
 
 .nav-title {
@@ -462,6 +473,76 @@ html {
   }
 }
 
+@media (max-width: 720px) {
+  .nav-right {
+    position: relative;
+  }
+
+  .nav-right-menu {
+    display: flex;
+  }
+
+  .nav-right-actions {
+    display: none;
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    width: min(220px, calc(100vw - 32px));
+    border-radius: 14px;
+    background-color: var(--color-dropdown-bg);
+    border: 1px solid var(--color-dropdown-border);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(14px);
+    z-index: 1000;
+  }
+
+  .nav-right.open .nav-right-actions {
+    display: flex;
+  }
+
+  .nav-right-actions .dropdown {
+    align-self: stretch;
+  }
+
+  .nav-right-actions .dropdown-menu {
+    position: static;
+    width: 100%;
+    margin-top: 8px;
+    opacity: 0;
+    pointer-events: none;
+    transform: none;
+    max-height: 0;
+    overflow: hidden;
+    padding: 0;
+    border-radius: 10px;
+    box-shadow: none;
+    transition: max-height 0.3s ease, opacity 0.2s ease;
+  }
+
+  .nav-right-actions .dropdown.show .dropdown-menu {
+    opacity: 1;
+    pointer-events: auto;
+    max-height: 240px;
+    padding: 6px 0;
+  }
+
+  .nav-right-actions .dropdown-menu li a {
+    color: #2c1e00;
+  }
+
+  html.dark .nav-right-actions .dropdown-menu li a {
+    color: #fff;
+  }
+
+  .nav-right-actions .dropdown-menu li a:hover {
+    background-color: var(--color-dropdown-hover);
+  }
+}
+
 @media (max-width: 600px) {
   .navbar {
     flex-wrap: wrap;
@@ -469,17 +550,20 @@ html {
     padding: 8px 12px;
   }
 
-  
+
   .nav-title {
     height: 100%;
     font-size: 1.4rem;
     padding: 3px 8px;
   }
 
-  .nav-left,
-  .nav-right {
+  .nav-left {
     gap: 10px;
     flex-wrap: wrap;
+  }
+
+  .nav-right-actions {
+    gap: 10px;
   }
 
   .icon-btn img {

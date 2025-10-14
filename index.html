@@ -41,28 +41,34 @@
     </div>
 
     <div class="nav-right">
-      <div class="dropdown">
-        <button class="icon-btn" id="language-toggle" title="Language"
-          onclick="const s=new Audio('audio/click.mp3'); s.volume=0.3; if(localStorage.getItem('sound')!=='off') s.play()">
-          <img src="images/language.svg" alt="Language" />
+      <button class="icon-btn nav-right-menu" id="nav-right-menu" title="Menu" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav-right-actions">
+        <img src="images/menu.svg" alt="Menu" />
+      </button>
+
+      <div class="nav-right-actions" id="nav-right-actions">
+        <div class="dropdown">
+          <button class="icon-btn" id="language-toggle" title="Language"
+            onclick="const s=new Audio('audio/click.mp3'); s.volume=0.3; if(localStorage.getItem('sound')!=='off') s.play()">
+            <img src="images/language.svg" alt="Language" />
+          </button>
+          <ul class="dropdown-menu" id="language-menu">
+            <li><a href="#" data-lang="en" data-sound="slide">English</a></li>
+            <li><a href="#" data-lang="ar" data-sound="slide">العربية</a></li>
+            <li><a href="#" data-lang="ja" data-sound="slide">日本語</a></li>
+          </ul>
+        </div>
+
+        <button class="icon-btn" id="theme-toggle" title="Toggle Theme" aria-label="Toggle Theme">
+          <svg id="theme-icon" viewBox="0 0 100 60" width="48" height="32" xmlns="http://www.w3.org/2000/svg">
+            <rect class="switch-bg" x="5" y="10" rx="15" ry="15" width="90" height="40" />
+            <circle class="switch-knob" cx="30" cy="30" r="10" />
+          </svg>
         </button>
-        <ul class="dropdown-menu" id="language-menu">
-          <li><a href="#" data-lang="en" data-sound="slide">English</a></li>
-          <li><a href="#" data-lang="ar" data-sound="slide">العربية</a></li>
-          <li><a href="#" data-lang="ja" data-sound="slide">日本語</a></li>
-        </ul>
+
+        <button class="icon-btn" title="Toggle Sound" id="sound-toggle">
+          <img src="images/sound.svg" alt="Sound" />
+        </button>
       </div>
-
-      <button class="icon-btn" id="theme-toggle" title="Toggle Theme" aria-label="Toggle Theme">
-        <svg id="theme-icon" viewBox="0 0 100 60" width="48" height="32" xmlns="http://www.w3.org/2000/svg">
-          <rect class="switch-bg" x="5" y="10" rx="15" ry="15" width="90" height="40" />
-          <circle class="switch-knob" cx="30" cy="30" r="10" />
-        </svg>
-      </button>
-
-      <button class="icon-btn" title="Toggle Sound" id="sound-toggle">
-        <img src="images/sound.svg" alt="Sound" />
-      </button>
     </div>
   </header>
 
