@@ -7,5 +7,7 @@
   "contactTitle": "著者のすべての公式ソーシャルメディアサイト",
   "latestChapterLabel": "最新話",
   "continueReadingLabel": "続きを読む",
-  "pageLabel": "ページ"
+  "pageLabel": "ページ",
+  "updatesLoading": "更新を読み込み中…",
+  "updatesEmpty": "更新が見つかりません。"
 }

@@ -175,12 +175,13 @@ body::-webkit-scrollbar {
 
 #theme-icon .switch-knob {
   fill: var(--color-bg);
-  transition: all 0.3s ease;
+  transform: translateX(0);
+  transition: transform 0.3s ease, fill 0.3s ease;
 }
 
 /* Animate knob position and recolor on dark mode */
 html.dark #theme-icon .switch-knob {
-  cx: 70;
+  transform: translateX(40px);
   fill: var(--color-text);
 }
 
@@ -196,6 +197,12 @@ body {
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
+}
+
+body.transition-gradient,
+body.transition-gradient * {
+  transition: background-color 0.35s ease, color 0.35s ease, fill 0.35s ease,
+    border-color 0.35s ease, filter 0.35s ease;
 }
 
 /* Smooth transition for theme toggle */
@@ -265,9 +272,9 @@ footer,
   right: 0;
   flex-direction: column;
   align-items: flex-start;
-  gap: 12px;
-  padding: 16px;
-  width: min(220px, calc(100vw - 32px));
+  gap: 10px;
+  padding: 10px 12px;
+  width: min(164px, calc(100vw - 48px));
   border-radius: 14px;
   background-color: var(--color-dropdown-bg);
   border: 1px solid var(--color-dropdown-border);
@@ -275,6 +282,9 @@ footer,
   backdrop-filter: blur(14px);
   z-index: 1000;
   text-align: left;
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .navbar.is-collapsed .nav-right-actions.is-open {
@@ -309,8 +319,9 @@ footer,
 .navbar.is-collapsed .nav-right-actions .dropdown.show .dropdown-menu {
   opacity: 1;
   pointer-events: auto;
-  max-height: 240px;
+  max-height: min(420px, 70vh);
   padding: 6px 0;
+  overflow-y: auto;
 }
 
 .navbar.is-collapsed .nav-right-actions .dropdown-menu li a {

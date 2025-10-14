@@ -1,3 +1,5 @@
+import { getTranslation } from './i18n.js';
+
 let updates = [];
 let currentIndex = 0;
 let configLoaded = false;
@@ -43,7 +45,8 @@ export async function loadUpdates(maxUpdates = null, lang = 'en') {
   const counter = document.getElementById('update-counter');
 
   box.classList.remove('fade-out');
-  box.innerHTML = '<div class="update-loading">Loading updates…</div>';
+  const loadingLabel = escapeHTML(getTranslation('updatesLoading', 'Loading updates…'));
+  box.innerHTML = `<div class="update-loading">${loadingLabel}</div>`;
   if (counter) {
     counter.textContent = '0 / 0';
   }
@@ -117,7 +120,7 @@ export async function loadUpdates(maxUpdates = null, lang = 'en') {
   if (updates.length > 0) {
     showUpdate(0);
   } else {
-    box.textContent = 'No updates found.';
+    box.textContent = getTranslation('updatesEmpty', 'No updates found.');
   }
 
   const prev = document.getElementById('update-prev');
