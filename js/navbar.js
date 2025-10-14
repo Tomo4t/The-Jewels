@@ -19,6 +19,24 @@ export function initNavbar() {
 
   if (!themeBtn || !soundBtn) return;
 
+  const syncMenuHiddenState = (isCollapsed, isOpen) => {
+    if (!navRightActions) return;
+
+    if (!isCollapsed) {
+      navRightActions.hidden = false;
+      navRightActions.removeAttribute("aria-hidden");
+      return;
+    }
+
+    if (isOpen) {
+      navRightActions.hidden = false;
+      navRightActions.setAttribute("aria-hidden", "false");
+    } else {
+      navRightActions.hidden = true;
+      navRightActions.setAttribute("aria-hidden", "true");
+    }
+  };
+
   const applyCollapsedState = (collapsed) => {
     if (!navbar) return;
 
@@ -37,10 +55,12 @@ export function initNavbar() {
 
     if (collapsed) {
       navRightActions?.classList.remove("is-open");
+      syncMenuHiddenState(true, false);
     } else {
       navRight?.classList.remove("open");
       navMenuBtn?.setAttribute("aria-expanded", "false");
       navRightActions?.classList.remove("is-open");
+      syncMenuHiddenState(false, false);
     }
   };
 
@@ -95,6 +115,7 @@ export function initNavbar() {
       navMenuBtn.setAttribute("aria-expanded", "false");
       navDropdown?.classList.remove("show");
       navRightActions?.classList.remove("is-open");
+      syncMenuHiddenState(true, false);
     };
     closeNavMenu = closeMenu;
 
@@ -108,6 +129,7 @@ export function initNavbar() {
       navRight.classList.toggle("open", willOpen);
       navRightActions?.classList.toggle("is-open", willOpen);
       navMenuBtn.setAttribute("aria-expanded", willOpen ? "true" : "false");
+      syncMenuHiddenState(true, willOpen);
       if (!willOpen) {
         navDropdown?.classList.remove("show");
       }
