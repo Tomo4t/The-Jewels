@@ -24,6 +24,17 @@ export function initNavbar() {
 
     navbar.classList.toggle("is-collapsed", collapsed);
 
+    if (navMenuBtn) {
+      if (collapsed) {
+        navMenuBtn.hidden = false;
+        navMenuBtn.removeAttribute("aria-hidden");
+      } else {
+        navMenuBtn.hidden = true;
+        navMenuBtn.setAttribute("aria-hidden", "true");
+        navMenuBtn.setAttribute("aria-expanded", "false");
+      }
+    }
+
     if (!collapsed) {
       navRight?.classList.remove("open");
       navMenuBtn?.setAttribute("aria-expanded", "false");
