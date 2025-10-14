@@ -3,10 +3,36 @@ let currentIndex = 0;
 let configLoaded = false;
 let updateConfig = { count: 1, folder: 'updates' };
 
+function escapeHTML(value) {
+  if (value == null) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export async function loadUpdates(maxUpdates = null, lang = 'en') {
   const box = document.getElementById('updates-text');
+  if (!box) return;
+
+  box.textContent = '';
   updates = [];
   currentIndex = 0;
+
+  const prevButton = document.getElementById('update-prev');
+  const nextButton = document.getElementById('update-next');
+
+  if (prevButton) {
+    const clone = prevButton.cloneNode(true);
+    prevButton.parentNode.replaceChild(clone, prevButton);
+  }
+
+  if (nextButton) {
+    const clone = nextButton.cloneNode(true);
+    nextButton.parentNode.replaceChild(clone, nextButton);
+  }
 
   // 🔄 Load config.json once
   if (!configLoaded) {
@@ -30,10 +56,24 @@ export async function loadUpdates(maxUpdates = null, lang = 'en') {
       const res = await fetch(`${folder}/${lang}/${i}.txt`);
       if (res.ok) {
         const text = await res.text();
-        updates.push(text.trim());
+        const raw = text.trim();
+        if (!raw) continue;
+
+        const normalized = raw.replace(/\r\n/g, '\n');
+        const [dateLine = '', ...messageLines] = normalized.split('\n');
+        const message = messageLines.join('\n').trim();
+
+        updates.push({
+          id: i,
+          raw,
+          date: dateLine.trim(),
+          message
+        });
       }
     } catch {}
   }
+
+  updates.sort((a, b) => b.id - a.id);
 
   if (updates.length > 0) {
     showUpdate(currentIndex);
@@ -45,7 +85,7 @@ export async function loadUpdates(maxUpdates = null, lang = 'en') {
     if (currentIndex > 0) {
       currentIndex--;
       showUpdate(currentIndex);
-      
+
     }
   });
 
@@ -53,7 +93,7 @@ export async function loadUpdates(maxUpdates = null, lang = 'en') {
     if (currentIndex < updates.length - 1) {
       currentIndex++;
       showUpdate(currentIndex);
-     
+
     }
   });
 }
@@ -83,19 +123,26 @@ function showUpdate(index) {
   if (!box || !updates.length) return;
 
   const update = updates[index];
+  if (!update) return;
 
   box.classList.add('fade-out');
   setTimeout(() => {
-    if (update.includes('\n')) {
-      const [date, ...messageLines] = update.split('\n');
-      const message = messageLines.join('\n');
+    if (update.date && update.message) {
+      const messageHTML = escapeHTML(update.message)
+        .split('\n')
+        .map(line => line || '&nbsp;')
+        .join('<br>');
 
       box.innerHTML = `
-        <div class="update-date">${formatDate(date)}</div>
-        <div class="update-message">${message}</div>
+        <div class="update-date">${escapeHTML(formatDate(update.date))}</div>
+        <div class="update-message">${messageHTML}</div>
+      `;
+    } else if (update.date) {
+      box.innerHTML = `
+        <div class="update-date">${escapeHTML(formatDate(update.date))}</div>
       `;
     } else {
-      box.textContent = update;
+      box.textContent = update.raw;
     }
 
     box.classList.remove('fade-out');
@@ -105,8 +152,8 @@ function showUpdate(index) {
     }
 
     // ✅ Hide/show arrows without moving them
-    prev.classList.toggle('visible', index > 0);
-    next.classList.toggle('visible', index < updates.length - 1);
+    if (prev) prev.classList.toggle('visible', index > 0);
+    if (next) next.classList.toggle('visible', index < updates.length - 1);
 
   }, 200);
 }
