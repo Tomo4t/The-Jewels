@@ -7,5 +7,7 @@
   "contactTitle": "All official socials for the creator",
   "latestChapterLabel": "Latest Chapter",
   "continueReadingLabel": "Continue Reading",
-  "pageLabel": "Page"
+  "pageLabel": "Page",
+  "updatesLoading": "Loading updates…",
+  "updatesEmpty": "No updates found."
 }

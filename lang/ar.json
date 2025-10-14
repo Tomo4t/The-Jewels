@@ -7,5 +7,7 @@
   "contactTitle": "جميع مواقع التواصل الرسميه للمألف",
   "latestChapterLabel": "أحدث فصل",
   "continueReadingLabel": "تابع القراءة",
-  "pageLabel": "الصفحة"
+  "pageLabel": "الصفحة",
+  "updatesLoading": "جارٍ تحميل التحديثات…",
+  "updatesEmpty": "لا توجد تحديثات."
 }

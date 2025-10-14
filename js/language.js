@@ -1,5 +1,6 @@
 import { loadUpdates } from './updates.js';
 import { refreshHomeDynamicSections } from './pages/home.js';
+import { setTranslations, getTranslation } from './i18n.js';
 
 export async function initLanguageSelector() {
   const dropdown = document.querySelector('.dropdown');
@@ -60,23 +61,32 @@ export async function initLanguageSelector() {
 }
 
 async function applyLanguage(lang) {
+  let translations = {};
+
   try {
     const res = await fetch(`lang/${lang}.json`);
-    const translations = await res.json();
-
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-      const key = el.getAttribute('data-i18n');
-      if (translations[key]) {
-        el.textContent = translations[key];
-      }
-    });
-
-    document.documentElement.setAttribute('lang', lang);
-    localStorage.setItem('language', lang);
-    loadUpdates(null, lang);
+    translations = await res.json();
   } catch (err) {
     console.error(`Could not load lang/${lang}.json`, err);
   }
+
+  setTranslations(lang, translations);
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (!key) return;
+
+    if (!el.hasAttribute('data-i18n-original')) {
+      el.setAttribute('data-i18n-original', el.textContent);
+    }
+
+    const fallback = el.getAttribute('data-i18n-original') || '';
+    el.textContent = getTranslation(key, fallback);
+  });
+
+  document.documentElement.setAttribute('lang', lang);
+  localStorage.setItem('language', lang);
+  loadUpdates(null, lang);
   const currentPage = location.hash ? location.hash.replace(/^#/, '').split('?')[0] : 'home';
   if (!currentPage || currentPage === 'home') {
     refreshHomeDynamicSections(lang);
