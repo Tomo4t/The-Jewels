@@ -1,5 +1,3 @@
-
-import { initRouter } from './router.js';
 export let soundOn = localStorage.getItem("sound") !== "off"; // Global state
 const clickSound = new Audio("audio/click.mp3");
 clickSound.volume = 0.3;
@@ -18,6 +16,41 @@ export function initNavbar() {
   let resizeRaf = null;
 
   if (!themeBtn || !soundBtn) return;
+
+  const syncMenuHiddenState = (isCollapsed, isOpen) => {
+    if (!navRightActions) return;
+
+    const shouldHide = isCollapsed && !isOpen;
+
+    if (shouldHide) {
+      navRightActions.setAttribute("hidden", "");
+      navRightActions.setAttribute("aria-hidden", "true");
+      navRightActions.setAttribute("inert", "");
+    } else {
+      navRightActions.removeAttribute("hidden");
+      navRightActions.removeAttribute("aria-hidden");
+      navRightActions.removeAttribute("inert");
+    }
+  };
+
+  const refreshGradients = () => {
+    document.querySelectorAll("[data-gradient]").forEach((el) => {
+      const gradientName = el.getAttribute("data-gradient");
+      if (!gradientName) return;
+
+      el.style.backgroundImage = "";
+
+      requestAnimationFrame(() => {
+        const newGradient = getComputedStyle(document.documentElement)
+          .getPropertyValue(`--gradient-${gradientName}`)
+          ?.trim();
+
+        if (newGradient) {
+          el.style.backgroundImage = newGradient;
+        }
+      });
+    });
+  };
 
   const applyCollapsedState = (collapsed) => {
     if (!navbar) return;
@@ -42,6 +75,8 @@ export function initNavbar() {
       navMenuBtn?.setAttribute("aria-expanded", "false");
       navRightActions?.classList.remove("is-open");
     }
+
+    syncMenuHiddenState(collapsed, false);
   };
 
   const shouldCollapseNavbar = () => {
@@ -95,6 +130,7 @@ export function initNavbar() {
       navMenuBtn.setAttribute("aria-expanded", "false");
       navDropdown?.classList.remove("show");
       navRightActions?.classList.remove("is-open");
+      syncMenuHiddenState(navbar?.classList.contains("is-collapsed"), false);
     };
     closeNavMenu = closeMenu;
 
@@ -108,6 +144,7 @@ export function initNavbar() {
       navRight.classList.toggle("open", willOpen);
       navRightActions?.classList.toggle("is-open", willOpen);
       navMenuBtn.setAttribute("aria-expanded", willOpen ? "true" : "false");
+      syncMenuHiddenState(isCollapsed, willOpen);
       if (!willOpen) {
         navDropdown?.classList.remove("show");
       }
@@ -131,29 +168,22 @@ export function initNavbar() {
   // === Theme Toggle ===
   if (!themeBtn.dataset.bound) {
     themeBtn.addEventListener("click", () => {
-      closeNavMenu?.();
       document.body.classList.add("transition-gradient");
 
+      const isDark = document.documentElement.classList.toggle("dark");
+      const theme = isDark ? "dark" : "light";
+      localStorage.setItem("theme", theme);
+
+      requestAnimationFrame(() => {
+        refreshGradients();
+        window.dispatchEvent(
+          new CustomEvent("themechange", { detail: { theme } })
+        );
+      });
+
       setTimeout(() => {
-        document.documentElement.classList.toggle("dark");
         document.body.classList.remove("transition-gradient");
-
-        const theme = document.documentElement.classList.contains("dark") ? "dark" : "light";
-        localStorage.setItem("theme", theme);
-        location.reload();
-
-        // 🔁 Force reapply gradient on all gradient-based sections
-        document.querySelectorAll("[data-gradient]").forEach(el => {
-          const gradientName = el.getAttribute("data-gradient");
-          el.style.backgroundImage = ""; // Reset
-          requestAnimationFrame(() => {
-            const newGradient = getComputedStyle(document.documentElement)
-              .getPropertyValue(`--gradient-${gradientName}`)?.trim();
-            el.style.backgroundImage = newGradient || "";
-          });
-        });
-      }, 300);
-
+      }, 350);
     });
     themeBtn.dataset.bound = "true";
   }
@@ -174,7 +204,6 @@ export function initNavbar() {
       }
 
       bindButtonEffects(); // Re-bind with updated state
-      closeNavMenu?.();
     });
 
     soundBtn.dataset.bound = "true";
