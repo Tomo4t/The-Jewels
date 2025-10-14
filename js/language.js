@@ -1,4 +1,5 @@
 import { loadUpdates } from './updates.js';
+import { refreshHomeDynamicSections } from './pages/home.js';
 
 export async function initLanguageSelector() {
   const dropdown = document.querySelector('.dropdown');
@@ -69,6 +70,10 @@ async function applyLanguage(lang) {
     loadUpdates(null, lang);
   } catch (err) {
     console.error(`Could not load lang/${lang}.json`, err);
+  }
+  const currentPage = location.hash ? location.hash.replace(/^#/, '').split('?')[0] : 'home';
+  if (!currentPage || currentPage === 'home') {
+    refreshHomeDynamicSections(lang);
   }
   if (location.hash === '#chapters') {
   const content = document.getElementById('page-content');
