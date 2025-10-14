@@ -8,12 +8,72 @@ export function initNavbar() {
   const themeBtn = document.getElementById("theme-toggle");
   const soundBtn = document.getElementById("sound-toggle");
   const navRight = document.querySelector(".nav-right");
+  const navbar = document.querySelector(".navbar");
+  const navLeft = document.querySelector(".nav-left");
+  const navTitle = document.querySelector("header .nav-title");
   const navRightActions = document.getElementById("nav-right-actions");
   const navMenuBtn = document.getElementById("nav-right-menu");
   const navDropdown = document.querySelector(".nav-right .dropdown");
   let closeNavMenu = null;
+  let resizeRaf = null;
 
   if (!themeBtn || !soundBtn) return;
+
+  const applyCollapsedState = (collapsed) => {
+    if (!navbar) return;
+
+    navbar.classList.toggle("is-collapsed", collapsed);
+
+    if (!collapsed) {
+      navRight?.classList.remove("open");
+      navMenuBtn?.setAttribute("aria-expanded", "false");
+    }
+  };
+
+  const shouldCollapseNavbar = () => {
+    if (!navbar || !navLeft || !navTitle || !navRightActions) {
+      return window.innerWidth <= 640;
+    }
+
+    const navbarStyles = getComputedStyle(navbar);
+    const horizontalPadding =
+      parseFloat(navbarStyles.paddingLeft || "0") +
+      parseFloat(navbarStyles.paddingRight || "0");
+
+    const availableWidth = navbar.clientWidth - horizontalPadding;
+    const leftWidth = navLeft.getBoundingClientRect().width;
+    const titleWidth = navTitle.getBoundingClientRect().width;
+    const rightWidth = navRightActions.getBoundingClientRect().width;
+
+    const buffer = 24; // account for flex gaps and rounding differences
+    return window.innerWidth <= 640 || leftWidth + titleWidth + rightWidth + buffer > availableWidth;
+  };
+
+  const updateNavbarLayout = () => {
+    if (!navbar || !navMenuBtn) return;
+
+    const wasCollapsed = navbar.classList.contains("is-collapsed");
+
+    if (wasCollapsed) {
+      navbar.classList.remove("is-collapsed");
+      navRight?.classList.remove("open");
+      navMenuBtn.setAttribute("aria-expanded", "false");
+    }
+
+    const collapsed = shouldCollapseNavbar();
+    applyCollapsedState(collapsed);
+  };
+
+  const queueLayoutUpdate = () => {
+    if (resizeRaf) cancelAnimationFrame(resizeRaf);
+    resizeRaf = requestAnimationFrame(updateNavbarLayout);
+  };
+
+  if (navbar && !navbar.dataset.layoutBound) {
+    queueLayoutUpdate();
+    window.addEventListener("resize", queueLayoutUpdate);
+    navbar.dataset.layoutBound = "true";
+  }
 
   if (navRight && navRightActions && navMenuBtn && !navMenuBtn.dataset.bound) {
     const closeMenu = () => {
@@ -25,6 +85,11 @@ export function initNavbar() {
 
     navMenuBtn.addEventListener("click", (event) => {
       event.stopPropagation();
+      queueLayoutUpdate();
+      const isCollapsed = navbar?.classList.contains("is-collapsed");
+      if (!isCollapsed) {
+        return;
+      }
       const willOpen = !navRight.classList.contains("open");
       navRight.classList.toggle("open", willOpen);
       navMenuBtn.setAttribute("aria-expanded", willOpen ? "true" : "false");
@@ -41,12 +106,6 @@ export function initNavbar() {
 
     document.addEventListener("click", () => {
       if (navRight.classList.contains("open")) {
-        closeMenu();
-      }
-    });
-
-    window.addEventListener("resize", () => {
-      if (window.innerWidth > 720 && navRight.classList.contains("open")) {
         closeMenu();
       }
     });
@@ -109,6 +168,7 @@ export function initNavbar() {
   // Initialize state
   soundBtn.classList.toggle("active", !soundOn);
   bindButtonEffects(); // Initial bind
+  queueLayoutUpdate();
 }
 
 export function bindButtonEffects() {

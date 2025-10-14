@@ -50,6 +50,7 @@ export async function initLanguageSelector() {
         navRight.classList.remove('open');
         document.getElementById('nav-right-menu')?.setAttribute('aria-expanded', 'false');
       }
+      window.dispatchEvent(new Event('resize'));
     });
   });
 
