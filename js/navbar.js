@@ -35,9 +35,12 @@ export function initNavbar() {
       }
     }
 
-    if (!collapsed) {
+    if (collapsed) {
+      navRightActions?.classList.remove("is-open");
+    } else {
       navRight?.classList.remove("open");
       navMenuBtn?.setAttribute("aria-expanded", "false");
+      navRightActions?.classList.remove("is-open");
     }
   };
 
@@ -91,6 +94,7 @@ export function initNavbar() {
       navRight.classList.remove("open");
       navMenuBtn.setAttribute("aria-expanded", "false");
       navDropdown?.classList.remove("show");
+      navRightActions?.classList.remove("is-open");
     };
     closeNavMenu = closeMenu;
 
@@ -103,6 +107,7 @@ export function initNavbar() {
       }
       const willOpen = !navRight.classList.contains("open");
       navRight.classList.toggle("open", willOpen);
+      navRightActions?.classList.toggle("is-open", willOpen);
       navMenuBtn.setAttribute("aria-expanded", willOpen ? "true" : "false");
       if (!willOpen) {
         navDropdown?.classList.remove("show");

@@ -253,17 +253,9 @@ footer,
   gap: 14px;
 }
 
-.nav-right-menu {
-  display: none;
-}
-
 .navbar.is-collapsed .nav-right {
   position: relative;
   justify-content: flex-end;
-}
-
-.navbar.is-collapsed .nav-right-menu {
-  display: flex;
 }
 
 .navbar.is-collapsed .nav-right-actions {
@@ -285,7 +277,7 @@ footer,
   text-align: left;
 }
 
-.navbar.is-collapsed .nav-right.open .nav-right-actions {
+.navbar.is-collapsed .nav-right-actions.is-open {
   display: flex;
 }
 
@@ -360,7 +352,15 @@ html.dark .navbar.is-collapsed .nav-right-actions .dropdown-menu li a {
   display: flex;
   align-items: center;
   justify-content: center;
-  
+
+}
+
+.navbar:not(.is-collapsed) .nav-right-menu {
+  display: none;
+}
+
+.navbar.is-collapsed .nav-right-menu {
+  display: flex;
 }
 
 .icon-btn img {
