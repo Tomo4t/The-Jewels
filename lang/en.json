@@ -4,5 +4,11 @@
   "chapters": "Chapters",
   "contact": "Contact",
   "updatesTitle": "Updates",
-  "contactTitle": "All official socials for the creator"
+  "contactTitle": "All official socials for the creator",
+  "latestChapterLabel": "Latest Chapter",
+  "continueReadingLabel": "Continue",
+  "pageLabel": "Page",
+  "nav.language": "Language",
+  "nav.theme": "Theme",
+  "nav.sound": "Sound"
 }

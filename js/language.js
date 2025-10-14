@@ -1,8 +1,10 @@
 import { loadUpdates } from './updates.js';
 
 export async function initLanguageSelector() {
-  const dropdown = document.querySelector('.dropdown');
+  const dropdown = document.getElementById('language-wrapper');
   const toggle = document.getElementById('language-toggle');
+
+  if (!dropdown || !toggle) return;
 
   // Rebind toggle
   const newToggle = toggle.cloneNode(true);
@@ -66,7 +68,7 @@ async function applyLanguage(lang) {
 
     document.documentElement.setAttribute('lang', lang);
     localStorage.setItem('language', lang);
-    loadUpdates(1, lang);
+    loadUpdates(null, lang);
   } catch (err) {
     console.error(`Could not load lang/${lang}.json`, err);
   }

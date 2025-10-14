@@ -1,0 +1,3 @@
+2024-06-15
+Performance polish: image preloading is smoother and UI sounds respect your mute toggle.
+We also tidied the particle overlay for better frame rates on mobile.
