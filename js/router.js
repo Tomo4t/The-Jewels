@@ -45,6 +45,21 @@ function updateGradient(gradientCSS) {
   }
 }
 
+function getCSSVar(name) {
+  const target = document.body || document.documentElement;
+  return getComputedStyle(target).getPropertyValue(name).trim();
+}
+
+function resolveGradientForPage(page) {
+  return (
+    {
+      home: getCSSVar('--gradient-home'),
+      contact: getCSSVar('--gradient-contact'),
+      chapters: getCSSVar('--gradient-chapters'),
+    }[page] || getCSSVar('--gradient-default')
+  );
+}
+
 function getChaptersPerRow() {
   const width = window.innerWidth;
   if (width >= 1200) return 5;
@@ -132,17 +147,7 @@ export function initRouter() {
       );
     }, 10);
 
-    function getCSSVar(name) {
-      return getComputedStyle(document.body).getPropertyValue(name).trim();
-    }
-
-    updateGradient(
-      {
-        home: getCSSVar('--gradient-home'),
-        contact: getCSSVar('--gradient-contact'),
-        chapters: getCSSVar('--gradient-chapters'),
-      }[targetPage] || getCSSVar('--gradient-default')
-    );
+    updateGradient(resolveGradientForPage(targetPage));
 
     if (targetPage === 'reader') {
       window.renderComicPages();
@@ -236,3 +241,7 @@ export function initRouter() {
     speed: 0.6
   });
 }
+
+window.addEventListener('themechange', () => {
+  updateGradient(resolveGradientForPage(currentPage));
+});

@@ -1,5 +1,3 @@
-
-import { initRouter } from './router.js';
 export let soundOn = localStorage.getItem("sound") !== "off"; // Global state
 const clickSound = new Audio("audio/click.mp3");
 clickSound.volume = 0.3;
@@ -170,14 +168,18 @@ export function initNavbar() {
   // === Theme Toggle ===
   if (!themeBtn.dataset.bound) {
     themeBtn.addEventListener("click", () => {
-      closeNavMenu?.();
       document.body.classList.add("transition-gradient");
 
       const isDark = document.documentElement.classList.toggle("dark");
       const theme = isDark ? "dark" : "light";
       localStorage.setItem("theme", theme);
 
-      requestAnimationFrame(refreshGradients);
+      requestAnimationFrame(() => {
+        refreshGradients();
+        window.dispatchEvent(
+          new CustomEvent("themechange", { detail: { theme } })
+        );
+      });
 
       setTimeout(() => {
         document.body.classList.remove("transition-gradient");
@@ -202,7 +204,6 @@ export function initNavbar() {
       }
 
       bindButtonEffects(); // Re-bind with updated state
-      closeNavMenu?.();
     });
 
     soundBtn.dataset.bound = "true";
