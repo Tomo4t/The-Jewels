@@ -4,7 +4,7 @@
   --social-icon-hover: brightness(0.1) invert(0.5);
 }
 
-body.dark {
+html.dark {
 
   --social-icon-filter: brightness(0) invert(0.85);
   --social-icon-hover: brightness(0.2) invert(0.6);
