@@ -56,7 +56,7 @@ html.dark {
   --color-accent-hover: #40e0d0; /* turquoise accent on hover only */
 }
 
-html.dark {
+body.dark {
   --color-bg: #1f1a27;
   --color-surface: #5f3e7a;
   --color-text: #000000;
@@ -179,12 +179,12 @@ body::-webkit-scrollbar {
 }
 
 /* Animate knob position and recolor on dark mode */
-html.dark #theme-icon .switch-knob {
+body.dark #theme-icon .switch-knob {
   cx: 70;
   fill: var(--color-text);
 }
 
-html.dark #theme-icon .switch-bg {
+body.dark #theme-icon .switch-bg {
   fill: var(--color-surface);
   stroke: var(--color-text);
 }
@@ -237,68 +237,6 @@ footer,
   gap: 14px;
 }
 
-.nav-right {
-  align-items: center;
-  position: relative;
-}
-
-.nav-controls {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.nav-control-list {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.nav-inline-list {
-  flex-direction: row;
-}
-
-.nav-overflow-list {
-  display: none;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 10px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.nav-control-item {
-  display: flex;
-}
-
-.nav-control-text {
-  display: none;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: inherit;
-}
-
-.nav-overflow-btn {
-  display: none;
-}
-
-.nav-overflow-btn svg {
-  width: 32px;
-  height: 32px;
-  filter: var(--color-icon);
-  transition: transform 0.2s ease, filter 0.2s ease;
-}
-
-.nav-overflow-btn:hover svg,
-.nav-right.open .nav-overflow-btn svg {
-  filter: var(--color-icon-hover);
-  transform: scale(1.1);
-}
-
 .nav-title {
   font-size: 1.5rem;
   font-weight: bold;
@@ -336,6 +274,7 @@ footer,
   transition: transform 0.2s ease, filter 0.2s ease;
 }
 
+<<<<<<< HEAD
 .nav-control-item .icon-btn img,
 .nav-control-item .icon-btn svg {
   flex-shrink: 0;
@@ -459,6 +398,8 @@ html.dark .navbar.nav-collapsed .nav-controls .dropdown-menu li a:hover {
   background-color: rgba(255, 255, 255, 0.14);
 }
 
+=======
+>>>>>>> parent of 14829d4 (Fix navbar overflow list layout)
 .icon-btn:hover img {
   transform: scale(1.1);
   filter: var(--color-icon-hover);

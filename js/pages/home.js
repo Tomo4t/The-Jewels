@@ -1,21 +1,3 @@
-const LATEST_CHAPTER_LABELS = {
-  en: 'Latest Chapter',
-  ar: 'أحدث فصل',
-  ja: '最新話'
-};
-
-const CONTINUE_READING_LABELS = {
-  en: 'Continue',
-  ar: 'تابع القراءة',
-  ja: '続きを読む'
-};
-
-const PAGE_LABELS = {
-  en: 'Page',
-  ar: 'الصفحة',
-  ja: 'ページ'
-};
-
 export default function renderHome() {
   setTimeout(() => {
     const lang = localStorage.getItem('language') || 'en';
@@ -23,7 +5,7 @@ export default function renderHome() {
     loadContinuePreview(lang);
   }, 0);
 
-  return `
+return `
   <div class="home-layout" style="opacity: 0;">
     <section id="updates" class="updates-box">
       <h3 data-i18n="updatesTitle">Updates</h3>
@@ -63,12 +45,10 @@ async function loadLatestChapter(lang) {
 
     const meta = await fetch(`chapters/${lang}/chapter${latest}/meta.json`).then(r => r.json());
 
-    const label = LATEST_CHAPTER_LABELS[lang] || LATEST_CHAPTER_LABELS.en;
-
     document.getElementById('latest').innerHTML = `
       <a href="#reader?lang=${lang}&chapter=${latest}&page=0" class="latest-cover-link">
         <img src="chapters/${lang}/chapter${latest}/page0.jpg" alt="${meta.title}" class="cover-img">
-        <div class="cover-title"><span data-i18n="latestChapterLabel">${label}</span>: ${meta.title}</div>
+        <div class="cover-title">${meta.title}</div>
       </a>
     `;
   } catch (e) {
@@ -86,13 +66,10 @@ async function loadContinuePreview(lang) {
     // Clamp to valid page range just in case
     const page = Math.max(0, Math.min(progress.page, meta.pages - 1));
 
-    const continueLabel = CONTINUE_READING_LABELS[lang] || CONTINUE_READING_LABELS.en;
-    const pageLabel = PAGE_LABELS[lang] || PAGE_LABELS.en;
-
     document.getElementById('continue-preview').innerHTML = `
       <a href="#reader?lang=${lang}&chapter=${progress.chapter}&page=${page}" class="latest-cover-link">
-        <img src="chapters/${lang}/chapter${progress.chapter}/page${page}.jpg" alt="${pageLabel} ${page}" class="cover-img">
-        <div class="cover-title"><span data-i18n="continueReadingLabel">${continueLabel}</span>: ${meta.title} — <span data-i18n="pageLabel">${pageLabel}</span> ${page}</div>
+        <img src="chapters/${lang}/chapter${progress.chapter}/page${page}.jpg" alt="Page ${page}" class="cover-img">
+        <div class="cover-title">Continue: ${meta.title} — Page ${page}</div>
       </a>
     `;
   } catch (e) {

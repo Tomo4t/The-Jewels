@@ -15,20 +15,6 @@ const routes = {
   reader: { render: renderReaderPage, style: 'css/reader.css' }
 };
 
-let openChapterAudio = null;
-
-function playOpenChapterSound() {
-  if (localStorage.getItem('sound') === 'off') return;
-
-  if (!openChapterAudio) {
-    openChapterAudio = new Audio('audio/OpenChapter.mp3');
-    openChapterAudio.volume = 0.4;
-  }
-
-  openChapterAudio.currentTime = 0;
-  openChapterAudio.play().catch(() => {});
-}
-
 function updateGradient(gradientCSS) {
   const overlay = document.getElementById('gradient-overlay');
   if (!overlay) return;
@@ -53,28 +39,15 @@ function getChaptersPerRow() {
   return 2;
 }
 
-function parseHash(hashValue) {
-  const trimmed = (hashValue || '').replace(/^#/, '');
-  if (!trimmed) return { page: 'home', queryString: '' };
-
-  const [page, ...rest] = trimmed.split('?');
-  return {
-    page: page || 'home',
-    queryString: rest.join('?')
-  };
-}
-
-let currentPage = parseHash(location.hash).page;
+let currentPage = location.hash.replace('#', '') || 'home';
 let currentChaptersPerRow = getChaptersPerRow();
 
 export function initRouter() {
   const content = document.getElementById('page-content');
   const savedTheme = localStorage.getItem('theme');
-  if (savedTheme === 'dark') {
-    document.documentElement.classList.add('dark');
-  } else {
-    document.documentElement.classList.remove('dark');
-  }
+if (savedTheme === 'dark') {
+  document.body.classList.add('dark');
+}
 
 
   function loadStyle(href) {
@@ -88,143 +61,103 @@ export function initRouter() {
     document.head.appendChild(link);
   }
 
-  async function loadPage({ page, queryString }) {
-    const targetPage = page || 'home';
-    currentPage = targetPage;
+ async function loadPage(rawHash) {
+  const [page, queryString] = rawHash.split('?');
+  currentPage = page;
 
-    if (targetPage === 'chapters') currentChaptersPerRow = getChaptersPerRow();
+  if (page === 'chapters') currentChaptersPerRow = getChaptersPerRow();
 
-    const route = routes[targetPage];
-    if (!route) {
-      content.innerHTML = '<p>Page not found.</p>';
-      return;
-    }
+  const route = routes[page];
+  if (!route) {
+    content.innerHTML = '<p>Page not found.</p>';
+    return;
+  }
 
-    let rendered;
-    let readerParams;
+  const rendered = await route.render();
+  content.innerHTML = rendered;
+  window.scrollTo(0, 0);
+  loadStyle(route.style);
 
-    if (targetPage === 'reader') {
-      const params = new URLSearchParams(queryString || '');
-      readerParams = {
-        lang: params.get('lang') || undefined,
-        chapter: params.get('chapter') || undefined,
-        page: params.get('page') || undefined
-      };
-      rendered = await renderReaderPage(readerParams);
-    } else {
-      rendered = await route.render();
-    }
+  if (page === 'home') {
+    loadUpdates(1, localStorage.getItem('language') || 'en');
+  }
 
-    content.innerHTML = rendered;
-    window.scrollTo(0, 0);
-    loadStyle(route.style);
+  initNavbar();
+  initLanguageSelector();
 
-    if (targetPage === 'home') {
-      loadUpdates(null, localStorage.getItem('language') || 'en');
-    }
-
-    initNavbar();
-    initLanguageSelector();
-
-    setTimeout(() => {
-      document.querySelectorAll('[style*="opacity: 0"]').forEach(el =>
-        el.classList.add('fade-in')
-      );
-    }, 10);
-
-    function getCSSVar(name) {
-      return getComputedStyle(document.body).getPropertyValue(name).trim();
-    }
-
-    updateGradient(
-      {
-        home: getCSSVar('--gradient-home'),
-        contact: getCSSVar('--gradient-contact'),
-        chapters: getCSSVar('--gradient-chapters'),
-      }[targetPage] || getCSSVar('--gradient-default')
+  setTimeout(() => {
+    document.querySelectorAll('[style*="opacity: 0"]').forEach(el =>
+      el.classList.add('fade-in')
     );
+  }, 10);
 
-    if (targetPage === 'reader') {
-      window.renderComicPages();
-      playOpenChapterSound();
+  function getCSSVar(name) {
+  return getComputedStyle(document.body).getPropertyValue(name).trim();
+}
 
-      const modeBindings = [
-        { selector: '#mode-comic', mode: 'flip' },
-        { selector: '#mode-scroll', mode: 'scroll' },
-        { selector: '#mode-card', mode: 'card' }
-      ];
+updateGradient(
+  {
+    home: getCSSVar('--gradient-home'),
+    contact: getCSSVar('--gradient-contact'),
+    chapters: getCSSVar('--gradient-chapters'),
+  }[page] || getCSSVar('--gradient-default')
+);
+  if (page === 'reader') {
+    const params = new URLSearchParams(queryString || '');
+    const lang = params.get('lang') || 'en';
+    const chapter = params.get('chapter') || '1';
+    const pageNum = params.get('page') || '0';
 
-      modeBindings.forEach(({ selector, mode }) => {
-        const button = document.querySelector(selector);
-        if (button) {
-          button.addEventListener('click', (event) => {
-            if (!event.currentTarget.classList.contains('active')) {
-              window.renderComicPages(mode);
-            }
-          });
-        }
-      });
+    const html = await renderReaderPage({ lang, chapter, page: pageNum });
+    document.querySelector('#app')?.replaceChildren();
+    document.querySelector('#app')?.insertAdjacentHTML('beforeend', html);
+    window.renderComicPages();
 
-      if (readerParams) {
-        const params = new URLSearchParams();
-        if (readerParams.lang) params.set('lang', readerParams.lang);
-        if (readerParams.chapter) params.set('chapter', readerParams.chapter);
-        if (readerParams.page) params.set('page', readerParams.page);
-        const suffix = params.toString();
-        if (suffix) {
-          history.replaceState({}, '', `#reader?${suffix}`);
-        }
-      }
-    } else if (window.readerKeydownHandler) {
-      document.removeEventListener('keydown', window.readerKeydownHandler);
-      window.readerKeydownHandler = null;
-    }
+    document.getElementById('mode-comic')?.addEventListener('click', () => {
+      if (!event.currentTarget.classList.contains('active')) window.renderComicPages('flip');
+    });
+
+    document.getElementById('mode-scroll')?.addEventListener('click', () => {
+      if (!event.currentTarget.classList.contains('active')) window.renderComicPages('scroll');
+    });
   }
+}
 
 
-  function buildHash(page, queryString) {
-    const suffix = queryString ? `?${queryString}` : '';
-    return `#${page}${suffix}`;
-  }
+ window.addEventListener('click', (e) => {
+  const target = e.target.closest('[data-page]');
+  if (target) {
+    e.preventDefault();
+    const page = target.dataset.page;
 
-  window.addEventListener('click', (e) => {
-    const target = e.target.closest('[data-page]');
-    if (target) {
-      e.preventDefault();
-      const page = target.dataset.page;
+    // Store language and chapter to localStorage if going to reader
+    if (page === 'reader') {
+      const lang = target.dataset.lang;
+      const chapter = target.dataset.chapter;
 
-      let queryString = '';
-      if (page === 'reader') {
-        const params = new URLSearchParams();
-        if (target.dataset.lang) params.set('lang', target.dataset.lang);
-        if (target.dataset.chapter) params.set('chapter', target.dataset.chapter);
-        if (target.dataset.page) params.set('page', target.dataset.page);
-        queryString = params.toString();
-      }
-
-      loadPage({ page, queryString });
-      const newHash = buildHash(page, queryString);
-      history.pushState({}, '', newHash);
+      if (lang) localStorage.setItem('language', lang);
+      if (chapter) localStorage.setItem('chapter', chapter);
     }
-  });
 
-  window.addEventListener('hashchange', () => {
-    loadPage(parseHash(location.hash));
-  });
+    loadPage(page);
+    history.pushState({}, '', `#${page}`);
+  }
+});
 
-  window.addEventListener('popstate', () => {
-    loadPage(parseHash(location.hash));
-  });
+window.addEventListener('popstate', () => {
+  const page = location.hash.slice(1) || 'home';
+  loadPage(page);
+});
 
   window.addEventListener('resize', () => {
     const newPerRow = getChaptersPerRow();
     if (currentPage === 'chapters' && newPerRow !== currentChaptersPerRow) {
       currentChaptersPerRow = newPerRow;
-      loadPage({ page: 'chapters', queryString: '' });
+      loadPage('chapters');
     }
   });
 
-  const initial = parseHash(location.hash);
+  const initial = location.hash.slice(1) || 'home';
 
   loadPage(initial);
 

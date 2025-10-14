@@ -12,7 +12,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The Jewels</title>
-  <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="stylesheet" href="css/navbar.css" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&family=Noto+Sans+Arabic&family=Noto+Sans+JP&display=swap" rel="stylesheet" />
 </head>
@@ -41,51 +40,38 @@
       <span class="nav-title" data-i18n="title">The Jewels</span>
     </div>
 
+<<<<<<< HEAD
     <div class="nav-right" id="nav-right">
       <button class="icon-btn nav-overflow-btn" id="nav-overflow-toggle" title="More Options" aria-label="More Options" aria-expanded="false" aria-hidden="true" hidden>
         <svg viewBox="0 0 24 24" width="32" height="32" aria-hidden="true" focusable="false">
           <circle cx="5" cy="12" r="2"></circle>
           <circle cx="12" cy="12" r="2"></circle>
           <circle cx="19" cy="12" r="2"></circle>
+=======
+    <div class="nav-right">
+      <div class="dropdown">
+        <button class="icon-btn" id="language-toggle" title="Language"
+          onclick="const s=new Audio('audio/click.mp3'); s.volume=0.3; if(localStorage.getItem('sound')!=='off') s.play()">
+          <img src="images/language.svg" alt="Language" />
+        </button>
+        <ul class="dropdown-menu" id="language-menu">
+          <li><a href="#" data-lang="en" data-sound="slide">English</a></li>
+          <li><a href="#" data-lang="ar" data-sound="slide">العربية</a></li>
+          <li><a href="#" data-lang="ja" data-sound="slide">日本語</a></li>
+        </ul>
+      </div>
+
+      <button class="icon-btn" id="theme-toggle" title="Toggle Theme" aria-label="Toggle Theme">
+        <svg id="theme-icon" viewBox="0 0 100 60" width="48" height="32" xmlns="http://www.w3.org/2000/svg">
+          <rect class="switch-bg" x="5" y="10" rx="15" ry="15" width="90" height="40" />
+          <circle class="switch-knob" cx="30" cy="30" r="10" />
+>>>>>>> parent of 14829d4 (Fix navbar overflow list layout)
         </svg>
       </button>
 
-      <div class="nav-controls" id="nav-controls">
-        <ul class="nav-control-list nav-inline-list" id="nav-inline-list">
-          <li class="nav-control-item">
-            <div class="dropdown language-dropdown" id="language-wrapper">
-              <button class="icon-btn" id="language-toggle" title="Language"
-                onclick="const s=new Audio('audio/click.mp3'); s.volume=0.3; if(localStorage.getItem('sound')!=='off') s.play()">
-                <img src="images/language.svg" alt="Language" />
-                <span class="nav-control-text" data-i18n="nav.language">Language</span>
-              </button>
-              <ul class="dropdown-menu" id="language-menu">
-                <li><a href="#" data-lang="en" data-sound="slide">English</a></li>
-                <li><a href="#" data-lang="ar" data-sound="slide">العربية</a></li>
-                <li><a href="#" data-lang="ja" data-sound="slide">日本語</a></li>
-              </ul>
-            </div>
-          </li>
-
-          <li class="nav-control-item">
-            <button class="icon-btn" id="theme-toggle" title="Toggle Theme" aria-label="Toggle Theme">
-              <svg id="theme-icon" viewBox="0 0 100 60" width="48" height="32" xmlns="http://www.w3.org/2000/svg">
-                <rect class="switch-bg" x="5" y="10" rx="15" ry="15" width="90" height="40" />
-                <circle class="switch-knob" cx="30" cy="30" r="10" />
-              </svg>
-              <span class="nav-control-text" data-i18n="nav.theme">Theme</span>
-            </button>
-          </li>
-
-          <li class="nav-control-item">
-            <button class="icon-btn" title="Toggle Sound" id="sound-toggle">
-              <img src="images/sound.svg" alt="Sound" />
-              <span class="nav-control-text" data-i18n="nav.sound">Sound</span>
-            </button>
-          </li>
-        </ul>
-        <ul class="nav-control-list nav-overflow-list" id="nav-overflow-list" aria-hidden="true"></ul>
-      </div>
+      <button class="icon-btn" title="Toggle Sound" id="sound-toggle">
+        <img src="images/sound.svg" alt="Sound" />
+      </button>
     </div>
   </header>
 
