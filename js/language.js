@@ -15,10 +15,12 @@ export async function initLanguageSelector() {
   updatedToggle.addEventListener('click', (e) => {
     e.stopPropagation();
     dropdown.classList.toggle('show');
+    window.dispatchEvent(new Event('navbar:invalidate'));
   });
 
   document.addEventListener('click', () => {
     dropdown.classList.remove('show');
+    window.dispatchEvent(new Event('navbar:invalidate'));
   });
 
   // Bind links after cloning
@@ -46,6 +48,7 @@ export async function initLanguageSelector() {
 
       applyLanguage(lang);
       dropdown.classList.remove('show');
+      window.dispatchEvent(new Event('navbar:invalidate'));
     });
   });
 
@@ -72,6 +75,7 @@ async function applyLanguage(lang) {
   } catch (err) {
     console.error(`Could not load lang/${lang}.json`, err);
   }
+  window.dispatchEvent(new Event('navbar:invalidate'));
   if (location.hash === '#chapters') {
   const content = document.getElementById('page-content');
   import('./pages/chapters.js').then(({ default: renderChapters }) => {

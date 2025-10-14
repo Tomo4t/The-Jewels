@@ -143,13 +143,14 @@ function setupOverflow(navbar, navRight, overflowToggle) {
     const styles = getComputedStyle(navbar);
     const horizontalPadding = parseFloat(styles.paddingLeft || '0') + parseFloat(styles.paddingRight || '0');
 
+    const controlsWidth = inlineList.scrollWidth || inlineList.offsetWidth || 0;
     const totalWidth =
       (navLeft?.offsetWidth || 0) +
       (navTitle?.offsetWidth || 0) +
-      (navControls?.offsetWidth || 0) +
+      controlsWidth +
       horizontalPadding;
 
-    const collapsed = totalWidth > navbar.clientWidth;
+    const collapsed = Math.ceil(totalWidth) > Math.floor(navbar.clientWidth);
     isCollapsed = collapsed;
     navbar.classList.toggle('nav-collapsed', collapsed);
 
@@ -195,11 +196,21 @@ function setupOverflow(navbar, navRight, overflowToggle) {
     if (typeof ResizeObserver !== 'undefined') {
       const overflowObserver = new ResizeObserver(evaluateOverflow);
       overflowObserver.observe(navbar);
+      [navLeft, navTitle, inlineList].forEach(el => {
+        if (el) overflowObserver.observe(el);
+      });
       navbar._overflowObserver = overflowObserver;
     }
     window.addEventListener('resize', evaluateOverflow);
     window.addEventListener('load', evaluateOverflow, { once: true });
     navbar.dataset.resizeBound = 'true';
+  }
+
+  if (!navbar.dataset.invalidateBound) {
+    window.addEventListener('navbar:invalidate', () => {
+      requestAnimationFrame(evaluateOverflow);
+    });
+    navbar.dataset.invalidateBound = 'true';
   }
 
   evaluateOverflow();

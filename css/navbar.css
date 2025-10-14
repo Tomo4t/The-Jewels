@@ -354,12 +354,15 @@ footer,
   gap: 10px;
   padding: 14px 16px;
   min-width: 220px;
+  width: max-content;
+  max-width: calc(100vw - 32px);
   border-radius: 16px;
   border: 1px solid var(--color-dropdown-border);
   background-color: var(--color-dropdown-bg);
   box-shadow: 0 16px 30px rgba(0, 0, 0, 0.25);
   z-index: 1000;
   color: var(--color-title-text);
+  overflow: visible;
 }
 
 .navbar.nav-collapsed .nav-inline-list {
