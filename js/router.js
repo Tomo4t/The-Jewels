@@ -106,7 +106,7 @@ export function initRouter() {
     loadStyle(route.style);
 
     if (targetPage === 'home') {
-      loadUpdates(1, localStorage.getItem('language') || 'en');
+      loadUpdates(null, localStorage.getItem('language') || 'en');
     }
 
     initNavbar();
@@ -160,6 +160,9 @@ export function initRouter() {
           history.replaceState({}, '', `#reader?${suffix}`);
         }
       }
+    } else if (window.readerKeydownHandler) {
+      document.removeEventListener('keydown', window.readerKeydownHandler);
+      window.readerKeydownHandler = null;
     }
   }
 

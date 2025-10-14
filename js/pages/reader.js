@@ -19,6 +19,37 @@ export default async function renderReaderPage(params = {}) {
     localStorage.setItem(`lastRead-${lang}`, JSON.stringify({ chapter, page: currentReadingPage }));
   }
 
+  function playFlipSound() {
+    if (localStorage.getItem('sound') === 'off') return;
+
+    const sfx = new Audio('audio/paper-flip.mp3');
+    sfx.volume = 0.3;
+    sfx.play().catch(() => {});
+  }
+
+  function createNavButtons() {
+    const nav = document.createElement('div');
+    nav.className = 'navbtns';
+    nav.innerHTML = `
+      <button type="button" id="prev-btn" class="navbtnL" data-sound="paper-flip">
+        <img src="images/button-book.svg" alt="Previous">
+      </button>
+      <button type="button" id="next-btn" class="navbtnR" data-sound="paper-flip">
+        <img src="images/button-book.svg" alt="Next">
+      </button>`;
+
+    return {
+      nav,
+      prev: nav.querySelector('#prev-btn'),
+      next: nav.querySelector('#next-btn')
+    };
+  }
+
+  if (window.readerKeydownHandler) {
+    document.removeEventListener('keydown', window.readerKeydownHandler);
+    window.readerKeydownHandler = null;
+  }
+
   window.renderComicPages = function (mode = savedMode) {
     const bookEl = document.getElementById('book');
     if (!bookEl) return;
@@ -49,15 +80,7 @@ export default async function renderReaderPage(params = {}) {
 
         bookEl.appendChild(bookInner);
 
-        const nav = document.createElement('div');
-        nav.className = 'navbtns';
-        nav.innerHTML = `
-          <button id="prev-btn" class="navbtnL" data-sound="paper-flip">
-            <img src="../images/button-book.svg" alt="Previous">
-          </button>
-          <button id="next-btn" class="navbtnR" data-sound="paper-flip">
-            <img src="../images/button-book.svg" alt="Next">
-          </button>`;
+        const { nav, prev, next } = createNavButtons();
         document.querySelector('.reader-wrapper')?.appendChild(nav);
 
         let currentFlipIndex = currentReadingPage === 0 ? -2 : Math.floor(currentReadingPage / 2) * 2;
@@ -87,29 +110,21 @@ export default async function renderReaderPage(params = {}) {
 
         updateFlipState();
 
-document.getElementById('next-btn')?.addEventListener('click', () => {
-  if (localStorage.getItem("sound") !== "off") {
-    const sfx = new Audio('audio/paper-flip.mp3');
-    sfx.volume = 0.3;
-    sfx.play().catch(() => {});
-  }
-  if (currentFlipIndex + 2 < totalPages) {
-    currentFlipIndex += 2;
-    updateFlipState();
-  }
-});
+        next?.addEventListener('click', () => {
+          if (currentFlipIndex + 2 < totalPages) {
+            playFlipSound();
+            currentFlipIndex += 2;
+            updateFlipState();
+          }
+        });
 
-document.getElementById('prev-btn')?.addEventListener('click', () => {
-  if (localStorage.getItem("sound") !== "off") {
-    const sfx = new Audio('audio/paper-flip.mp3');
-    sfx.volume = 0.3;
-    sfx.play().catch(() => {});
-  }
-  if (currentFlipIndex >= 0) {
-    currentFlipIndex -= 2;
-    updateFlipState();
-  }
-});
+        prev?.addEventListener('click', () => {
+          if (currentFlipIndex >= 0) {
+            playFlipSound();
+            currentFlipIndex -= 2;
+            updateFlipState();
+          }
+        });
 
 
 
@@ -126,6 +141,9 @@ document.getElementById('prev-btn')?.addEventListener('click', () => {
         }
 
         bookEl.appendChild(scrollInner);
+
+        const { nav, prev, next } = createNavButtons();
+        document.querySelector('.reader-wrapper')?.appendChild(nav);
 
         setTimeout(() => {
           const target = scrollInner.querySelector(`[data-index="${currentReadingPage}"]`);
@@ -149,75 +167,83 @@ document.getElementById('prev-btn')?.addEventListener('click', () => {
           setCurrentPage(closest);
         });
 
+        next?.addEventListener('click', () => {
+          if (currentReadingPage < totalPages - 1) {
+            currentReadingPage += 1;
+            const target = scrollInner.querySelector(`[data-index="${currentReadingPage}"]`);
+            if (target) {
+              playFlipSound();
+              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            setCurrentPage(currentReadingPage);
+          }
+        });
+
+        prev?.addEventListener('click', () => {
+          if (currentReadingPage > 0) {
+            currentReadingPage -= 1;
+            const target = scrollInner.querySelector(`[data-index="${currentReadingPage}"]`);
+            if (target) {
+              playFlipSound();
+              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            setCurrentPage(currentReadingPage);
+          }
+        });
+
      } else if (mode === 'card') {
-  const cardInner = document.createElement('div');
-  cardInner.className = 'card-inner';
-  cardInner.id = 'card-inner';
+        const cardInner = document.createElement('div');
+        cardInner.className = 'card-inner';
+        cardInner.id = 'card-inner';
 
-  for (let i = 0; i < totalPages; i++) {
-    cardInner.innerHTML += `
-      <div class="card-page" data-index="${i}">
-        <img src="chapters/${lang}/chapter${chapter}/page${i}.jpg" alt="Page ${i}" class="page-iner">
-      </div>`;
-  }
+        for (let i = 0; i < totalPages; i++) {
+          cardInner.innerHTML += `
+            <div class="card-page" data-index="${i}">
+              <img src="chapters/${lang}/chapter${chapter}/page${i}.jpg" alt="Page ${i}" class="page-iner">
+            </div>`;
+        }
 
-  bookEl.appendChild(cardInner);
+        bookEl.appendChild(cardInner);
 
-  const nav = document.createElement('div');
-  nav.className = 'navbtns';
-  nav.innerHTML = `
-    <button id="prev-btn" class="navbtnL" data-sound="paper-flip">
-      <img src="images/button-book.svg" alt="Previous">
-    </button>
-    <button id="next-btn" class="navbtnR" data-sound="paper-flip">
-      <img src="images/button-book.svg" alt="Next">
-    </button>`;
-  document.querySelector('.reader-wrapper')?.appendChild(nav);
+        const { nav, prev, next } = createNavButtons();
+        document.querySelector('.reader-wrapper')?.appendChild(nav);
 
-  const pages = cardInner.querySelectorAll('.card-page');
+        const pages = cardInner.querySelectorAll('.card-page');
 
-  function updateCardView() {
-    pages.forEach((p, i) => {
-      p.classList.remove('show', 'hide-left', 'hide-right');
-      if (i === currentReadingPage) {
-        p.classList.add('show');
-      } else if (i < currentReadingPage) {
-        p.classList.add('hide-left');
-      } else {
-        p.classList.add('hide-right');
+        function updateCardView() {
+          pages.forEach((p, i) => {
+            p.classList.remove('show', 'hide-left', 'hide-right');
+            if (i === currentReadingPage) {
+              p.classList.add('show');
+            } else if (i < currentReadingPage) {
+              p.classList.add('hide-left');
+            } else {
+              p.classList.add('hide-right');
+            }
+          });
+
+          setCurrentPage(currentReadingPage);
+        }
+
+        updateCardView();
+
+        next?.addEventListener('click', () => {
+          if (currentReadingPage < totalPages - 1) {
+            playFlipSound();
+            currentReadingPage++;
+            updateCardView();
+          }
+        });
+
+        prev?.addEventListener('click', () => {
+          if (currentReadingPage > 0) {
+            playFlipSound();
+            currentReadingPage--;
+            updateCardView();
+          }
+        });
+
       }
-    });
-
-    setCurrentPage(currentReadingPage);
-  }
-
-  updateCardView();
-
-document.getElementById('next-btn')?.addEventListener('click', () => {
-  if (localStorage.getItem("sound") !== "off") {
-    const sfx = new Audio('audio/paper-flip.mp3');
-    sfx.volume = 0.3;
-    sfx.play().catch(() => {});
-  }
-  if (currentReadingPage < totalPages - 1) {
-    currentReadingPage++;
-    updateCardView();
-  }
-});
-
-document.getElementById('prev-btn')?.addEventListener('click', () => {
-  if (localStorage.getItem("sound") !== "off") {
-    const sfx = new Audio('audio/paper-flip.mp3');
-    sfx.volume = 0.3;
-    sfx.play().catch(() => {});
-  }
-  if (currentReadingPage > 0) {
-    currentReadingPage--;
-    updateCardView();
-  }
-});
-
-}
 
 
       document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
@@ -248,22 +274,23 @@ document.getElementById('prev-btn')?.addEventListener('click', () => {
       });
     });
 
-    document.addEventListener('keydown', (e) => {
+    const handleKeydown = (e) => {
+      if (e.repeat) return;
+
       const mode = document.getElementById('book')?.dataset.mode;
       if (!mode) return;
 
-      if (mode === 'flip' || mode === 'card') {
+      if (mode === 'flip' || mode === 'card' || mode === 'scroll') {
         if (e.key === 'ArrowRight') {
           document.getElementById('next-btn')?.click();
         } else if (e.key === 'ArrowLeft') {
           document.getElementById('prev-btn')?.click();
         }
       }
-    });
+    };
 
-    document.getElementById('mode-comic')?.addEventListener('click', () => renderComicPages('flip'));
-    document.getElementById('mode-scroll')?.addEventListener('click', () => renderComicPages('scroll'));
-    document.getElementById('mode-card')?.addEventListener('click', () => renderComicPages('card'));
+    document.addEventListener('keydown', handleKeydown);
+    window.readerKeydownHandler = handleKeydown;
   }, 0);
 
   return `

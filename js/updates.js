@@ -5,8 +5,24 @@ let updateConfig = { count: 1, folder: 'updates' };
 
 export async function loadUpdates(maxUpdates = null, lang = 'en') {
   const box = document.getElementById('updates-text');
+  if (!box) return;
+
+  box.textContent = '';
   updates = [];
   currentIndex = 0;
+
+  const prevButton = document.getElementById('update-prev');
+  const nextButton = document.getElementById('update-next');
+
+  if (prevButton) {
+    const clone = prevButton.cloneNode(true);
+    prevButton.parentNode.replaceChild(clone, prevButton);
+  }
+
+  if (nextButton) {
+    const clone = nextButton.cloneNode(true);
+    nextButton.parentNode.replaceChild(clone, nextButton);
+  }
 
   // 🔄 Load config.json once
   if (!configLoaded) {
@@ -45,7 +61,7 @@ export async function loadUpdates(maxUpdates = null, lang = 'en') {
     if (currentIndex > 0) {
       currentIndex--;
       showUpdate(currentIndex);
-      
+
     }
   });
 
@@ -53,7 +69,7 @@ export async function loadUpdates(maxUpdates = null, lang = 'en') {
     if (currentIndex < updates.length - 1) {
       currentIndex++;
       showUpdate(currentIndex);
-     
+
     }
   });
 }
