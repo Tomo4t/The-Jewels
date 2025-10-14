@@ -16,6 +16,29 @@ export function initNavbar() {
   const navDropdown = document.querySelector(".nav-right .dropdown");
   let closeNavMenu = null;
   let resizeRaf = null;
+  let isCollapsed = false;
+  let isMenuOpen = false;
+
+  const updateMenuVisibility = () => {
+    if (!navRightActions) return;
+
+    if (isCollapsed) {
+      navRightActions.classList.toggle("is-open", isMenuOpen);
+      navRightActions.style.display = isMenuOpen ? "flex" : "none";
+      navRightActions.setAttribute("aria-hidden", isMenuOpen ? "false" : "true");
+    } else {
+      navRightActions.classList.remove("is-open");
+      navRightActions.style.display = "";
+      navRightActions.setAttribute("aria-hidden", "false");
+    }
+  };
+
+  const setMenuOpen = (open) => {
+    isMenuOpen = !!open && isCollapsed;
+    navRight?.classList.toggle("open", isMenuOpen);
+    navMenuBtn?.setAttribute("aria-expanded", isMenuOpen ? "true" : "false");
+    updateMenuVisibility();
+  };
 
   if (!themeBtn || !soundBtn) return;
 
@@ -23,6 +46,7 @@ export function initNavbar() {
     if (!navbar) return;
 
     navbar.classList.toggle("is-collapsed", collapsed);
+    isCollapsed = collapsed;
 
     if (navMenuBtn) {
       if (collapsed) {
@@ -36,12 +60,13 @@ export function initNavbar() {
     }
 
     if (collapsed) {
-      navRightActions?.classList.remove("is-open");
+      setMenuOpen(false);
     } else {
       navRight?.classList.remove("open");
-      navMenuBtn?.setAttribute("aria-expanded", "false");
-      navRightActions?.classList.remove("is-open");
+      setMenuOpen(false);
     }
+
+    updateMenuVisibility();
   };
 
   const shouldCollapseNavbar = () => {
@@ -91,10 +116,8 @@ export function initNavbar() {
 
   if (navRight && navRightActions && navMenuBtn && !navMenuBtn.dataset.bound) {
     const closeMenu = () => {
-      navRight.classList.remove("open");
-      navMenuBtn.setAttribute("aria-expanded", "false");
       navDropdown?.classList.remove("show");
-      navRightActions?.classList.remove("is-open");
+      setMenuOpen(false);
     };
     closeNavMenu = closeMenu;
 
@@ -105,23 +128,21 @@ export function initNavbar() {
       if (!isCollapsed) {
         return;
       }
-      const willOpen = !navRight.classList.contains("open");
-      navRight.classList.toggle("open", willOpen);
-      navRightActions?.classList.toggle("is-open", willOpen);
-      navMenuBtn.setAttribute("aria-expanded", willOpen ? "true" : "false");
+      const willOpen = !isMenuOpen;
+      setMenuOpen(willOpen);
       if (!willOpen) {
         navDropdown?.classList.remove("show");
       }
     });
 
     navRightActions.addEventListener("click", (event) => {
-      if (navRight.classList.contains("open")) {
+      if (isMenuOpen) {
         event.stopPropagation();
       }
     });
 
     document.addEventListener("click", () => {
-      if (navRight.classList.contains("open")) {
+      if (isMenuOpen) {
         closeMenu();
       }
     });
