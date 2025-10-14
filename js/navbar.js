@@ -16,25 +16,25 @@ export function initNavbar() {
     themeBtn.addEventListener("click", () => {
       document.body.classList.add("transition-gradient");
 
-setTimeout(() => {
-  document.body.classList.toggle("dark");
-  document.body.classList.remove("transition-gradient");
+      setTimeout(() => {
+        document.documentElement.classList.toggle("dark");
+        document.body.classList.remove("transition-gradient");
 
-  const theme = document.body.classList.contains("dark") ? "dark" : "light";
-  localStorage.setItem("theme", theme);
-   location.reload();
-  
-  // 🔁 Force reapply gradient on all gradient-based sections
-  document.querySelectorAll("[data-gradient]").forEach(el => {
-    const gradientName = el.getAttribute("data-gradient");
-    el.style.backgroundImage = ""; // Reset
-    requestAnimationFrame(() => {
-      const newGradient = getComputedStyle(document.documentElement)
-        .getPropertyValue(`--gradient-${gradientName}`)?.trim();
-      el.style.backgroundImage = newGradient || "";
-    });
-  });
-}, 300);
+        const theme = document.documentElement.classList.contains("dark") ? "dark" : "light";
+        localStorage.setItem("theme", theme);
+        location.reload();
+
+        // 🔁 Force reapply gradient on all gradient-based sections
+        document.querySelectorAll("[data-gradient]").forEach(el => {
+          const gradientName = el.getAttribute("data-gradient");
+          el.style.backgroundImage = ""; // Reset
+          requestAnimationFrame(() => {
+            const newGradient = getComputedStyle(document.documentElement)
+              .getPropertyValue(`--gradient-${gradientName}`)?.trim();
+            el.style.backgroundImage = newGradient || "";
+          });
+        });
+      }, 300);
 
     });
     themeBtn.dataset.bound = "true";
