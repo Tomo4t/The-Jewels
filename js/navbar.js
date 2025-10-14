@@ -102,6 +102,8 @@ function setupOverflow(navbar, navRight, overflowToggle) {
   const syncAria = () => {
     const expanded = navRight.classList.contains('open');
     overflowToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    overflowToggle.setAttribute('aria-hidden', isCollapsed ? 'false' : 'true');
+    overflowToggle.hidden = !isCollapsed;
     overflowList.setAttribute('aria-hidden', expanded ? 'false' : 'true');
     inlineList.setAttribute('aria-hidden', isCollapsed ? 'true' : 'false');
   };
@@ -134,6 +136,8 @@ function setupOverflow(navbar, navRight, overflowToggle) {
     navbar.classList.remove('nav-collapsed');
     navRight.classList.remove('open');
     overflowToggle.setAttribute('aria-expanded', 'false');
+    overflowToggle.setAttribute('aria-hidden', 'true');
+    overflowToggle.hidden = true;
     overflowList.setAttribute('aria-hidden', 'true');
 
     const styles = getComputedStyle(navbar);
@@ -151,6 +155,7 @@ function setupOverflow(navbar, navRight, overflowToggle) {
 
     overflowToggle.tabIndex = collapsed ? 0 : -1;
     overflowToggle.setAttribute('aria-hidden', collapsed ? 'false' : 'true');
+    overflowToggle.hidden = !collapsed;
 
     if (collapsed) {
       moveToOverflow();
