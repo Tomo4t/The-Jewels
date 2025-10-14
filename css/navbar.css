@@ -56,7 +56,7 @@ html.dark {
   --color-accent-hover: #40e0d0; /* turquoise accent on hover only */
 }
 
-body.dark {
+html.dark {
   --color-bg: #1f1a27;
   --color-surface: #5f3e7a;
   --color-text: #000000;
@@ -179,12 +179,12 @@ body::-webkit-scrollbar {
 }
 
 /* Animate knob position and recolor on dark mode */
-body.dark #theme-icon .switch-knob {
+html.dark #theme-icon .switch-knob {
   cx: 70;
   fill: var(--color-text);
 }
 
-body.dark #theme-icon .switch-bg {
+html.dark #theme-icon .switch-bg {
   fill: var(--color-surface);
   stroke: var(--color-text);
 }
