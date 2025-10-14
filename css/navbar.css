@@ -56,7 +56,7 @@ html.dark {
   --color-accent-hover: #40e0d0; /* turquoise accent on hover only */
 }
 
-body.dark {
+html.dark {
   --color-bg: #1f1a27;
   --color-surface: #5f3e7a;
   --color-text: #000000;
@@ -179,12 +179,12 @@ body::-webkit-scrollbar {
 }
 
 /* Animate knob position and recolor on dark mode */
-body.dark #theme-icon .switch-knob {
+html.dark #theme-icon .switch-knob {
   cx: 70;
   fill: var(--color-text);
 }
 
-body.dark #theme-icon .switch-bg {
+html.dark #theme-icon .switch-bg {
   fill: var(--color-surface);
   stroke: var(--color-text);
 }
@@ -237,6 +237,30 @@ footer,
   gap: 14px;
 }
 
+.nav-right {
+  align-items: center;
+  position: relative;
+}
+
+.nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.nav-overflow-btn {
+  display: none;
+}
+
+.nav-overflow-btn svg circle {
+  fill: var(--color-title-text);
+  transition: fill 0.2s ease;
+}
+
+.nav-right.open .nav-overflow-btn svg circle {
+  fill: var(--color-accent-hover);
+}
+
 .nav-title {
   font-size: 1.5rem;
   font-weight: bold;
@@ -272,6 +296,54 @@ footer,
   height: 32px;
   filter: var(--color-icon);
   transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.navbar.nav-collapsed .nav-overflow-btn {
+  display: flex;
+}
+
+.navbar.nav-collapsed .nav-controls {
+  display: none;
+  position: absolute;
+  top: 110%;
+  right: 0;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  min-width: 200px;
+  border-radius: 14px;
+  border: 1px solid var(--color-dropdown-border);
+  background-color: var(--color-dropdown-bg);
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.25);
+  z-index: 1000;
+}
+
+.navbar.nav-collapsed .nav-right.open .nav-controls {
+  display: flex;
+}
+
+.navbar.nav-collapsed .nav-controls .dropdown-menu {
+  position: static;
+  width: 100%;
+  box-shadow: none;
+  background-color: transparent;
+  padding: 0;
+  transform: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.navbar.nav-collapsed .nav-controls .dropdown.show .dropdown-menu {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.navbar.nav-collapsed .nav-controls .dropdown-menu li a {
+  color: inherit;
+}
+
+.navbar.nav-collapsed .nav-controls .dropdown-menu li a:hover {
+  background-color: rgba(0, 0, 0, 0.08);
 }
 
 .icon-btn:hover img {
