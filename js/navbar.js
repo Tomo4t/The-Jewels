@@ -22,18 +22,16 @@ export function initNavbar() {
   const syncMenuHiddenState = (isCollapsed, isOpen) => {
     if (!navRightActions) return;
 
-    if (!isCollapsed) {
-      navRightActions.hidden = false;
-      navRightActions.removeAttribute("aria-hidden");
-      return;
-    }
+    const shouldHide = isCollapsed && !isOpen;
 
-    if (isOpen) {
-      navRightActions.hidden = false;
-      navRightActions.setAttribute("aria-hidden", "false");
-    } else {
-      navRightActions.hidden = true;
+    if (shouldHide) {
+      navRightActions.setAttribute("hidden", "");
       navRightActions.setAttribute("aria-hidden", "true");
+      navRightActions.setAttribute("inert", "");
+    } else {
+      navRightActions.removeAttribute("hidden");
+      navRightActions.removeAttribute("aria-hidden");
+      navRightActions.removeAttribute("inert");
     }
   };
 
@@ -55,13 +53,13 @@ export function initNavbar() {
 
     if (collapsed) {
       navRightActions?.classList.remove("is-open");
-      syncMenuHiddenState(true, false);
     } else {
       navRight?.classList.remove("open");
       navMenuBtn?.setAttribute("aria-expanded", "false");
       navRightActions?.classList.remove("is-open");
-      syncMenuHiddenState(false, false);
     }
+
+    syncMenuHiddenState(collapsed, false);
   };
 
   const shouldCollapseNavbar = () => {
@@ -115,7 +113,7 @@ export function initNavbar() {
       navMenuBtn.setAttribute("aria-expanded", "false");
       navDropdown?.classList.remove("show");
       navRightActions?.classList.remove("is-open");
-      syncMenuHiddenState(true, false);
+      syncMenuHiddenState(navbar?.classList.contains("is-collapsed"), false);
     };
     closeNavMenu = closeMenu;
 
@@ -129,7 +127,7 @@ export function initNavbar() {
       navRight.classList.toggle("open", willOpen);
       navRightActions?.classList.toggle("is-open", willOpen);
       navMenuBtn.setAttribute("aria-expanded", willOpen ? "true" : "false");
-      syncMenuHiddenState(true, willOpen);
+      syncMenuHiddenState(isCollapsed, willOpen);
       if (!willOpen) {
         navDropdown?.classList.remove("show");
       }
