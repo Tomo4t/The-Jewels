@@ -38,6 +38,8 @@ html.dark {
   /* Buttons & Icons */
   --color-icon: brightness(0) invert(1);
   --color-icon-hover: brightness(0) invert(0.4);
+  --color-icon-fg: #faf6e9;
+  --color-icon-fg-hover: #cbeff5;
   --color-sound-muted: brightness(0) invert(0.6);
 
   /* Dropdown */
@@ -74,6 +76,8 @@ html.dark {
 
   --color-icon: brightness(0) invert(0.1);
   --color-icon-hover: brightness(0) invert(0.85);
+  --color-icon-fg: #f0ecff;
+  --color-icon-fg-hover: #40e0d0;
   --color-sound-muted: brightness(0.1) invert(0.25);
 
   --color-dropdown-bg: #3a2e4e;
@@ -171,13 +175,13 @@ body::-webkit-scrollbar {
   width: 40px;
   height: 40px;
   border-radius: 999px;
-  color: var(--color-title-text);
+  color: var(--color-icon-fg);
   transition: color 0.2s ease, transform 0.2s ease;
   overflow: hidden;
 }
 
 #theme-toggle:hover {
-  color: var(--color-accent-hover);
+  color: var(--color-icon-fg-hover);
   transform: scale(1.05);
 }
 
@@ -191,12 +195,15 @@ body::-webkit-scrollbar {
   height: 100%;
   opacity: 0;
   transform: scale(0.6) rotate(-25deg);
+  color: inherit;
   filter: none;
 }
 
 #theme-toggle svg {
   width: 24px;
   height: 24px;
+  fill: currentColor;
+  stroke: currentColor;
 }
 
 #theme-toggle[data-theme="light"] .theme-icon-sun,
@@ -322,7 +329,7 @@ footer,
   display: flex;
   align-items: center;
   gap: 14px;
-  flex: 1 1 auto;
+  flex: 1 1 0;
   min-width: 0;
 }
 
@@ -337,9 +344,10 @@ footer,
 .nav-title {
   display: flex;
   justify-content: center;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-width: 0;
   text-align: center;
+  margin: 0 auto;
 }
 
 .nav-right-actions {
@@ -429,7 +437,7 @@ html.dark .navbar.is-collapsed .nav-right-actions .dropdown-menu li a {
   font-weight: bold;
   background-color: var(--color-title-bg);
   color: var(--color-title-text);
-  padding: 0 12px;
+  padding: 0.35em 14px;
   border-radius: 5px;
   display: inline-flex;
   align-items: center;
@@ -441,6 +449,8 @@ html.dark .navbar.is-collapsed .nav-right-actions .dropdown-menu li a {
   overflow-wrap: anywhere;
   word-break: break-word;
   text-align: center;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 
 
