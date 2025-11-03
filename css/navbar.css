@@ -209,6 +209,17 @@ body::-webkit-scrollbar {
   stroke: currentColor;
 }
 
+#theme-toggle .theme-icon path,
+#theme-toggle .theme-icon circle,
+#theme-toggle .theme-icon line {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+#theme-toggle .theme-icon-moon path {
+  transform: translateX(-0.4px);
+}
+
 #theme-toggle:not([data-animating="true"]):hover .theme-icon {
   filter: var(--color-icon-hover);
 }
@@ -407,6 +418,13 @@ footer,
 .navbar.is-collapsed .nav-right-actions #theme-toggle {
   width: 100%;
   min-width: 0;
+  padding-inline: 4px;
+  justify-content: flex-start;
+}
+
+.navbar.is-collapsed .nav-right-actions #theme-toggle .theme-icon {
+  justify-content: flex-start;
+  padding-inline-start: 4px;
 }
 
 .navbar.is-collapsed .nav-right-actions .dropdown-menu {
