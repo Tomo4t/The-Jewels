@@ -17,6 +17,50 @@ export function initNavbar() {
 
   if (!themeBtn || !soundBtn) return;
 
+  const getDocumentTheme = () =>
+    document.documentElement.classList.contains("dark") ? "dark" : "light";
+
+  const setThemeToggleState = (theme, previousTheme, animate = false) => {
+    if (!themeBtn) return;
+
+    themeBtn.setAttribute("data-theme", theme);
+    themeBtn.setAttribute("aria-pressed", theme === "dark" ? "true" : "false");
+
+    if (!animate || previousTheme === theme) {
+      themeBtn.removeAttribute("data-animating");
+      themeBtn.removeAttribute("data-prev-theme");
+      return;
+    }
+
+    themeBtn.setAttribute("data-prev-theme", previousTheme);
+    themeBtn.setAttribute("data-animating", "true");
+
+    const handleAnimationEnd = (event) => {
+      if (!event.target.classList.contains("theme-icon")) return;
+      themeBtn.removeAttribute("data-animating");
+      themeBtn.removeAttribute("data-prev-theme");
+      themeBtn.removeEventListener("animationend", handleAnimationEnd, true);
+    };
+
+    themeBtn.addEventListener("animationend", handleAnimationEnd, true);
+  };
+
+  setThemeToggleState(getDocumentTheme());
+
+  window.addEventListener("themechange", (event) => {
+    const newTheme = event.detail?.theme || getDocumentTheme();
+    const currentTheme = themeBtn.getAttribute("data-theme") || getDocumentTheme();
+
+    if (newTheme === currentTheme) {
+      if (!themeBtn.hasAttribute("data-animating")) {
+        setThemeToggleState(newTheme);
+      }
+      return;
+    }
+
+    setThemeToggleState(newTheme, currentTheme, true);
+  });
+
   const syncMenuHiddenState = (isCollapsed, isOpen) => {
     if (!navRightActions) return;
 
@@ -170,9 +214,12 @@ export function initNavbar() {
     themeBtn.addEventListener("click", () => {
       document.body.classList.add("transition-gradient");
 
+      const previousTheme = themeBtn.getAttribute("data-theme") || getDocumentTheme();
       const isDark = document.documentElement.classList.toggle("dark");
       const theme = isDark ? "dark" : "light";
       localStorage.setItem("theme", theme);
+
+      setThemeToggleState(theme, previousTheme, true);
 
       requestAnimationFrame(() => {
         refreshGradients();
