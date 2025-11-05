@@ -283,8 +283,7 @@ footer,
   z-index: 1000;
   text-align: left;
   max-height: calc(100vh - 96px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  overflow: visible;
 }
 
 .navbar.is-collapsed .nav-right-actions.is-open {
@@ -293,6 +292,8 @@ footer,
 
 .navbar.is-collapsed .nav-right-actions .dropdown {
   align-self: stretch;
+  position: relative;
+  width: 100%;
 }
 
 .navbar.is-collapsed .nav-right-actions .icon-btn,
@@ -301,19 +302,33 @@ footer,
   width: 100%;
 }
 
+.navbar.is-collapsed .nav-right-actions #theme-toggle {
+  padding-left: 4px;
+  justify-content: flex-start;
+}
+
+.navbar.is-collapsed .nav-right-actions #theme-toggle svg {
+  margin-left: 0;
+  margin-right: auto;
+  display: block;
+}
+
 .navbar.is-collapsed .nav-right-actions .dropdown-menu {
-  position: static;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
   width: 100%;
-  margin-top: 8px;
+  margin-top: 0;
   opacity: 0;
   pointer-events: none;
-  transform: none;
+  transform: translateY(-6px);
   max-height: 0;
   overflow: hidden;
   padding: 0;
   border-radius: 10px;
   box-shadow: none;
-  transition: max-height 0.3s ease, opacity 0.2s ease;
+  transition: max-height 0.3s ease, opacity 0.2s ease, transform 0.2s ease;
+  z-index: 5;
 }
 
 .navbar.is-collapsed .nav-right-actions .dropdown.show .dropdown-menu {
@@ -322,6 +337,7 @@ footer,
   max-height: min(420px, 70vh);
   padding: 6px 0;
   overflow-y: auto;
+  transform: translateY(0);
 }
 
 .navbar.is-collapsed .nav-right-actions .dropdown-menu li a {
