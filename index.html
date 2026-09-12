@@ -1,86 +1,153 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <script>
-    // Apply theme before rendering
-    const theme = localStorage.getItem('theme');
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    }
-  </script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Jewels</title>
-  <link rel="stylesheet" href="css/navbar.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&family=Noto+Sans+Arabic&family=Noto+Sans+JP&display=swap" rel="stylesheet" />
-</head>
+    <title>The Jewels</title>
+    <meta
+      name="description"
+      content="Read The Jewels — an original webcomic. Free, multilingual, and updated chapter by chapter."
+    />
+    <meta name="theme-color" content="#f4eee6" />
+    <meta name="color-scheme" content="light dark" />
 
-<body style="display: none">
-  <div id="bg-image">
-    <img src="images/HomeBackground.png" alt="Background" />
-  </div>
-  <canvas id="particle-canvas"></canvas>
-  <div id="gradient-overlay"></div>
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="canonical" href="https://thejewels.example/" />
 
-  <header class="navbar">
-    <div class="nav-left">
-      <button class="icon-btn" data-page="home" title="Go Home">
-        <img src="images/home.svg" alt="Home" />
-      </button>
-      <button class="icon-btn" data-page="chapters" title="All Chapters">
-        <img src="images/chapters.svg" alt="Chapters" />
-      </button>
-      <button class="icon-btn" data-page="contact" title="Contact Me">
-        <img src="images/contact.svg" alt="Contact" />
-      </button>
+    <!-- Open Graph / Twitter -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="The Jewels" />
+    <meta property="og:title" content="The Jewels" />
+    <meta
+      property="og:description"
+      content="An original webcomic by Tomo. Free, multilingual, and updated chapter by chapter."
+    />
+    <meta property="og:image" content="/images/HomeBackground.png" />
+    <meta property="og:locale" content="en_GB" />
+    <meta property="og:locale:alternate" content="ja_JP" />
+    <meta property="og:locale:alternate" content="pl_PL" />
+    <meta property="og:locale:alternate" content="es_ES" />
+    <meta property="og:locale:alternate" content="fr_FR" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="The Jewels" />
+    <meta name="twitter:description" content="An original webcomic by Tomo." />
+    <meta name="twitter:image" content="/images/HomeBackground.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&family=Noto+Sans+JP:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="/theme-init.js"></script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#page-content" data-i18n="nav.skipToContent">Skip to content</a>
+
+    <div id="bg-image" aria-hidden="true">
+      <img src="/images/HomeBackground.png" alt="" decoding="async" />
     </div>
+    <canvas id="particle-canvas" aria-hidden="true"></canvas>
+    <div id="gradient-overlay" aria-hidden="true"></div>
 
-    <div class="nav-title">
-      <span class="nav-title" data-i18n="title">The Jewels</span>
-    </div>
-
-    <div class="nav-right">
-      <button class="icon-btn nav-right-menu" id="nav-right-menu" title="Menu" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav-right-actions">
-        <img src="images/menu.svg" alt="Menu" />
-      </button>
-
-      <div class="nav-right-actions" id="nav-right-actions">
-        <div class="dropdown">
-          <button class="icon-btn" id="language-toggle" title="Language"
-            onclick="const s=new Audio('audio/click.mp3'); s.volume=0.3; if(localStorage.getItem('sound')!=='off') s.play()">
-            <img src="images/language.svg" alt="Language" />
-          </button>
-          <ul class="dropdown-menu" id="language-menu">
-            <li><a href="#" data-lang="en" data-sound="slide">English</a></li>
-            <li><a href="#" data-lang="ar" data-sound="slide">العربية</a></li>
-            <li><a href="#" data-lang="ja" data-sound="slide">日本語</a></li>
-          </ul>
-        </div>
-
-        <button class="icon-btn" id="theme-toggle" title="Toggle Theme" aria-label="Toggle Theme">
-          <svg id="theme-icon" viewBox="0 0 100 60" width="48" height="32" xmlns="http://www.w3.org/2000/svg">
-            <rect class="switch-bg" x="5" y="10" rx="15" ry="15" width="90" height="40" />
-            <circle class="switch-knob" cx="30" cy="30" r="10" />
-          </svg>
-        </button>
-
-        <button class="icon-btn" title="Toggle Sound" id="sound-toggle">
-          <img src="images/sound.svg" alt="Sound" />
-        </button>
+    <header class="navbar">
+      <div class="nav-left">
+        <a
+          class="icon-btn"
+          href="#home"
+          data-sound="ui"
+          data-i18n-attr="title:nav.home aria-label:nav.home"
+        >
+          <img src="/images/home.svg" alt="" aria-hidden="true" />
+        </a>
+        <a
+          class="icon-btn"
+          href="#chapters"
+          data-sound="ui"
+          data-i18n-attr="title:nav.chapters aria-label:nav.chapters"
+        >
+          <img src="/images/chapters.svg" alt="" aria-hidden="true" />
+        </a>
+        <a
+          class="icon-btn"
+          href="#contact"
+          data-sound="ui"
+          data-i18n-attr="title:nav.contact aria-label:nav.contact"
+        >
+          <img src="/images/contact.svg" alt="" aria-hidden="true" />
+        </a>
       </div>
-    </div>
-  </header>
 
-  <main id="page-content" class="page-hidden"></main>
+      <div class="nav-title">
+        <a href="#home" data-i18n="site.title">The Jewels</a>
+      </div>
 
-  <script type="module" src="js/main.js"></script>
-  <script type="module" src="js/router.js"></script>
-  <script>
-    // Prevent flicker until fully ready
-    window.addEventListener('DOMContentLoaded', () => {
-      document.body.style.display = 'block';
-    });
-  </script>
-</body>
+      <div class="nav-right">
+        <button
+          type="button"
+          class="icon-btn nav-right-menu"
+          id="nav-right-menu"
+          aria-expanded="false"
+          aria-controls="nav-right-actions"
+          data-i18n-attr="title:nav.menu aria-label:nav.menu"
+          hidden
+        >
+          <img src="/images/menu.svg" alt="" aria-hidden="true" />
+        </button>
+
+        <div class="nav-right-actions" id="nav-right-actions">
+          <a class="nav-link" id="admin-link" href="/admin" data-i18n="nav.admin" hidden
+            >Admin panel</a
+          >
+          <a class="nav-link" id="account-action" href="#signin" data-sound="ui" hidden>Sign in</a>
+
+          <div class="dropdown" id="language-dropdown">
+            <button
+              type="button"
+              class="icon-btn"
+              id="language-toggle"
+              aria-haspopup="true"
+              aria-expanded="false"
+              aria-controls="language-menu"
+              data-sound="click"
+              data-i18n-attr="title:nav.language aria-label:nav.language"
+            >
+              <img src="/images/language.svg" alt="" aria-hidden="true" />
+            </button>
+            <ul class="dropdown-menu" id="language-menu" role="menu"></ul>
+          </div>
+
+          <button
+            type="button"
+            class="icon-btn"
+            id="theme-toggle"
+            aria-pressed="false"
+            data-i18n-attr="title:nav.theme aria-label:nav.theme"
+          >
+            <svg id="theme-icon" viewBox="0 0 100 60" width="48" height="32" aria-hidden="true">
+              <rect class="switch-bg" x="5" y="10" rx="15" ry="15" width="90" height="40" />
+              <circle class="switch-knob" cx="30" cy="30" r="10" />
+            </svg>
+          </button>
+
+          <button
+            type="button"
+            class="icon-btn"
+            id="sound-toggle"
+            aria-pressed="true"
+            data-i18n-attr="title:nav.sound aria-label:nav.sound"
+          >
+            <img src="/images/sound.svg" alt="" aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main id="page-content" tabindex="-1"></main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
 </html>

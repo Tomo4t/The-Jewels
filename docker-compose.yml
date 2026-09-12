@@ -1,0 +1,25 @@
+services:
+  jewels:
+    build: .
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_PATH: /app/data/jewels.db
+      CONTENT_DIR: /app/content
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-http://localhost:3000}
+      SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET must be set}
+      ALLOW_REGISTRATION: ${ALLOW_REGISTRATION:-true}
+      MODERATION_QUEUE: ${MODERATION_QUEUE:-true}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      MODERATION_MODEL: ${MODERATION_MODEL:-claude-haiku-4-5}
+    volumes:
+      # Persist the database and uploaded chapters across redeploys.
+      - jewels-data:/app/data
+      - jewels-content:/app/content
+
+volumes:
+  jewels-data:
+  jewels-content:

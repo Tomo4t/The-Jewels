@@ -1,0 +1,23 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+
+# runtime data (SQLite database, sessions, logs)
+data/
+
+# uploaded content that is not part of the repo baseline
+content/**/*.tmp
+
+# environment
+.env
+.env.local
+.env.*.local
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/

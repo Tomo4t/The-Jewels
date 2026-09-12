@@ -1,0 +1,140 @@
+/* ==========================================================================
+   Design tokens
+   The single source of truth for colour, spacing and motion.
+   Light values live on :root; dark mode only redefines what changes.
+   ========================================================================== */
+
+:root {
+  /* --- gradients ------------------------------------------------------- */
+  --gradient-home: linear-gradient(135deg, #d4af37, #a471c2);
+  --gradient-contact: linear-gradient(135deg, #a471c2, #40e0d0);
+  --gradient-chapters: linear-gradient(135deg, #a471c2, #d4af37);
+  --gradient-reader: linear-gradient(135deg, #f9f5ec, #d4af37);
+  --gradient-default: linear-gradient(135deg, #f9f5ec, #a471c2);
+
+  /* --- surfaces and text ----------------------------------------------- */
+  --color-bg: #fdf9ef;
+  --color-surface: #f5f0e6;
+  --color-surface-raised: #fffdf8;
+  --color-border: #e0d5bd;
+  --color-text: #2c1e00;
+  --color-text-muted: #7a5f30;
+
+  --color-updates-heading: #1a1200;
+  --color-updates-text: #2c1e00;
+
+  --color-selection: #d8882c;
+  --color-selection-text: #ffffff;
+
+  /* --- navbar ----------------------------------------------------------- */
+  --color-navbar: #b18e3c;
+  --color-title-bg: #d4af37;
+  --color-title-text: #faf6e9;
+
+  /* --- icons ------------------------------------------------------------ */
+  --color-icon: brightness(0) invert(1);
+  --color-icon-hover: brightness(0) invert(0.4);
+  --color-sound-muted: brightness(0) invert(0.6);
+  /* Icons drawn on page backgrounds rather than on the coloured navbar. */
+  --icon-filter-content: brightness(0) invert(0.35);
+
+  /* --- dropdowns -------------------------------------------------------- */
+  --color-dropdown-bg: #f1e7c8;
+  --color-dropdown-border: #b48e2c;
+  --color-dropdown-hover: #dfc167;
+
+  /* --- footer ----------------------------------------------------------- */
+  --color-footer-bg: #eae1d0;
+  --color-footer-text: #7e673c;
+  --color-footer-link: #a4823f;
+  --color-footer-link-hover: #40e0d0;
+
+  /* --- accents ---------------------------------------------------------- */
+  --color-accent: #d4af37;
+  --color-accent-hover: #40e0d0;
+  --color-accent-contrast: #2c1e00;
+  --color-focus: #1f6feb;
+
+  /* --- feedback --------------------------------------------------------- */
+  --color-danger: #b3261e;
+  --color-danger-soft: #fdecea;
+  --color-success: #1b6b33;
+  --color-success-soft: #e8f5ec;
+  --color-warning: #8a6100;
+  --color-warning-soft: #fdf3d8;
+
+  /* --- shape and motion -------------------------------------------------- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 3px rgb(0 0 0 / 12%);
+  --shadow-md: 0 6px 20px rgb(0 0 0 / 14%);
+  --transition-fast: 140ms ease;
+  --transition-base: 240ms ease;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+
+  --font-body: 'Noto Sans', 'Noto Sans JP', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+html.dark {
+  --gradient-home: linear-gradient(135deg, #7a4fcf, #3ccfcf);
+  --gradient-contact: linear-gradient(135deg, #7a4fcf, #c19c52);
+  --gradient-chapters: linear-gradient(135deg, #5784be, #be3ccf);
+  --gradient-reader: linear-gradient(135deg, #1c1b22, #5784be);
+  --gradient-default: linear-gradient(135deg, #1c1b22, #7a4fcf);
+
+  --color-bg: #1f1a27;
+  --color-surface: #2e2440;
+  --color-surface-raised: #3a2e4e;
+  --color-border: #4b3a66;
+
+  /* Was #000000 — black on a near-black background measured 1.24:1, far below
+     the 4.5:1 WCAG AA minimum. These pass at 14:1 and 7:1. */
+  --color-text: #ece7f5;
+  --color-text-muted: #b9a9d4;
+
+  --color-updates-heading: #ffffff;
+  --color-updates-text: #ece7f5;
+
+  --color-selection: #d82cd8;
+  --color-selection-text: #ffffff;
+
+  --color-navbar: #5f3e7a;
+  --color-title-bg: #38275c;
+  --color-title-text: #ffffff;
+
+  --color-icon: brightness(0) invert(0.95);
+  --color-icon-hover: brightness(0) invert(0.75);
+  --color-sound-muted: brightness(0) invert(0.45);
+  --icon-filter-content: brightness(0) invert(0.85);
+
+  --color-dropdown-bg: #3a2e4e;
+  --color-dropdown-border: #654f80;
+  --color-dropdown-hover: #8365b3;
+
+  --color-footer-bg: #2c223a;
+  --color-footer-text: #c7b0e2;
+  --color-footer-link: #b699dd;
+  --color-footer-link-hover: #40e0d0;
+
+  --color-accent: #a471c2;
+  --color-accent-hover: #40e0d0;
+  --color-accent-contrast: #ffffff;
+  --color-focus: #7aa7ff;
+
+  --color-danger: #ff8a80;
+  --color-danger-soft: #3a2028;
+  --color-success: #7fdba0;
+  --color-success-soft: #1e3327;
+  --color-warning: #ffcf6b;
+  --color-warning-soft: #3a3020;
+
+  --shadow-sm: 0 1px 3px rgb(0 0 0 / 45%);
+  --shadow-md: 0 6px 20px rgb(0 0 0 / 55%);
+}

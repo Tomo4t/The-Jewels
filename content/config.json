@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "defaultLanguage": "en",
+  "languages": {
+    "en": { "chapters": 6, "updates": 5 },
+    "ja": { "chapters": 1, "updates": 5 },
+    "pl": { "chapters": 0, "updates": 0 },
+    "es": { "chapters": 0, "updates": 0 },
+    "fr": { "chapters": 0, "updates": 0 }
+  }
+}

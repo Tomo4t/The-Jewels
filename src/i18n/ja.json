@@ -1,0 +1,152 @@
+{
+  "meta": {
+    "code": "ja",
+    "name": "日本語",
+    "dir": "ltr",
+    "locale": "ja-JP"
+  },
+  "site": {
+    "title": "The Jewels",
+    "tagline": "Tomo によるオリジナルウェブコミック",
+    "description": "オリジナルウェブコミック『The Jewels』。無料・多言語対応、章ごとに更新中。"
+  },
+  "nav": {
+    "home": "ホーム",
+    "chapters": "章一覧",
+    "contact": "お問い合わせ",
+    "menu": "メニュー",
+    "language": "言語",
+    "theme": "テーマ切り替え",
+    "sound": "音のオン・オフ",
+    "account": "アカウント",
+    "admin": "管理画面",
+    "skipToContent": "本文へスキップ"
+  },
+  "common": {
+    "loading": "読み込み中…",
+    "error": "エラーが発生しました。",
+    "retry": "再試行",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "delete": "削除",
+    "edit": "編集",
+    "close": "閉じる",
+    "submit": "送信",
+    "required": "この項目は必須です。"
+  },
+  "home": {
+    "updates": "お知らせ",
+    "noUpdates": "お知らせはまだありません。",
+    "loadingUpdates": "お知らせを読み込み中…",
+    "latestChapter": "最新話",
+    "continueReading": "続きを読む",
+    "page": "ページ",
+    "previousUpdate": "前のお知らせ",
+    "nextUpdate": "次のお知らせ"
+  },
+  "chapters": {
+    "title": "章一覧",
+    "empty": "この言語の章はまだありません。",
+    "emptyHint": "他の言語をお試しいただくか、また後日ご確認ください。",
+    "chapter": "第{n}話",
+    "openChapter": "{title} を開く"
+  },
+  "reader": {
+    "comicMode": "見開きモード",
+    "scrollMode": "スクロールモード",
+    "cardMode": "カードモード",
+    "previousPage": "前のページ",
+    "nextPage": "次のページ",
+    "pageOf": "{total} ページ中 {current} ページ",
+    "backToChapters": "章一覧に戻る",
+    "notFound": "その章は見つかりませんでした。",
+    "fullscreenHint": "ページをダブルタップで全画面表示"
+  },
+  "contact": {
+    "title": "作者の公式SNS一覧"
+  },
+  "auth": {
+    "signIn": "ログイン",
+    "signUp": "アカウント作成",
+    "signOut": "ログアウト",
+    "username": "ユーザー名",
+    "password": "パスワード",
+    "confirmPassword": "パスワードの確認",
+    "displayName": "表示名",
+    "haveAccount": "すでにアカウントをお持ちですか？",
+    "needAccount": "アカウントが必要ですか？",
+    "signedInAs": "{name} としてログイン中",
+    "invalidCredentials": "ユーザー名またはパスワードが正しくありません。",
+    "registrationClosed": "現在、新規登録を受け付けていません。",
+    "usernameTaken": "そのユーザー名はすでに使用されています。",
+    "usernameRules": "3〜24文字。英数字・アンダースコア・ハイフンが使えます。",
+    "passwordRules": "10文字以上で入力してください。",
+    "passwordMismatch": "パスワードが一致しません。",
+    "rateLimited": "試行回数が多すぎます。しばらく待ってからお試しください。",
+    "welcome": "おかえりなさい、{name} さん。",
+    "accountCreated": "アカウントを作成し、ログインしました。"
+  },
+  "comments": {
+    "title": "コメント",
+    "count": "コメント {count} 件",
+    "countOne": "コメント 1 件",
+    "placeholder": "この章の感想を書いてみましょう…",
+    "replyPlaceholder": "返信を書く…",
+    "post": "コメントする",
+    "reply": "返信",
+    "empty": "まだコメントはありません。最初の一人になりましょう。",
+    "signInPrompt": "コメントするにはログインしてください。",
+    "pending": "承認待ち",
+    "pendingNotice": "コメントを送信しました。モデレーターの承認をお待ちください。",
+    "flagged": "確認のため保留中",
+    "edited": "編集済み",
+    "deleted": "このコメントは削除されました。",
+    "confirmDelete": "このコメントを完全に削除しますか？",
+    "tooLong": "コメントは {max} 文字までです。",
+    "tooFast": "投稿が早すぎます。少し時間をおいてください。",
+    "loadMore": "コメントをもっと見る",
+    "author": "作者",
+    "moderator": "モデレーター",
+    "admin": "管理者"
+  },
+  "admin": {
+    "title": "管理画面",
+    "tabs": {
+      "chapters": "章",
+      "updates": "お知らせ",
+      "moderation": "モデレーション",
+      "users": "ユーザー"
+    },
+    "uploadChapter": "章をアップロード",
+    "chapterTitle": "章タイトル",
+    "chapterDescription": "説明",
+    "chapterNumber": "章番号",
+    "language": "言語",
+    "dropPages": "ページ画像をドロップ、またはクリックして選択",
+    "dropHint": "JPG・PNG・WebP対応。ファイル名順に並びます。ドラッグで並べ替えできます。",
+    "publish": "章を公開",
+    "deleteChapter": "章を削除",
+    "newUpdate": "新しいお知らせ",
+    "updateDate": "日付",
+    "updateBody": "本文",
+    "queueEmpty": "確認待ちの項目はありません。",
+    "approve": "承認",
+    "reject": "却下",
+    "flagReason": "フラグ: {reason}",
+    "role": "権限",
+    "roles": {
+      "user": "ユーザー",
+      "moderator": "モデレーター",
+      "admin": "管理者"
+    },
+    "banUser": "アクセス禁止",
+    "unbanUser": "禁止解除",
+    "confirmDeleteChapter": "この章とすべてのページを削除しますか？元に戻せません。"
+  },
+  "errors": {
+    "notFound": "ページが見つかりません",
+    "notFoundHint": "そのページは存在しません。章一覧をご覧ください。",
+    "offline": "サーバーに接続できません。利用可能な内容を表示しています。",
+    "forbidden": "この操作を行う権限がありません。"
+  }
+}

@@ -1,0 +1,152 @@
+{
+  "meta": {
+    "code": "en",
+    "name": "English",
+    "dir": "ltr",
+    "locale": "en-GB"
+  },
+  "site": {
+    "title": "The Jewels",
+    "tagline": "An original webcomic by Tomo",
+    "description": "Read The Jewels — an original webcomic. Free, multilingual, and updated chapter by chapter."
+  },
+  "nav": {
+    "home": "Home",
+    "chapters": "Chapters",
+    "contact": "Contact",
+    "menu": "Menu",
+    "language": "Language",
+    "theme": "Toggle theme",
+    "sound": "Toggle sound",
+    "account": "Account",
+    "admin": "Admin panel",
+    "skipToContent": "Skip to content"
+  },
+  "common": {
+    "loading": "Loading…",
+    "error": "Something went wrong.",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "submit": "Submit",
+    "required": "This field is required."
+  },
+  "home": {
+    "updates": "Updates",
+    "noUpdates": "No updates yet.",
+    "loadingUpdates": "Loading updates…",
+    "latestChapter": "Latest Chapter",
+    "continueReading": "Continue Reading",
+    "page": "Page",
+    "previousUpdate": "Previous update",
+    "nextUpdate": "Next update"
+  },
+  "chapters": {
+    "title": "Chapters",
+    "empty": "No chapters in this language yet.",
+    "emptyHint": "Try another language, or check back soon.",
+    "chapter": "Chapter {n}",
+    "openChapter": "Open {title}"
+  },
+  "reader": {
+    "comicMode": "Book mode",
+    "scrollMode": "Scroll mode",
+    "cardMode": "Card mode",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "pageOf": "Page {current} of {total}",
+    "backToChapters": "Back to chapters",
+    "notFound": "That chapter could not be found.",
+    "fullscreenHint": "Double-tap a page to go fullscreen"
+  },
+  "contact": {
+    "title": "All official socials for the creator"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signUp": "Create account",
+    "signOut": "Sign out",
+    "username": "Username",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "displayName": "Display name",
+    "haveAccount": "Already have an account?",
+    "needAccount": "Need an account?",
+    "signedInAs": "Signed in as {name}",
+    "invalidCredentials": "That username or password is not right.",
+    "registrationClosed": "New sign-ups are currently closed.",
+    "usernameTaken": "That username is already taken.",
+    "usernameRules": "3–24 characters: letters, numbers, underscore or hyphen.",
+    "passwordRules": "At least 10 characters.",
+    "passwordMismatch": "The two passwords do not match.",
+    "rateLimited": "Too many attempts. Please wait a minute and try again.",
+    "welcome": "Welcome back, {name}.",
+    "accountCreated": "Account created. You are signed in."
+  },
+  "comments": {
+    "title": "Comments",
+    "count": "{count} comments",
+    "countOne": "1 comment",
+    "placeholder": "Share your thoughts on this chapter…",
+    "replyPlaceholder": "Write a reply…",
+    "post": "Post comment",
+    "reply": "Reply",
+    "empty": "No comments yet. Be the first.",
+    "signInPrompt": "Sign in to join the conversation.",
+    "pending": "Awaiting moderation",
+    "pendingNotice": "Your comment was submitted and is waiting for a moderator.",
+    "flagged": "Held for review",
+    "edited": "edited",
+    "deleted": "This comment was removed.",
+    "confirmDelete": "Delete this comment permanently?",
+    "tooLong": "Comments are limited to {max} characters.",
+    "tooFast": "You are posting too quickly. Please slow down.",
+    "loadMore": "Load more comments",
+    "author": "Author",
+    "moderator": "Moderator",
+    "admin": "Admin"
+  },
+  "admin": {
+    "title": "Admin panel",
+    "tabs": {
+      "chapters": "Chapters",
+      "updates": "Updates",
+      "moderation": "Moderation",
+      "users": "Users"
+    },
+    "uploadChapter": "Upload chapter",
+    "chapterTitle": "Chapter title",
+    "chapterDescription": "Description",
+    "chapterNumber": "Chapter number",
+    "language": "Language",
+    "dropPages": "Drop page images here, or click to choose",
+    "dropHint": "JPG, PNG or WebP. They are ordered by filename — drag to reorder.",
+    "publish": "Publish chapter",
+    "deleteChapter": "Delete chapter",
+    "newUpdate": "New update",
+    "updateDate": "Date",
+    "updateBody": "Message",
+    "queueEmpty": "Nothing waiting for review.",
+    "approve": "Approve",
+    "reject": "Reject",
+    "flagReason": "Flagged: {reason}",
+    "role": "Role",
+    "roles": {
+      "user": "User",
+      "moderator": "Moderator",
+      "admin": "Admin"
+    },
+    "banUser": "Ban",
+    "unbanUser": "Unban",
+    "confirmDeleteChapter": "Delete this chapter and all of its pages? This cannot be undone."
+  },
+  "errors": {
+    "notFound": "Page not found",
+    "notFoundHint": "That page does not exist. Try the chapter list.",
+    "offline": "Cannot reach the server. Showing what is available.",
+    "forbidden": "You do not have permission to do that."
+  }
+}

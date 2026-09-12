@@ -1,0 +1,648 @@
+/* ==========================================================================
+   Navbar, background layers and global chrome
+   Design tokens live in tokens.css; this file only consumes them.
+   ========================================================================== */
+
+a {
+  text-decoration: none;
+}
+@keyframes fadeInSmooth {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeInSmooth 0.6s ease-out forwards;
+}
+.animate-click {
+  animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+  0% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(5deg);
+  }
+  50% {
+    transform: rotate(-5deg);
+  }
+  75% {
+    transform: rotate(3deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+html {
+  overflow-y: scroll;
+  scrollbar-width: none;
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+#particle-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  display: block;
+}
+
+#gradient-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  display: grid;
+}
+
+.gradient-layer {
+  position: absolute;
+  inset: 0;
+  transition: opacity 1s ease;
+  opacity: 0;
+  z-index: 0;
+}
+
+.gradient-layer.active {
+  opacity: 1;
+  z-index: 1;
+}
+
+/* RESET + BASE */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+/* SVG respects palette-based coloring */
+#theme-icon .switch-bg {
+  fill: var(--color-navbar);
+  stroke: var(--color-bg);
+  stroke-width: 8;
+  transition: all 0.3s ease;
+}
+
+#theme-icon .switch-knob {
+  fill: var(--color-bg);
+  transition: all 0.3s ease;
+}
+
+/* Animate knob position and recolor on dark mode */
+html.dark #theme-icon .switch-knob {
+  cx: 70;
+  fill: var(--color-text);
+}
+
+html.dark #theme-icon .switch-bg {
+  fill: var(--color-surface);
+  stroke: var(--color-text);
+}
+body {
+  overflow-x: hidden;
+  font-family: 'Noto Sans Rounded', 'Noto Sans Arabic', 'Noto Sans JP', sans-serif;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* Smooth transition for theme toggle */
+body {
+  transition:
+    background-color 0.4s ease,
+    color 0.4s ease;
+}
+
+.navbar,
+.nav-title,
+.dropdown-menu,
+footer,
+.button-accent {
+  transition:
+    background-color 0.4s ease,
+    color 0.4s ease,
+    filter 0.4s ease;
+}
+
+.icon-btn img {
+  transition:
+    transform 0.2s ease,
+    filter 0.4s ease;
+}
+
+.navbar {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--color-navbar);
+  padding: 10px 20px;
+  height: 60px;
+
+  /* prevent squeeze causing misalignment */
+  min-width: 0;
+}
+
+.nav-left,
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+}
+
+.nav-left {
+  justify-content: flex-start;
+}
+
+.nav-right {
+  justify-content: flex-end;
+}
+
+.nav-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.navbar.is-collapsed .nav-right {
+  position: relative;
+  justify-content: flex-end;
+}
+
+.navbar.is-collapsed .nav-right-actions {
+  display: none;
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  width: min(220px, calc(100vw - 32px));
+  border-radius: 14px;
+  background-color: var(--color-dropdown-bg);
+  border: 1px solid var(--color-dropdown-border);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(14px);
+  z-index: 1000;
+  text-align: left;
+}
+
+.navbar.is-collapsed .nav-right-actions.is-open {
+  display: flex;
+}
+
+.navbar.is-collapsed .nav-right-actions .dropdown {
+  align-self: stretch;
+}
+
+.navbar.is-collapsed .nav-right-actions .icon-btn,
+.navbar.is-collapsed .nav-right-actions .dropdown > button {
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.navbar.is-collapsed .nav-right-actions .dropdown-menu {
+  position: static;
+  width: 100%;
+  margin-top: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transform: none;
+  max-height: 0;
+  overflow: hidden;
+  padding: 0;
+  border-radius: 10px;
+  box-shadow: none;
+  transition:
+    max-height 0.3s ease,
+    opacity 0.2s ease;
+}
+
+.navbar.is-collapsed .nav-right-actions .dropdown.show .dropdown-menu {
+  opacity: 1;
+  pointer-events: auto;
+  max-height: 240px;
+  padding: 6px 0;
+}
+
+.navbar.is-collapsed .nav-right-actions .dropdown-menu li a {
+  color: #2c1e00;
+}
+
+html.dark .navbar.is-collapsed .nav-right-actions .dropdown-menu li a {
+  color: #fff;
+}
+
+.navbar.is-collapsed .nav-right-actions .dropdown-menu li a:hover {
+  background-color: var(--color-dropdown-hover);
+}
+
+.nav-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  background-color: var(--color-title-bg);
+  color: var(--color-title-text);
+  padding: 0 12px;
+  border-radius: 5px;
+  white-space: nowrap;
+
+  display: flex;
+  align-items: center;
+
+  flex-shrink: 0;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* ICON BUTTONS */
+.icon-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar:not(.is-collapsed) .nav-right-menu {
+  display: none;
+}
+
+.navbar.is-collapsed .nav-right-menu {
+  display: flex;
+}
+
+.icon-btn img {
+  width: 32px;
+  height: 32px;
+  filter: var(--color-icon);
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+}
+
+.icon-btn:hover img {
+  transform: scale(1.1);
+  filter: var(--color-icon-hover);
+}
+
+/* DROPDOWN */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  z-index: 999;
+  min-width: 140px;
+
+  padding: 6px 0;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  background-color: rgba(30, 30, 30, 0.6); /* translucent dark */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  transition:
+    opacity 0.3s ease,
+    transform 0.2s ease;
+
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+}
+
+.dropdown.show .dropdown-menu {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.dropdown-menu li {
+  list-style: none;
+}
+
+.dropdown-menu li a {
+  display: block;
+  padding: 10px 16px;
+  color: white;
+  text-decoration: none;
+  font-size: 0.95rem;
+  text-align: left;
+  transition: background 0.2s ease;
+}
+
+.dropdown-menu li a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* SOUND TOGGLE */
+#sound-toggle.active img {
+  filter: var(--color-sound-muted);
+}
+
+/* FOOTER (if used) */
+footer {
+  background-color: var(--color-footer-bg);
+  color: var(--color-footer-text);
+  padding: 20px;
+  text-align: center;
+}
+
+footer a {
+  color: var(--color-footer-link);
+  text-decoration: none;
+}
+
+footer a:hover {
+  color: var(--color-footer-link-hover);
+}
+
+/* ACCENT BUTTON (if used) */
+.button-accent {
+  background-color: var(--color-accent);
+  color: #000;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 4px;
+}
+
+.button-accent:hover {
+  background-color: var(--color-accent-hover);
+}
+
+/* Shake animation for the mute button */
+@keyframes shake {
+  0% {
+    transform: translate(0);
+  }
+  25% {
+    transform: translate(2px, 1px);
+  }
+  50% {
+    transform: translate(-2px, -1px);
+  }
+  75% {
+    transform: translate(2px, 2px);
+  }
+  100% {
+    transform: translate(0);
+  }
+}
+
+#sound-toggle.animate-click {
+  animation: shake 0.2s ease;
+}
+
+/* Press-in and spring-out animation for other buttons */
+.icon-btn:active {
+  transform: scale(0.95);
+  transition: transform 0.1s ease;
+}
+
+.icon-btn.release-pop {
+  transform: scale(1.05);
+  transition: transform 0.1s ease;
+}
+
+.icon-btn {
+  position: relative;
+  transition: transform 0.1s ease;
+}
+
+#language-toggle.disabled {
+  opacity: 0.3;
+  pointer-events: auto;
+  animation: shake 0.2s ease;
+}
+
+#background-layer {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+}
+
+#particles {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+#bg-image {
+  position: fixed;
+  inset: 0;
+  z-index: -3; /* Behind particles and gradient */
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#bg-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.6; /* Optional: blend with gradient */
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html,
+  body {
+    cursor: url('/images/cursor.svg'), default;
+  }
+
+  a,
+  button,
+  .icon-btn,
+  .chapter-box {
+    cursor: url('/images/cursor-pointer.svg'), pointer;
+  }
+
+  input,
+  textarea,
+  [contenteditable='true'],
+  ::selection,
+  ::-moz-selection {
+    cursor: url('/images/cursor-text.svg'), text !important;
+  }
+  ::selection {
+    background: var(--color-selection);
+    color: var(--color-selection-text);
+  }
+  body.loading,
+  html.loading {
+    cursor: url('/images/cursor-loading.svg'), progress !important;
+  }
+}
+
+html {
+  font-size: 16px;
+}
+@media (max-width: 768px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 720px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 600px) {
+  .navbar {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 8px 12px;
+  }
+
+  .nav-title {
+    height: 100%;
+    font-size: 1.4rem;
+    padding: 3px 8px;
+  }
+
+  .nav-left {
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .nav-right-actions {
+    gap: 10px;
+  }
+
+  .icon-btn img {
+    width: 35px;
+  }
+
+  .dropdown-menu {
+    min-width: 100%;
+    right: 0;
+    left: auto;
+  }
+
+  .reader-toggle {
+    flex-direction: row;
+    gap: 6px;
+    justify-content: center;
+    max-width: 100%;
+  }
+
+  .mode-btn {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 14px;
+  }
+
+  .icon-btn img {
+    width: 27px;
+  }
+}
+
+@media (max-width: 400px) {
+  .nav-title {
+    font-size: 1.2rem;
+    padding: 0 8px;
+  }
+  .icon-btn img {
+    width: 24px;
+  }
+  .nav-left,
+  .nav-right {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 360px) {
+  .nav-title {
+    font-size: 0.9rem;
+    padding: 0 6px;
+  }
+  .icon-btn img {
+    width: 20px;
+  }
+  .nav-left,
+  .nav-right {
+    gap: 4px;
+  }
+}
+
+/* --- additions: account links and the language menu as buttons ------------ */
+
+.nav-link {
+  padding: 0.35rem 0.6rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-title-text);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.nav-link:hover {
+  background: rgb(255 255 255 / 15%);
+}
+
+.language-option {
+  display: block;
+  width: 100%;
+  padding: 0.45rem 0.9rem;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: start;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.language-option:hover {
+  background: var(--color-dropdown-hover);
+}
+
+.language-option[aria-current='true'] {
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+/* The old rules assumed anchors inside the dropdown. */
+.dropdown-menu li {
+  list-style: none;
+}
+
+/* The site title is a link now; it must not pick up the default link colour. */
+.nav-title a {
+  color: var(--color-title-text);
+  text-decoration: none;
+}
+
+.nav-title a:hover {
+  color: var(--color-title-text);
+  opacity: 0.85;
+}

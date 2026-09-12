@@ -1,0 +1,47 @@
+{
+  "name": "the-jewels",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The Jewels — a multilingual webcomic reader with an Express backend, accounts, comments and an admin panel.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "concurrently -n server,vite -c blue,magenta \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:server": "node --watch server/index.js",
+    "dev:client": "vite",
+    "build": "vite build",
+    "start": "NODE_ENV=production node server/index.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{js,css,json,html,md}\"",
+    "format:check": "prettier --check \"**/*.{js,css,json,html,md}\"",
+    "seed:admin": "node server/scripts/create-admin.js",
+    "test": "node --test \"server/tests/*.test.js\""
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.7.0",
+    "compression": "^1.7.5",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.7",
+    "express": "^5.2.1",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "multer": "^2.3.0",
+    "sharp": "^0.35.4",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "concurrently": "^9.1.0",
+    "eslint": "^9.17.0",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.2",
+    "vite": "^6.0.7"
+  },
+  "overrides": {
+    "qs": "^6.16.0"
+  }
+}
