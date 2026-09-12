@@ -7,8 +7,6 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      DATABASE_PATH: /app/data/jewels.db
-      CONTENT_DIR: /app/content
       PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-http://localhost:3000}
       SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET must be set}
       ALLOW_REGISTRATION: ${ALLOW_REGISTRATION:-true}
@@ -16,10 +14,9 @@ services:
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       MODERATION_MODEL: ${MODERATION_MODEL:-claude-haiku-4-5}
     volumes:
-      # Persist the database and uploaded chapters across redeploys.
-      - jewels-data:/app/data
-      - jewels-content:/app/content
+      # One volume holds everything that must survive a redeploy: the database
+      # and every uploaded chapter. Back this up.
+      - jewels-data:/data
 
 volumes:
   jewels-data:
-  jewels-content:

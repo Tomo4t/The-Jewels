@@ -1,0 +1,12 @@
+node_modules
+dist
+data
+.git
+.github
+docs
+*.tgz
+.env
+.env.*
+!.env.example
+npm-debug.log*
+.DS_Store

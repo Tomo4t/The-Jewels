@@ -77,21 +77,48 @@ node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 
 ## Deployment
 
+### Railway (recommended — no server administration)
+
+Railway builds straight from the `Dockerfile` and gives the service a public
+HTTPS URL. `railway.json` already sets the builder and the health check.
+
+1. Push this repo to GitHub.
+2. On [railway.app](https://railway.app), create a project from the repo.
+3. Add a **Volume** to the service with mount path **`/data`**. This is the
+   single most important step — it holds the database and every uploaded
+   chapter. Without it, both are wiped on every redeploy.
+4. Set one variable: `SESSION_SECRET`. Everything else has a sensible default,
+   and `PUBLIC_ORIGIN` is detected from Railway's own domain.
+5. Generate a public domain for the service and open it.
+6. Register — the first account becomes the administrator.
+
+Hobby is the cheapest plan that keeps a service always on with a volume.
+
+### Docker anywhere else
+
 ```bash
-cp .env.example .env    # set SESSION_SECRET and PUBLIC_ORIGIN
+cp .env.example .env    # set SESSION_SECRET
 docker compose up -d --build
 ```
 
-Two volumes persist across redeploys — `jewels-data` (the database) and
-`jewels-content` (uploaded chapters). **Back both up.** Uploaded chapters are not
-in git; only the baseline content committed to the repo is.
+One named volume, `jewels-data`, is mounted at `/data` and holds both the
+database and the uploaded chapters. **Back it up.** Uploaded chapters are not in
+git; only the baseline content committed to the repo is.
 
-Run it behind a reverse proxy that terminates TLS (Caddy, nginx, or a platform
+Put it behind a reverse proxy that terminates TLS (Caddy, nginx, or a platform
 that does it for you). The app sets `trust proxy`, so the client address and
 scheme come through correctly for rate limiting and secure cookies.
 
-Without Docker: `npm ci && npm run build && npm start` behind the same proxy,
-with a process manager such as systemd or pm2.
+### Bare Node
+
+`npm ci && npm run build && npm start` behind the same kind of proxy, with a
+process manager such as systemd or pm2.
+
+### First boot
+
+On a fresh volume the server copies the chapters committed to the repo into
+`CONTENT_DIR` once, then leaves it alone forever. A redeploy never overwrites
+content you have uploaded.
 
 ---
 

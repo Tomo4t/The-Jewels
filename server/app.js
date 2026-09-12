@@ -6,6 +6,7 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 import config, { validateConfig } from './config.js';
+import { ensureContentSeeded } from './services/bootstrap.js';
 import { attachUser } from './middleware/auth.js';
 import { errorHandler, notFoundHandler } from './middleware/errors.js';
 import { generalLimiter, requireSameOrigin } from './middleware/security.js';
@@ -15,6 +16,10 @@ import commentRoutes from './routes/comments.js';
 import adminRoutes from './routes/admin.js';
 
 validateConfig();
+
+// Must run before any route reads content: a freshly mounted volume is empty.
+const seeding = ensureContentSeeded();
+if (seeding.seeded) console.log(`[content] ${seeding.reason}`);
 
 const app = express();
 

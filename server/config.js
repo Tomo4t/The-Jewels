@@ -18,15 +18,32 @@ const abs = (value, fallback) => {
 
 const isProduction = process.env.NODE_ENV === 'production';
 
+/**
+ * Hosting platforms expose the service's public hostname. Using it saves the
+ * operator from having to paste the URL back into the environment after the
+ * first deploy — and getting it wrong would silently disable Secure cookies.
+ */
+const platformOrigin = () => {
+  const host = process.env.RAILWAY_PUBLIC_DOMAIN || process.env.RENDER_EXTERNAL_HOSTNAME;
+  return host ? `https://${host.replace(/^https?:\/\//, '').replace(/\/+$/, '')}` : '';
+};
+
 export const config = {
   isProduction,
   port: int(process.env.PORT, 3000),
-  publicOrigin: (process.env.PUBLIC_ORIGIN || `http://localhost:${int(process.env.PORT, 3000)}`)
+  publicOrigin: (
+    process.env.PUBLIC_ORIGIN ||
+    platformOrigin() ||
+    `http://localhost:${int(process.env.PORT, 3000)}`
+  )
     .trim()
     .replace(/\/+$/, ''),
 
   databasePath: abs(process.env.DATABASE_PATH, './data/jewels.db'),
   contentDir: abs(process.env.CONTENT_DIR, './content'),
+  // Read-only copy of the chapters committed to the repo. When CONTENT_DIR
+  // points at a fresh, empty volume, this is what gets copied in on first boot.
+  contentBaselineDir: abs(process.env.CONTENT_BASELINE_DIR, './content-baseline'),
   distDir: abs(process.env.DIST_DIR, './dist'),
 
   sessionSecret: process.env.SESSION_SECRET || '',
