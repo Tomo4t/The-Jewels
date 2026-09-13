@@ -212,14 +212,18 @@ footer,
   display: none;
   position: absolute;
   top: calc(100% + 10px);
-  /* Anchored to the same edge as the burger and only as wide as one column of
-     icons, so the button sits centred over the list it opens rather than off
-     to one side of a wide panel. */
-  right: 0;
+  /* Centred on the burger, not merely aligned to the same edge.
+     
+     The panel is one icon wide plus 6px either side, and it is pulled 6px past
+     its container's right edge. That makes the two centres identical at every
+     breakpoint without hard-coding a width: the panel's centre works out to
+     (container right - icon/2), which is exactly where the burger's centre
+     sits, whatever size the icon is at that width. */
+  right: -6px;
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  padding: 10px;
+  padding: 10px 6px;
   width: max-content;
   min-width: 0;
   max-width: calc(100vw - 24px);
