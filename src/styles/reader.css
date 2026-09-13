@@ -127,23 +127,49 @@ html.dark .mode-btn.active img {
      bounded now, and the pane matches the height book mode uses so all three
      modes occupy the same box. */
   width: 100%;
-  max-width: min(100%, 560px);
+
+  /* The pane IS one page: as wide as a page, and as tall as a page -- except on
+     a narrow screen, where the width runs out first and the height comes down
+     with it so the page still fills the pane exactly. Without that second term
+     the pane stayed full height while the page shrank, and the leftover turned
+     into empty bands above and below every page. */
+  max-width: min(90vw, var(--page-w));
   min-width: 0;
-  height: min(700px, 68vh);
+  height: min(var(--page-h), calc(90vw * 3 / 2));
+
   overflow-y: auto;
+  /* One page per pane, and it snaps -- so the reader never stops halfway
+     between two pages. */
+  scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
   padding-bottom: 0;
 }
 
 .page-scroll {
   width: 100%;
-  padding: 0 1rem;
+  height: 100%;
+  padding: 0;
   margin: 0;
   box-sizing: border-box;
   line-height: 0;
+  scroll-snap-align: start;
+}
+
+/* The pane is already the page's shape, so the page simply fills it. */
+.page-scroll .page-iner {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
 }
 
 .book {
+  /* One page box, shared by all three modes, so switching modes never resizes
+     the comic. 2/3 is the real shape of the artwork (pages are 800x1200 and
+     1080x1600). */
+  --page-h: min(700px, 68vh);
+  --page-w: calc(var(--page-h) * 2 / 3);
+
   display: flex;
   justify-content: center;
   transition: transform 0.3s ease;
@@ -172,7 +198,7 @@ html.dark .mode-btn.active img {
      
      2/3 is the real shape of the artwork (the pages are 800x1200 and
      1080x1600), so `object-fit: cover` has nothing to crop. */
-  height: min(700px, 68vh);
+  height: var(--page-h);
   width: auto;
   aspect-ratio: 2 / 3;
   max-width: min(90vw, 450px);
@@ -247,7 +273,7 @@ html.dark .mode-btn.active img {
   /* The card is absolutely positioned, so this is what gives the mode its
      height. It used to be 80vh against a page that is never taller than 68vh,
      which left a dead band under every card. */
-  min-height: min(700px, 68vh);
+  min-height: var(--page-h);
   overflow: visible;
 }
 
@@ -275,7 +301,7 @@ html.dark .mode-btn.active img {
   width: auto;
   height: auto;
   max-width: min(90vw, 450px);
-  max-height: min(700px, 68vh);
+  max-height: var(--page-h);
   display: block;
   margin: 0 auto;
 }
@@ -395,33 +421,28 @@ html.dark .mode-btn.active img {
   }
 }
 
-@media (max-width: 640px) {
-  .reader-toolbar {
-    padding-inline: var(--space-3);
-  }
-
-  .reader-hint {
-    display: none;
-  }
-}
-
-/* Below this the title and the three buttons cannot share a row without the
-   title being squeezed to nothing, so they stack and both centre.
+/* The title takes its own row and the buttons centre under it, which is where
+   they sat before the toolbar became a grid.
 
    This has to sit after the base `.reader-toolbar` rule, not before it. A media
    query adds no specificity, so while this block was higher up the file the
    base three-column grid simply won and the buttons dropped into a 1fr side
    track -- under the title and hard against the left. */
-@media (max-width: 560px) {
+@media (max-width: 640px) {
   .reader-toolbar {
     grid-template-columns: 1fr;
     justify-items: center;
     gap: var(--space-2);
+    padding-inline: var(--space-3);
   }
 
   .reader-title,
   .reader-toggle {
     grid-column: 1;
     justify-self: center;
+  }
+
+  .reader-hint {
+    display: none;
   }
 }
