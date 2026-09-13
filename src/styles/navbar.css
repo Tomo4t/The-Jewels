@@ -93,12 +93,19 @@ body::-webkit-scrollbar {
   fill: var(--color-navbar);
   stroke: var(--color-bg);
   stroke-width: 8;
-  transition: all 0.3s ease;
+  transition:
+    fill var(--transition-base),
+    stroke var(--transition-base);
 }
 
 #theme-icon .switch-knob {
   fill: var(--color-bg);
-  transition: all 0.3s ease;
+  /* `cx` is animatable here and measurably tweens from the presentation
+     attribute, so leave it alone -- a transform on an SVG child does not render
+     consistently across engines and would be a downgrade. */
+  transition:
+    cx var(--transition-base),
+    fill var(--transition-base);
 }
 
 /* Animate knob position and recolor on dark mode */
@@ -304,6 +311,60 @@ html.dark .navbar.is-collapsed .nav-right-actions .dropdown-menu li a {
   filter: var(--color-icon-hover);
 }
 
+/* The knob slides, but without this every surface and every piece of text
+   changes colour in a single frame, which reads as the toggle not animating at
+   all. Scoped to a class the theme module adds for the length of the swap, so
+   ordinary navigation is never held behind a transition. */
+html.theme-changing,
+html.theme-changing body,
+html.theme-changing .navbar,
+html.theme-changing .dropdown-menu,
+html.theme-changing .auth-card,
+html.theme-changing .account-section,
+html.theme-changing .comment {
+  transition:
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    color var(--transition-base);
+}
+
+/* Sound toggle.
+
+   `is-muted` was being set on the button by the navbar script and there was no
+   rule anywhere that reacted to it, so switching sound off changed nothing on
+   screen. --color-sound-muted existed in the tokens and was never referenced. */
+#sound-toggle img {
+  transition:
+    transform var(--transition-fast),
+    filter var(--transition-base),
+    opacity var(--transition-base);
+}
+
+#sound-toggle.is-muted img {
+  filter: var(--color-sound-muted);
+  opacity: 0.7;
+}
+
+/* A short squash on each press, so the change registers as an action and not
+   just a colour shift that is easy to miss. */
+@keyframes soundPop {
+  0% {
+    transform: scale(1);
+  }
+
+  45% {
+    transform: scale(0.8);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+#sound-toggle.is-animating img {
+  animation: soundPop 0.32s ease;
+}
+
 /* DROPDOWN */
 .dropdown {
   position: relative;
@@ -466,34 +527,51 @@ footer a:hover {
   user-select: none;
 }
 
+/* Custom cursors.
+
+   Three things made these flicker. The art was near-white with no outline, so
+   it vanished over the cream page background and reappeared over the dark
+   artwork. The files were different sizes -- 20px for the arrow, 24px for the
+   rest -- and carried no hotspot, so the pointer visibly jumped as it crossed
+   between elements. And the text cursor was stroked in `currentColor`, which
+   never resolves in an external image, so it rendered as nothing at all.
+
+   All four are now 24px, white on a dark outline, with explicit hotspots. */
 @media (hover: hover) and (pointer: fine) {
   html,
   body {
-    cursor: url('/images/cursor.svg'), default;
+    cursor:
+      url('/images/cursor.svg') 5 3,
+      default;
   }
 
   a,
   button,
   .icon-btn,
   .chapter-box {
-    cursor: url('/images/cursor-pointer.svg'), pointer;
+    cursor:
+      url('/images/cursor-pointer.svg') 11 3,
+      pointer;
   }
 
   input,
   textarea,
-  [contenteditable='true'],
-  ::selection,
-  ::-moz-selection {
-    cursor: url('/images/cursor-text.svg'), text !important;
+  [contenteditable='true'] {
+    cursor:
+      url('/images/cursor-text.svg') 12 12,
+      text;
   }
-  ::selection {
-    background: var(--color-selection);
-    color: var(--color-selection-text);
+
+  [aria-busy='true'] {
+    cursor:
+      url('/images/cursor-loading.svg') 12 12,
+      progress;
   }
-  body.loading,
-  html.loading {
-    cursor: url('/images/cursor-loading.svg'), progress !important;
-  }
+}
+
+::selection {
+  background: var(--color-selection);
+  color: var(--color-selection-text);
 }
 
 html {

@@ -117,6 +117,20 @@ export function initNavbar() {
     const on = toggleSound();
     updateNavbar();
     if (on) play('click');
+
+    // Restart the squash on every press. Removing the class and forcing a
+    // reflow before re-adding it is what makes a repeated click replay the
+    // animation instead of being ignored as a no-op class change.
+    const icon = soundButton.querySelector('img');
+    if (icon) {
+      soundButton.classList.remove('is-animating');
+      void soundButton.offsetWidth;
+      soundButton.classList.add('is-animating');
+    }
+  });
+
+  soundButton?.addEventListener('animationend', () => {
+    soundButton.classList.remove('is-animating');
   });
 
   // --- sign in / out ---

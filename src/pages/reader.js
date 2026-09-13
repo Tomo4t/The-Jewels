@@ -241,7 +241,7 @@ function renderFlip(book) {
   // `flipped` counts sheets turned so far; page p sits at ceil(p / 2).
   let flipped = Math.ceil(state.page / 2);
 
-  const apply = ({ silent = false } = {}) => {
+  const apply = ({ silent = false, keepPage = false } = {}) => {
     flipped = Math.max(0, Math.min(flipped, sheets));
 
     inner.querySelectorAll('.front, .back').forEach((node) => {
@@ -251,7 +251,15 @@ function renderFlip(book) {
     inner.classList.toggle('shifted', flipped > 0 && flipped < sheets);
     inner.classList.toggle('center', flipped >= sheets && flipped > 0);
 
-    setPage(Math.min(flipped * 2, total - 1), { announcePage: !silent });
+    // A spread shows two pages: `right` and the one before it. Turning a sheet
+    // should land on the right-hand page, but arriving from another mode should
+    // not -- reporting `right` unconditionally is what made switching modes on
+    // an odd page silently skip forward by one.
+    const right = Math.min(flipped * 2, total - 1);
+    const onThisSpread = state.page === right || state.page === right - 1;
+    const target = keepPage && onThisSpread ? state.page : right;
+
+    setPage(target, { announcePage: !silent });
   };
 
   const next = () => {
@@ -269,7 +277,7 @@ function renderFlip(book) {
   };
 
   navButtons(prev, next);
-  apply({ silent: true });
+  apply({ silent: true, keepPage: true });
 }
 
 /** Continuous scroll. Native lazy loading handles the image budget here. */

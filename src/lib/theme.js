@@ -15,6 +15,13 @@ export function currentTheme() {
 
 export function applyTheme(theme) {
   const dark = theme === 'dark';
+
+  // Colour transitions are enabled only while the theme is actually changing,
+  // so they never slow down a normal page load or route change.
+  root.classList.add('theme-changing');
+  clearTimeout(applyTheme.settle);
+  applyTheme.settle = setTimeout(() => root.classList.remove('theme-changing'), 400);
+
   root.classList.toggle('dark', dark);
   root.style.colorScheme = dark ? 'dark' : 'light';
   write(KEYS.theme, dark ? 'dark' : 'light');

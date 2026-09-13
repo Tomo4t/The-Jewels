@@ -370,9 +370,18 @@
   color: var(--color-text-muted);
 }
 
-/* Pages fade in as their image arrives rather than popping. */
+/* A placeholder tint while the image is still arriving, so a page does not pop
+   in from nothing. */
 .page-iner {
   background: var(--color-surface);
+}
+
+/* Card mode sizes the page with `object-fit: contain`, so whenever the page's
+   aspect ratio does not match its box the leftover strips render the image
+   element's own background -- a pale block framing the comic. The placeholder
+   is dropped here and the surrounding page shows through instead. */
+.card-page .page-iner {
+  background: transparent;
 }
 
 /* Touch devices get no hover-only affordances, so the nav buttons stay put. */
