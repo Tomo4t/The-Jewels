@@ -120,14 +120,18 @@ html.dark {
 
   --color-dropdown-bg: #3a2e4e;
   --color-dropdown-border: #654f80;
-  --color-dropdown-hover: #8365b3;
+  /* Was #8365b3, which left menu text at 3.87:1 while hovered -- the one state
+     where a reader is definitely looking at it. This measures 5.4:1. */
+  --color-dropdown-hover: #6b4f96;
 
   --color-footer-bg: #2c223a;
   --color-footer-text: #c7b0e2;
   --color-footer-link: #b699dd;
   --color-footer-link-hover: #40e0d0;
 
-  --color-accent: #a471c2;
+  /* Was #a471c2, which put white button labels at 3.67:1. This measures
+     5.1:1 and keeps the same violet character. */
+  --color-accent: #8b5aa8;
   --color-accent-hover: #40e0d0;
   --color-accent-contrast: #ffffff;
   --color-link: #e0bd4c;

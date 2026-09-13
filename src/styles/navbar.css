@@ -171,8 +171,8 @@ footer,
      depends on its contents being exactly one icon wide. */
   --nav-icon: 32px;
 
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   background-color: var(--color-navbar);
   padding: 10px 20px;
@@ -185,13 +185,19 @@ footer,
   display: flex;
   align-items: center;
   gap: 14px;
-  min-width: 0;
+  flex: 0 0 auto;
 }
 
-/* The title is the only part that should give up room when space runs short. */
+/* The title takes the whole gap between the two icon groups and centres inside
+   it, so it sits midway between the last navigation icon and the burger rather
+   than on the bar's own centre -- the groups are different widths, so those are
+   two different places. */
 .nav-title {
-  justify-self: center;
+  flex: 1 1 auto;
   min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav-left {
@@ -284,30 +290,17 @@ footer,
   padding: 6px 0;
 }
 
-.navbar.is-collapsed .nav-right-actions .dropdown-menu li a {
-  color: #2c1e00;
-}
-
-html.dark .navbar.is-collapsed .nav-right-actions .dropdown-menu li a {
-  color: #fff;
-}
-
-.navbar.is-collapsed .nav-right-actions .dropdown-menu li a:hover {
-  background-color: var(--color-dropdown-hover);
-}
-
-.nav-title {
+.nav-title a {
   font-size: 1.75rem;
   font-weight: bold;
   background-color: var(--color-title-bg);
   color: var(--color-title-text);
-  padding: 0 12px;
+  padding: 2px 12px;
   border-radius: 5px;
   white-space: nowrap;
-
-  display: flex;
-  align-items: center;
-
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
   max-width: 100%;
 }
 
@@ -493,18 +486,21 @@ html.theme-changing .comment {
   list-style: none;
 }
 
+/* This was a hardcoded `white`, which is invisible on the cream dropdown
+   surface in light mode -- the menu only looked right in dark. Both the text
+   and the hover now come from the palette, so each theme gets its own. */
 .dropdown-menu li a {
   display: block;
   padding: 10px 16px;
-  color: white;
+  color: var(--color-text);
   text-decoration: none;
   font-size: 0.95rem;
   text-align: left;
-  transition: background 0.2s ease;
+  transition: background var(--transition-fast);
 }
 
 .dropdown-menu li a:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--color-dropdown-hover);
 }
 
 /* SOUND TOGGLE */
@@ -532,7 +528,7 @@ footer a:hover {
 /* ACCENT BUTTON (if used) */
 .button-accent {
   background-color: var(--color-accent);
-  color: #000;
+  color: var(--color-accent-contrast);
   padding: 10px 16px;
   border: none;
   border-radius: 4px;
@@ -691,17 +687,9 @@ html {
     padding: 8px 10px;
   }
 
-  .nav-title {
-    min-width: 0;
-    font-size: 1.4rem;
-    padding: 3px 10px;
-  }
-
   .nav-title a {
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    font-size: 1.4rem;
+    padding: 2px 10px;
   }
 
   .nav-left {
@@ -747,9 +735,9 @@ html {
 }
 
 @media (max-width: 400px) {
-  .nav-title {
+  .nav-title a {
     font-size: 1.25rem;
-    padding: 0 8px;
+    padding: 2px 8px;
   }
   .navbar {
     --nav-icon: 22px;
@@ -761,9 +749,9 @@ html {
 }
 
 @media (max-width: 360px) {
-  .nav-title {
+  .nav-title a {
     font-size: 1.05rem;
-    padding: 0 6px;
+    padding: 2px 6px;
   }
   .navbar {
     --nav-icon: 20px;
