@@ -63,8 +63,8 @@
 }
 
 .reader-toggle {
-  grid-column: 3;
-  justify-self: end;
+  grid-column: 1;
+  justify-self: center;
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -167,7 +167,14 @@ html.dark .mode-btn.active img {
   /* One page box, shared by all three modes, so switching modes never resizes
      the comic. 2/3 is the real shape of the artwork (pages are 800x1200 and
      1080x1600). */
-  --page-h: min(700px, 68vh);
+  /* The chrome around the comic -- bar, two-row toolbar, counter, hint and the
+     paging arrows -- is a fixed ~320px, so subtracting it is what actually
+     keeps the whole reader on screen. A vh fraction does not: 64vh left the
+     arrows 21px below the fold on a 800px-tall laptop and 35px below on a 760.
+     The floor keeps the page usable on a very short window, where the document
+     scrolls instead. */
+  --page-h: clamp(300px, calc(100vh - 320px), 700px);
+  --page-h: clamp(300px, calc(100svh - 320px), 700px);
   --page-w: calc(var(--page-h) * 2 / 3);
 
   display: flex;
@@ -362,21 +369,22 @@ html.dark .mode-btn.active img {
 /* --- toolbar, indicator and hints ---------------------------------------- */
 
 .reader-toolbar {
-  /* Three columns with equal outer tracks, so the title centres on the toolbar
-     itself rather than on the space the mode buttons happen to leave. The
-     buttons previously carried `margin: auto`, which on a flex child eats all
-     the free space and shoved the title hard against the left edge. */
+  /* The title on its own row and the buttons centred under it, at every width.
+     They used to share a row above 640px, with the title centred and the
+     buttons pushed to the right edge -- two different centres on one bar. One
+     column means there is only one. */
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: 1fr;
+  justify-items: center;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
   max-width: 1100px;
   margin: 0 auto;
   padding: var(--space-4) var(--space-4) 0;
 }
 
 .reader-title {
-  grid-column: 2;
+  grid-column: 1;
   margin: 0;
   min-width: 0;
   text-align: center;
@@ -421,28 +429,24 @@ html.dark .mode-btn.active img {
   }
 }
 
-/* The title takes its own row and the buttons centre under it, which is where
-   they sat before the toolbar became a grid.
-
-   This has to sit after the base `.reader-toolbar` rule, not before it. A media
-   query adds no specificity, so while this block was higher up the file the
-   base three-column grid simply won and the buttons dropped into a 1fr side
-   track -- under the title and hard against the left. */
 @media (max-width: 640px) {
   .reader-toolbar {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    gap: var(--space-2);
     padding-inline: var(--space-3);
-  }
-
-  .reader-title,
-  .reader-toggle {
-    grid-column: 1;
-    justify-self: center;
   }
 
   .reader-hint {
     display: none;
+  }
+
+  /* A phone gives scroll mode the page edge to edge -- as long as a whole page
+     still fits between the bar and the bottom of the screen, which is what the
+     second term reserves (bar, toolbar and the page counter). Scroll mode has
+     no paging arrows, so that is all the room the chrome needs. svh rather than
+     vh, so a page still fits while the browser's own bars are showing. */
+  .Wepcomic-inner {
+    --scroll-h: min(calc(100vw * 3 / 2), calc(100svh - 200px));
+
+    max-width: min(100%, calc(var(--scroll-h) * 2 / 3));
+    height: var(--scroll-h);
   }
 }

@@ -187,9 +187,18 @@ function renderMode(mode) {
   updateLazyImages();
 }
 
-function navButtons(onPrev, onNext) {
+/**
+ * Registers the paging actions and, unless `visible` is false, draws the two
+ * arrows. Scroll mode registers them without the arrows -- you scroll there,
+ * so a pair of page buttons under the column is just clutter -- but the
+ * keyboard and swipe handlers still read them off `state.actions`.
+ */
+function navButtons(onPrev, onNext, { visible = true } = {}) {
   const wrapper = document.querySelector('.reader-wrapper');
   if (!wrapper) return;
+
+  state.actions = { prev: onPrev, next: onNext };
+  if (!visible) return;
 
   const nav = document.createElement('div');
   nav.className = 'navbtns';
@@ -209,7 +218,6 @@ function navButtons(onPrev, onNext) {
   nav.querySelector('#next-btn').addEventListener('click', onNext);
   wrapper.append(nav);
 
-  state.actions = { prev: onPrev, next: onNext };
   state.cleanups.push(() => nav.remove());
 }
 
@@ -307,7 +315,8 @@ function renderScroll(book) {
 
   navButtons(
     () => goTo(state.page - 1),
-    () => goTo(state.page + 1)
+    () => goTo(state.page + 1),
+    { visible: false }
   );
 
   // Track which page is in view without hammering the main thread on scroll.

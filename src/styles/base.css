@@ -26,6 +26,35 @@ body {
   color: var(--color-selection-text);
 }
 
+/* Chrome is for pressing, not for reading. Tapping a button or a title on a
+   phone used to leave the label highlighted -- a long press, or just a tap the
+   browser reads as the start of a drag, selects the text inside. Prose,
+   comments and the comic itself are untouched, so anything worth copying still
+   selects normally. */
+button,
+a.icon-btn,
+.navbar,
+.nav-title,
+.reader-toolbar,
+.mode-btn,
+.navbtns,
+.page-indicator,
+.reader-hint,
+.chapter-box,
+.chapter-label {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Safari and Chrome on Android paint a grey box over whatever was tapped. */
+button,
+a,
+.icon-btn,
+.mode-btn,
+.chapter-box {
+  -webkit-tap-highlight-color: transparent;
+}
+
 img,
 svg,
 canvas {
