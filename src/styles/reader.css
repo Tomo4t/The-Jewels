@@ -333,22 +333,6 @@ html.dark .mode-btn.active img {
   }
 }
 
-/* Below this the title and the three buttons cannot share a row without the
-   title being squeezed to nothing, so they stack and both centre. */
-@media (max-width: 560px) {
-  .reader-toolbar {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    gap: var(--space-2);
-  }
-
-  .reader-title,
-  .reader-toggle {
-    grid-column: 1;
-    justify-self: center;
-  }
-}
-
 /* --- toolbar, indicator and hints ---------------------------------------- */
 
 .reader-toolbar {
@@ -416,12 +400,28 @@ html.dark .mode-btn.active img {
     padding-inline: var(--space-3);
   }
 
-  .reader-title {
-    order: -1;
-    flex-basis: 100%;
-  }
-
   .reader-hint {
     display: none;
+  }
+}
+
+/* Below this the title and the three buttons cannot share a row without the
+   title being squeezed to nothing, so they stack and both centre.
+
+   This has to sit after the base `.reader-toolbar` rule, not before it. A media
+   query adds no specificity, so while this block was higher up the file the
+   base three-column grid simply won and the buttons dropped into a 1fr side
+   track -- under the title and hard against the left. */
+@media (max-width: 560px) {
+  .reader-toolbar {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: var(--space-2);
+  }
+
+  .reader-title,
+  .reader-toggle {
+    grid-column: 1;
+    justify-self: center;
   }
 }
