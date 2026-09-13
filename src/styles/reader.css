@@ -187,7 +187,7 @@ html.dark .mode-btn.active img {
      scrolls instead. */
   --page-h: clamp(300px, calc(100vh - 320px), 700px);
   --page-h: clamp(300px, calc(100svh - 320px), 700px);
-  --page-w: calc(var(--page-h) * 2 / 3);
+  --page-w: calc(var(--page-h) * 27 / 40);
 
   display: flex;
   justify-content: center;
@@ -215,11 +215,13 @@ html.dark .mode-btn.active img {
      the ratio never applied and none of the four pairs actually matched the
      ratio they declared. On a laptop that ran the page off the bottom.
      
-     2/3 is the real shape of the artwork (the pages are 800x1200 and
-     1080x1600), so `object-fit: cover` has nothing to crop. */
+     The ratio is the artwork's own: 2/3 was close but not right for pages that
+     are 1080x1600, and the 0.8% it was out left a five-pixel strip of nothing
+     under every page. Each sheet publishes its exact ratio once loaded, so a
+     chapter drawn to another shape fills its sheet too. */
   height: var(--page-h);
   width: auto;
-  aspect-ratio: 2 / 3;
+  aspect-ratio: var(--page-ratio, 27 / 40);
   max-width: min(90vw, 450px);
   perspective: 1500px;
   transition: transform 0.3s ease;
@@ -253,7 +255,18 @@ html.dark .mode-btn.active img {
 }
 
 .fliped {
-  transform: rotateY(-180deg);
+  /* Nudged a pixel across the fold before the turn.
+     
+     Both sheets of a spread have an edge on the fold, and the fold rarely lands
+     on a whole pixel -- so two anti-aliased edges share it, each covering it
+     halfway, and the page background showed through the middle as a hairline
+     down the spread. The turned sheet reaches a pixel past the fold now, so the
+     two overlap there instead of meeting on it.
+     
+     The nudge has to come before the rotation: transform-origin is the sheet's
+     own left edge, so widening it or moving it with a margin takes the origin
+     along and the edges still meet. */
+  transform: translateX(1px) rotateY(-180deg);
   transition: 0.4s;
 }
 

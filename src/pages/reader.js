@@ -279,6 +279,21 @@ function renderFlip(book) {
     apply();
   };
 
+  // The sheet is shaped by the artwork, not by an assumption about it, so a
+  // page fills its sheet with no strip of background left under it.
+  inner.querySelectorAll('img.page-iner').forEach((img) => {
+    const publish = () => {
+      if (img.naturalWidth && img.naturalHeight) {
+        inner.style.setProperty('--page-ratio', `${img.naturalWidth} / ${img.naturalHeight}`);
+      }
+    };
+    // Book pages are lazy: they carry data-src and get a src later, so at this
+    // point `complete` is true only because there is nothing to load yet. The
+    // listener goes on either way.
+    img.addEventListener('load', publish, { once: true });
+    publish();
+  });
+
   navButtons(prev, next);
   apply({ silent: true, keepPage: true });
 }
