@@ -19,22 +19,6 @@ import session from '../lib/session.js';
 
 let initialised = false;
 
-function collapseNeeded(navbar, left, title, actions) {
-  if (!navbar || !left || !title || !actions) return window.innerWidth <= 640;
-  if (window.innerWidth <= 640) return true;
-
-  const styles = getComputedStyle(navbar);
-  const padding = parseFloat(styles.paddingLeft || 0) + parseFloat(styles.paddingRight || 0);
-  const available = navbar.clientWidth - padding;
-  const needed =
-    left.getBoundingClientRect().width +
-    title.getBoundingClientRect().width +
-    actions.getBoundingClientRect().width +
-    24;
-
-  return needed > available;
-}
-
 export function initNavbar() {
   if (initialised) {
     updateNavbar();
@@ -43,48 +27,19 @@ export function initNavbar() {
   initialised = true;
 
   const navbar = $('.navbar');
-  const navLeft = $('.nav-left');
-  const navTitle = $('.nav-title');
-  const navRight = $('.nav-right');
-  const actions = $('#nav-right-actions');
-  const menuButton = $('#nav-right-menu');
   const languageDropdown = $('#language-dropdown');
   const languageToggle = $('#language-toggle');
   const languageMenu = $('#language-menu');
   const themeButton = $('#theme-toggle');
   const soundButton = $('#sound-toggle');
 
-  // --- responsive collapse ---
-  let raf = null;
-  const applyLayout = () => {
-    if (!navbar || !menuButton) return;
-    navbar.classList.remove('is-collapsed');
-    const collapsed = collapseNeeded(navbar, navLeft, navTitle, actions);
-    navbar.classList.toggle('is-collapsed', collapsed);
-    menuButton.hidden = !collapsed;
-    if (!collapsed) closeMenu();
-  };
-  const queueLayout = () => {
-    if (raf) cancelAnimationFrame(raf);
-    raf = requestAnimationFrame(applyLayout);
-  };
-
+  // Every control is on the bar at every width now -- there is no burger and no
+  // collapsed panel, so the only thing that still opens and closes is the
+  // language list.
   const closeMenu = () => {
-    navRight?.classList.remove('open');
-    actions?.classList.remove('is-open');
-    menuButton?.setAttribute('aria-expanded', 'false');
     languageDropdown?.classList.remove('show');
     languageToggle?.setAttribute('aria-expanded', 'false');
   };
-
-  menuButton?.addEventListener('click', (event) => {
-    event.stopPropagation();
-    const willOpen = !navRight.classList.contains('open');
-    navRight.classList.toggle('open', willOpen);
-    actions?.classList.toggle('is-open', willOpen);
-    menuButton.setAttribute('aria-expanded', String(willOpen));
-    if (!willOpen) languageDropdown?.classList.remove('show');
-  });
 
   // --- language menu ---
   languageMenu.innerHTML = LANGUAGES.map(
@@ -142,15 +97,10 @@ export function initNavbar() {
     if (event.key === 'Escape') closeMenu();
   });
 
-  window.addEventListener('resize', queueLayout);
-  document.addEventListener('languagechange', () => {
-    updateNavbar();
-    queueLayout();
-  });
+  document.addEventListener('languagechange', updateNavbar);
   session.subscribe(updateNavbar);
 
   updateNavbar();
-  queueLayout();
 }
 
 /** Re-renders the parts of the navbar that depend on state. */

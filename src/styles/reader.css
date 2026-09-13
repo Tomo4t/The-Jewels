@@ -120,8 +120,16 @@ html.dark .mode-btn.active img {
 }
 
 .Wepcomic-inner {
-  height: 100%;
-  max-height: 100vh;
+  /* Without an explicit width this is a shrink-to-fit flex item, so its width
+     came from the pages' own min-content -- the full 1080px of the artwork.
+     On a desktop that rendered a 1080x1600 page inside a pane only 100vh tall,
+     which is what ran the comic off the bottom of the window. The column is
+     bounded now, and the pane matches the height book mode uses so all three
+     modes occupy the same box. */
+  width: 100%;
+  max-width: min(100%, 560px);
+  min-width: 0;
+  height: min(700px, 68vh);
   overflow-y: auto;
   scroll-behavior: smooth;
   padding-bottom: 0;
@@ -232,18 +240,24 @@ html.dark .mode-btn.active img {
   flex-direction: column;
   align-items: center;
   justify-content: start;
-  margin-top: 20px;
-  padding: 5vh 5vw;
+  padding: 0 5vw;
   box-sizing: border-box;
   width: 100%;
   max-width: 100%;
-  min-height: 80vh;
+  /* The card is absolutely positioned, so this is what gives the mode its
+     height. It used to be 80vh against a page that is never taller than 68vh,
+     which left a dead band under every card. */
+  min-height: min(700px, 68vh);
   overflow: visible;
 }
 
 .card-page {
-  width: 100%;
-  max-width: 90vw;
+  /* Shrink-to-fit around the page instead of stretching to 90vw. At 90vw of a
+     desktop the box was 1296px wide for artwork only 486px wide, and
+     `object-fit: contain` filled the other 810px with empty box -- the wide
+     frame around the comic in card mode. */
+  width: auto;
+  max-width: min(90vw, 450px);
   top: 0;
   left: 50%;
   position: absolute;
@@ -254,11 +268,16 @@ html.dark .mode-btn.active img {
 }
 
 .card-page img {
-  width: 100%;
-  max-width: 100%;
-  max-height: 80vh;
-  object-fit: contain;
+  /* Both dimensions auto with both maxima set: the browser scales the page to
+     fit and the element ends up exactly the size of the artwork, so there is no
+     leftover box to letterbox. The bounds are book mode's, so switching modes
+     does not resize the page. */
+  width: auto;
+  height: auto;
+  max-width: min(90vw, 450px);
+  max-height: min(700px, 68vh);
   display: block;
+  margin: 0 auto;
 }
 
 .card-page.show {

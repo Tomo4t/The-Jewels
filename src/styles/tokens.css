@@ -122,7 +122,7 @@ html.dark {
   --color-dropdown-border: #654f80;
   /* Was #8365b3, which left menu text at 3.87:1 while hovered -- the one state
      where a reader is definitely looking at it. This measures 5.4:1. */
-  --color-dropdown-hover: #6b4f96;
+  --color-dropdown-hover: #5f4587;
 
   --color-footer-bg: #2c223a;
   --color-footer-text: #c7b0e2;
