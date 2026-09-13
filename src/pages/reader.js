@@ -61,12 +61,6 @@ export async function render(params) {
   return `
     <div class="reader-wrapper" data-mode="${mode}">
       <div class="reader-toolbar">
-        <a class="reader-back" href="${buildHash('chapters')}" data-sound="ui"
-           title="${escapeHTML(t('reader.backToChapters'))}"
-           aria-label="${escapeHTML(t('reader.backToChapters'))}">
-          <img src="/images/arrow.svg" alt="" aria-hidden="true" class="arrow-icon arrow-icon--back">
-        </a>
-
         <h1 class="reader-title">${escapeHTML(chapter.title)}</h1>
 
         <div class="reader-toggle" role="group" aria-label="${escapeHTML(t('reader.comicMode'))}">

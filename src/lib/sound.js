@@ -19,7 +19,48 @@ const CLIPS = {
 
 const VOLUME = { click: 0.3, slide: 0.3, flip: 0.3, open: 0.4, ui: 0.3, notify: 0.3 };
 
+/**
+ * Instances per clip.
+ *
+ * Two reasons this is more than one. A clip that is still playing cannot be
+ * restarted without cutting itself off, and building a replacement on the spot
+ * is exactly the cost this pool exists to avoid -- so fast page-flipping
+ * borrows the next idle instance instead.
+ */
+const VOICES = 3;
+
+/** name -> array of preloaded HTMLAudioElement */
 const pool = new Map();
+let warmed = false;
+
+/**
+ * Builds and loads every clip up front.
+ *
+ * Previously the first play of a sound constructed its Audio and waited on the
+ * network, so the first page turn of a session fired its noise long after the
+ * page had already moved. Browsers refuse to load audio before a user gesture,
+ * so this runs on the first one and every play after it is instant.
+ */
+export function warmSounds() {
+  if (warmed) return;
+  warmed = true;
+
+  for (const [name, src] of Object.entries(CLIPS)) {
+    const voices = [];
+    for (let i = 0; i < VOICES; i += 1) {
+      const audio = new Audio(src);
+      audio.preload = 'auto';
+      audio.volume = VOLUME[name] ?? 0.3;
+      try {
+        audio.load();
+      } catch {
+        /* a browser that refuses to preload still plays on demand */
+      }
+      voices.push(audio);
+    }
+    pool.set(name, voices);
+  }
+}
 
 export const soundEnabled = () => read(KEYS.sound, 'on') !== 'off';
 
@@ -39,23 +80,15 @@ export function play(name) {
   if (!src) return;
 
   try {
-    let audio = pool.get(name);
-    if (!audio) {
-      audio = new Audio(src);
-      audio.preload = 'auto';
-      audio.volume = VOLUME[name] ?? 0.3;
-      pool.set(name, audio);
-    }
+    if (!warmed) warmSounds();
+    const voices = pool.get(name);
+    if (!voices || !voices.length) return;
 
-    if (audio.paused || audio.ended) {
-      audio.currentTime = 0;
-      audio.play().catch(() => {});
-    } else {
-      // Already playing — overlap with a throwaway clone.
-      const clone = audio.cloneNode();
-      clone.volume = audio.volume;
-      clone.play().catch(() => {});
-    }
+    // The first idle voice, or the oldest one restarted if every voice is busy.
+    // Nothing is constructed here, which is what keeps the sound on the action.
+    const voice = voices.find((a) => a.paused || a.ended) || voices[0];
+    voice.currentTime = 0;
+    voice.play().catch(() => {});
   } catch {
     /* autoplay policy or a missing file; silence is an acceptable outcome */
   }
@@ -63,6 +96,16 @@ export function play(name) {
 
 /** Plays a click for any button carrying data-sound, delegated once globally. */
 export function bindGlobalSounds() {
+  // The first gesture of the session is where a browser will finally allow
+  // audio to load, so every clip is fetched then rather than on first use.
+  const warmOnce = () => {
+    warmSounds();
+    document.removeEventListener('pointerdown', warmOnce);
+    document.removeEventListener('keydown', warmOnce);
+  };
+  document.addEventListener('pointerdown', warmOnce, { passive: true, once: false });
+  document.addEventListener('keydown', warmOnce, { passive: true, once: false });
+
   document.addEventListener(
     'pointerdown',
     (event) => {

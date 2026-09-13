@@ -141,10 +141,10 @@
             aria-pressed="false"
             data-i18n-attr="title:nav.theme aria-label:nav.theme"
           >
-            <svg id="theme-icon" viewBox="0 0 100 60" width="48" height="32" aria-hidden="true">
-              <rect class="switch-bg" x="5" y="10" rx="15" ry="15" width="90" height="40" />
-              <circle class="switch-knob" cx="30" cy="30" r="10" />
-            </svg>
+            <span class="theme-icons" aria-hidden="true">
+              <img class="theme-sun" src="/images/sun.svg" alt="" />
+              <img class="theme-moon" src="/images/moon.svg" alt="" />
+            </span>
           </button>
 
           <button
@@ -154,7 +154,10 @@
             aria-pressed="true"
             data-i18n-attr="title:nav.sound aria-label:nav.sound"
           >
-            <img src="/images/sound.svg" alt="" aria-hidden="true" />
+            <span class="sound-icon" aria-hidden="true">
+              <img src="/images/sound.svg" alt="" />
+              <span class="sound-slash"></span>
+            </span>
           </button>
         </div>
       </div>

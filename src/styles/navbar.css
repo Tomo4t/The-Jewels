@@ -88,35 +88,44 @@ body::-webkit-scrollbar {
   margin: 0;
   padding: 0;
 }
-/* SVG respects palette-based coloring */
-#theme-icon .switch-bg {
-  fill: var(--color-navbar);
-  stroke: var(--color-bg);
-  stroke-width: 8;
+/* Theme toggle: a sun in light, a moon in dark, crossfading through each other
+   so the control reads the same as every other icon in the bar. */
+.theme-icons {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+}
+
+.theme-icons img {
+  grid-area: 1 / 1;
+  width: 100%;
+  height: 100%;
+  filter: var(--color-icon);
   transition:
-    fill var(--transition-base),
-    stroke var(--transition-base);
+    opacity var(--transition-base),
+    transform var(--transition-base);
 }
 
-#theme-icon .switch-knob {
-  fill: var(--color-bg);
-  /* `cx` is animatable here and measurably tweens from the presentation
-     attribute, so leave it alone -- a transform on an SVG child does not render
-     consistently across engines and would be a downgrade. */
-  transition:
-    cx var(--transition-base),
-    fill var(--transition-base);
+.theme-sun {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
 }
 
-/* Animate knob position and recolor on dark mode */
-html.dark #theme-icon .switch-knob {
-  cx: 70;
-  fill: var(--color-text);
+.theme-moon {
+  opacity: 0;
+  transform: rotate(-70deg) scale(0.6);
 }
 
-html.dark #theme-icon .switch-bg {
-  fill: var(--color-surface);
-  stroke: var(--color-text);
+html.dark .theme-sun {
+  opacity: 0;
+  transform: rotate(70deg) scale(0.6);
+}
+
+html.dark .theme-moon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
 }
 body {
   overflow-x: hidden;
@@ -170,7 +179,13 @@ footer,
   display: flex;
   align-items: center;
   gap: 14px;
-  flex: 1;
+  flex: 0 0 auto;
+}
+
+/* The title is the only part that should give up room when space runs short. */
+.nav-title {
+  flex: 0 1 auto;
+  min-width: 0;
 }
 
 .nav-left {
@@ -349,6 +364,65 @@ html.theme-changing .comment {
   opacity: 0.7;
 }
 
+/* A slash drawn over the speaker, so the muted state is legible without
+   relying on the colour shift alone. */
+.sound-icon {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+}
+
+.sound-slash {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 118%;
+  height: 2.5px;
+  border-radius: 2px;
+  background: currentcolor;
+  box-shadow: 0 0 0 1.5px var(--color-navbar);
+  transform: rotate(-45deg) scaleX(0);
+  transform-origin: center;
+  opacity: 0;
+  transition:
+    transform var(--transition-base),
+    opacity var(--transition-fast);
+}
+
+#sound-toggle.is-muted .sound-slash {
+  transform: rotate(-45deg) scaleX(1);
+  opacity: 1;
+}
+
+/* Muting shakes; unmuting does not. The asymmetry is deliberate -- the shake
+   is the "no" gesture and only belongs on the turning-off half. */
+@keyframes soundShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-3px);
+  }
+
+  40% {
+    transform: translateX(3px);
+  }
+
+  60% {
+    transform: translateX(-2px);
+  }
+
+  80% {
+    transform: translateX(2px);
+  }
+}
+
+#sound-toggle.is-shaking .sound-icon {
+  animation: soundShake 0.36s ease;
+}
+
 /* A short squash on each press, so the change registers as an action and not
    just a colour shift that is easy to miss. */
 @keyframes soundPop {
@@ -365,7 +439,7 @@ html.theme-changing .comment {
   }
 }
 
-#sound-toggle.is-animating img {
+#sound-toggle.is-animating .sound-icon {
   animation: soundPop 0.32s ease;
 }
 
@@ -594,29 +668,40 @@ html {
 }
 
 @media (max-width: 600px) {
+  /* The header is a fixed 60px, so wrapping puts a second row outside it and
+     drops an icon onto the page behind. Three icons happened to fit; a fourth
+     did not. Nothing here wraps any more -- the title gives up width instead. */
   .navbar {
-    flex-wrap: wrap;
-    gap: 10px;
-    padding: 8px 12px;
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 8px 10px;
   }
 
   .nav-title {
-    height: 100%;
-    font-size: 1.4rem;
+    min-width: 0;
+    font-size: 1.15rem;
     padding: 3px 8px;
   }
 
+  .nav-title a {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .nav-left {
-    gap: 10px;
-    flex-wrap: wrap;
+    gap: 8px;
+    flex-wrap: nowrap;
   }
 
   .nav-right-actions {
-    gap: 10px;
+    gap: 8px;
   }
 
   .icon-btn img {
-    width: 35px;
+    width: 26px;
+    height: 26px;
   }
 
   .dropdown-menu {
@@ -644,17 +729,19 @@ html {
   }
 
   .icon-btn img {
-    width: 27px;
+    width: 24px;
+    height: 24px;
   }
 }
 
 @media (max-width: 400px) {
   .nav-title {
-    font-size: 1.2rem;
-    padding: 0 8px;
+    font-size: 1.05rem;
+    padding: 0 6px;
   }
   .icon-btn img {
-    width: 24px;
+    width: 22px;
+    height: 22px;
   }
   .nav-left,
   .nav-right {
@@ -665,10 +752,11 @@ html {
 @media (max-width: 360px) {
   .nav-title {
     font-size: 0.9rem;
-    padding: 0 6px;
+    padding: 0 4px;
   }
   .icon-btn img {
     width: 20px;
+    height: 20px;
   }
   .nav-left,
   .nav-right {

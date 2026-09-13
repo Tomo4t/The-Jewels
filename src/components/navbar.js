@@ -118,19 +118,16 @@ export function initNavbar() {
     updateNavbar();
     if (on) play('click');
 
-    // Restart the squash on every press. Removing the class and forcing a
-    // reflow before re-adding it is what makes a repeated click replay the
-    // animation instead of being ignored as a no-op class change.
-    const icon = soundButton.querySelector('img');
-    if (icon) {
-      soundButton.classList.remove('is-animating');
-      void soundButton.offsetWidth;
-      soundButton.classList.add('is-animating');
-    }
+    // Restart the animation on every press. Removing the class and forcing a
+    // reflow before re-adding it is what makes a repeated click replay it
+    // instead of being ignored as a no-op class change.
+    soundButton.classList.remove('is-animating', 'is-shaking');
+    void soundButton.offsetWidth;
+    soundButton.classList.add(on ? 'is-animating' : 'is-shaking');
   });
 
   soundButton?.addEventListener('animationend', () => {
-    soundButton.classList.remove('is-animating');
+    soundButton.classList.remove('is-animating', 'is-shaking');
   });
 
   // --- sign in / out ---
