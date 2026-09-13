@@ -119,6 +119,26 @@ html.dark .button--google:hover:not(:disabled) {
   background: var(--color-surface-raised);
 }
 
+/* The one section that is not just information: the account is not finished
+   until this is done, so it is marked rather than sitting flush with the rest. */
+.setup-pending {
+  border-color: color-mix(in srgb, var(--color-warning) 45%, transparent);
+  background: var(--color-warning-soft);
+}
+
+.setup-pending h2 {
+  color: var(--color-warning);
+}
+
+.setup-pending p {
+  margin: 0 0 var(--space-4);
+  color: var(--color-text);
+}
+
+.setup-pending p:last-child {
+  margin-bottom: 0;
+}
+
 .account-section h2 {
   margin: 0 0 var(--space-4);
   font-size: 1rem;

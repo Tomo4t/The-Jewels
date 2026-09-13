@@ -93,11 +93,16 @@ function page(mode) {
                      <input name="displayName" type="text" maxlength="40" autocomplete="nickname">
                    </label>
                    <label class="field">
-                     <span>${escapeHTML(t('auth.emailOptional'))}</span>
+                     <span>${escapeHTML(
+                       session.emailRequired ? t('auth.email') : t('auth.emailOptional')
+                     )}</span>
                      <input name="email" type="email" maxlength="254" autocomplete="email"
+                            ${session.emailRequired ? 'required' : ''}
                             aria-describedby="email-hint">
                    </label>
-                   <p class="field-hint" id="email-hint">${escapeHTML(t('auth.emailHint'))}</p>`
+                   <p class="field-hint" id="email-hint">${escapeHTML(
+                     session.emailRequired ? t('auth.emailRequiredHint') : t('auth.emailHint')
+                   )}</p>`
                 : ''
             }
 
@@ -171,6 +176,10 @@ function page(mode) {
         try {
           if (isRegister) {
             const email = String(data.email || '').trim();
+            if (!email && session.emailRequired) {
+              submit.disabled = false;
+              return showError(t('auth.emailRequired'));
+            }
             if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
               submit.disabled = false;
               return showError(t('auth.emailInvalid'));
@@ -187,10 +196,16 @@ function page(mode) {
             // Only promise an inbox check when one is genuinely on its way.
             if (verification?.status === 'sent') toastSuccess(t('auth.verifySent'));
             else if (verification?.status === 'send_failed') toastError(t('auth.verifySendFailed'));
-          } else {
-            const user = await session.signIn(username, password);
-            toastSuccess(t('auth.welcome', { name: user.displayName }));
+
+            // The account is not finished yet, so land on the page that says so
+            // and carries the resend button, rather than dropping them on the
+            // home page with nothing to act on.
+            navigate(session.setupPending ? 'profile' : 'home', {}, { replace: true });
+            return undefined;
           }
+
+          const user = await session.signIn(username, password);
+          toastSuccess(t('auth.welcome', { name: user.displayName }));
           navigate('home', {}, { replace: true });
         } catch (err) {
           if (err instanceof ApiError) {
@@ -198,6 +213,7 @@ function page(mode) {
               invalid_credentials: t('auth.invalidCredentials'),
               username_taken: t('auth.usernameTaken'),
               email_taken: t('auth.emailTaken'),
+              email_required: t('auth.emailRequired'),
               registration_closed: t('auth.registrationClosed'),
               account_banned: t('auth.accountBanned'),
               auth_rate_limited: t('auth.rateLimited'),

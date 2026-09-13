@@ -91,6 +91,8 @@
     "emailHint": "Solo se usa para confirmar que la dirección es tuya. Añade una marca de verificado a tus comentarios.",
     "emailTaken": "Ese correo ya pertenece a otra cuenta.",
     "emailInvalid": "Eso no parece una dirección de correo.",
+    "emailRequiredHint": "Te enviaremos un enlace para confirmarlo. Tu cuenta no estará lista hasta que lo abras.",
+    "emailRequired": "Necesitas un correo electrónico para terminar de configurar tu cuenta.",
     "orDivider": "o",
     "continueWithGoogle": "Continuar con Google",
     "verified": "Verificado",
@@ -217,7 +219,10 @@
     "adminPanel": "Panel de administración",
     "loadMore": "Ver más",
     "commentApproved": "Comentario publicado.",
-    "commentRejected": "Comentario rechazado."
+    "commentRejected": "Comentario rechazado.",
+    "finishSetupTitle": "Termina de configurar tu cuenta",
+    "finishSetupSent": "Enviamos un enlace de confirmación a {email}. Ábrelo para terminar de configurar tu cuenta; hasta entonces no puedes publicar comentarios.",
+    "finishSetupNoEmail": "Añade un correo electrónico abajo y confírmalo para terminar de configurar tu cuenta."
   },
   "settings": {
     "title": "Ajustes del sitio",

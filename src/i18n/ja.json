@@ -91,6 +91,8 @@
     "emailHint": "本人確認にのみ使用します。コメントに認証済みマークが付きます。",
     "emailTaken": "そのメールアドレスは別のアカウントで使用されています。",
     "emailInvalid": "メールアドレスの形式が正しくありません。",
+    "emailRequiredHint": "確認用のリンクをお送りします。リンクを開くまでアカウントの設定は完了しません。",
+    "emailRequired": "アカウントの設定を完了するにはメールアドレスが必要です。",
     "orDivider": "または",
     "continueWithGoogle": "Google で続行",
     "verified": "認証済み",
@@ -217,7 +219,10 @@
     "adminPanel": "管理パネル",
     "loadMore": "もっと見る",
     "commentApproved": "コメントを公開しました。",
-    "commentRejected": "コメントを却下しました。"
+    "commentRejected": "コメントを却下しました。",
+    "finishSetupTitle": "アカウントの設定を完了してください",
+    "finishSetupSent": "{email} に確認リンクを送信しました。リンクを開いてアカウントの設定を完了してください。それまではコメントを投稿できません。",
+    "finishSetupNoEmail": "下でメールアドレスを追加し、確認するとアカウントの設定が完了します。"
   },
   "settings": {
     "title": "サイト設定",

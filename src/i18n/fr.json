@@ -91,6 +91,8 @@
     "emailHint": "Sert uniquement à confirmer que l'adresse est la vôtre. Elle ajoute une mention vérifiée à vos commentaires.",
     "emailTaken": "Cet e-mail appartient déjà à un autre compte.",
     "emailInvalid": "Cela ne ressemble pas à une adresse e-mail.",
+    "emailRequiredHint": "Vous recevrez un lien de confirmation. Votre compte ne sera pas terminé tant que vous ne l'aurez pas ouvert.",
+    "emailRequired": "Une adresse e-mail est nécessaire pour terminer la création de votre compte.",
     "orDivider": "ou",
     "continueWithGoogle": "Continuer avec Google",
     "verified": "Vérifié",
@@ -217,7 +219,10 @@
     "adminPanel": "Panneau d'administration",
     "loadMore": "Afficher plus",
     "commentApproved": "Commentaire publié.",
-    "commentRejected": "Commentaire refusé."
+    "commentRejected": "Commentaire refusé.",
+    "finishSetupTitle": "Terminez la création de votre compte",
+    "finishSetupSent": "Nous avons envoyé un lien de confirmation à {email}. Ouvrez-le pour terminer la création de votre compte — d'ici là, vous ne pouvez pas publier de commentaires.",
+    "finishSetupNoEmail": "Ajoutez une adresse e-mail ci-dessous et confirmez-la pour terminer la création de votre compte."
   },
   "settings": {
     "title": "Paramètres du site",

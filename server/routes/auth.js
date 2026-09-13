@@ -56,6 +56,15 @@ const credentials = z.object({
     .or(z.literal('')),
 });
 
+/**
+ * True when an account cannot be finished without a confirmed address.
+ *
+ * Both halves matter. Without a mail provider nobody could ever confirm, so
+ * demanding an address would only lock people out of their own sign-up -- the
+ * same trap the comment gate stands down from.
+ */
+const emailRequired = () => mailEnabled() && getSetting('requireVerifiedEmail');
+
 const parse = (schema, payload) => {
   const result = schema.safeParse(payload);
   if (!result.success) {
@@ -81,6 +90,7 @@ router.get(
       // button that would only ever return an error.
       googleSignIn: googleEnabled(),
       emailVerification: mailEnabled(),
+      emailRequired: emailRequired(),
     });
   })
 );
@@ -95,6 +105,14 @@ router.post(
 
     const { username, password, displayName, email } = parse(credentials, req.body);
     const address = normaliseEmail(email);
+
+    if (!address && emailRequired()) {
+      throw ApiError.badRequest(
+        'email_required',
+        'An email address is needed to finish setting up your account.',
+        { field: 'email' }
+      );
+    }
 
     if (findByUsername(username)) {
       throw ApiError.conflict('username_taken', 'That username is already taken.');

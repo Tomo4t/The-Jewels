@@ -91,6 +91,8 @@
     "emailHint": "Only used to confirm the address is yours. It earns a verified marker on your comments.",
     "emailTaken": "That email is already on another account.",
     "emailInvalid": "That does not look like an email address.",
+    "emailRequiredHint": "You will get a link to confirm it. Your account is not finished until you open it.",
+    "emailRequired": "An email address is needed to finish setting up your account.",
     "orDivider": "or",
     "continueWithGoogle": "Continue with Google",
     "verified": "Verified",
@@ -217,7 +219,10 @@
     "adminPanel": "Admin panel",
     "loadMore": "Show more",
     "commentApproved": "Comment published.",
-    "commentRejected": "Comment rejected."
+    "commentRejected": "Comment rejected.",
+    "finishSetupTitle": "Finish setting up your account",
+    "finishSetupSent": "We sent a confirmation link to {email}. Open it to finish setting up your account — until then you cannot post comments.",
+    "finishSetupNoEmail": "Add an email address below and confirm it to finish setting up your account."
   },
   "settings": {
     "title": "Site settings",

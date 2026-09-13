@@ -652,6 +652,61 @@ describe('email and identity', () => {
   });
 });
 
+describe('an account is not finished until its address is confirmed', () => {
+  test('registering without one is refused when it could be confirmed', async () => {
+    const { setSetting, clearSettingsCache } = await import('../services/settings.js');
+    setSetting('requireVerifiedEmail', true, null);
+    process.env.RESEND_API_KEY = 'test-key-so-the-rule-applies';
+
+    const { status, body } = await makeClient()('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'no-address', password: 'a-long-enough-password' }),
+    });
+
+    assert.equal(status, 400);
+    assert.equal(body.error.code, 'email_required');
+
+    process.env.RESEND_API_KEY = '';
+    setSetting('requireVerifiedEmail', false, null);
+    clearSettingsCache();
+  });
+
+  test('and is allowed when nothing could send the confirmation', async () => {
+    const { setSetting, clearSettingsCache } = await import('../services/settings.js');
+    // The rule stands down without a mail provider. Demanding an address that
+    // can never be confirmed would only lock people out of their own sign-up.
+    setSetting('requireVerifiedEmail', true, null);
+    process.env.RESEND_API_KEY = '';
+
+    const { status } = await makeClient()('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'no-mailer', password: 'a-long-enough-password' }),
+    });
+
+    assert.equal(status, 201);
+
+    setSetting('requireVerifiedEmail', false, null);
+    clearSettingsCache();
+  });
+
+  test('/me says whether the address is demanded', async () => {
+    const { setSetting, clearSettingsCache } = await import('../services/settings.js');
+    setSetting('requireVerifiedEmail', true, null);
+
+    process.env.RESEND_API_KEY = '';
+    const off = await makeClient()('/api/auth/me');
+    assert.equal(off.body.emailRequired, false);
+
+    process.env.RESEND_API_KEY = 'test-key-so-the-rule-applies';
+    const on = await makeClient()('/api/auth/me');
+    assert.equal(on.body.emailRequired, true);
+
+    process.env.RESEND_API_KEY = '';
+    setSetting('requireVerifiedEmail', false, null);
+    clearSettingsCache();
+  });
+});
+
 describe('the verification gate on commenting', () => {
   test('an unverified account is refused, and told why', async () => {
     const { setSetting, clearSettingsCache } = await import('../services/settings.js');
@@ -661,7 +716,11 @@ describe('the verification gate on commenting', () => {
     const client = makeClient();
     await client('/api/auth/register', {
       method: 'POST',
-      body: json({ username: 'gated-user', password: 'a-long-enough-password' }),
+      body: json({
+        username: 'gated-user',
+        password: 'a-long-enough-password',
+        email: 'gated-user@example.com',
+      }),
     });
 
     const { status, body } = await client('/api/comments', {
@@ -710,10 +769,16 @@ describe('the verification gate on commenting', () => {
     setSetting('requireVerifiedEmail', true, null);
     process.env.RESEND_API_KEY = 'test-key-so-the-gate-applies';
 
+    // An address, but never confirmed -- the exemption is about verification,
+    // not about having one on file.
     const client = makeClient();
     await client('/api/auth/register', {
       method: 'POST',
-      body: json({ username: 'gated-mod', password: 'a-long-enough-password' }),
+      body: json({
+        username: 'gated-mod',
+        password: 'a-long-enough-password',
+        email: 'gated-mod@example.com',
+      }),
     });
     setRole(findByUsername('gated-mod').id, 'moderator');
 

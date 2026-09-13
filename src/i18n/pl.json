@@ -91,6 +91,8 @@
     "emailHint": "Służy wyłącznie do potwierdzenia adresu. Daje oznaczenie zweryfikowanego autora przy komentarzach.",
     "emailTaken": "Ten e-mail należy już do innego konta.",
     "emailInvalid": "To nie wygląda na adres e-mail.",
+    "emailRequiredHint": "Wyślemy link potwierdzający. Konto nie jest gotowe, dopóki go nie otworzysz.",
+    "emailRequired": "Do dokończenia zakładania konta potrzebny jest adres e-mail.",
     "orDivider": "lub",
     "continueWithGoogle": "Kontynuuj z Google",
     "verified": "Zweryfikowany",
@@ -217,7 +219,10 @@
     "adminPanel": "Panel administratora",
     "loadMore": "Pokaż więcej",
     "commentApproved": "Komentarz opublikowany.",
-    "commentRejected": "Komentarz odrzucony."
+    "commentRejected": "Komentarz odrzucony.",
+    "finishSetupTitle": "Dokończ zakładanie konta",
+    "finishSetupSent": "Wysłaliśmy link potwierdzający na adres {email}. Otwórz go, aby dokończyć zakładanie konta — do tego czasu nie możesz dodawać komentarzy.",
+    "finishSetupNoEmail": "Dodaj poniżej adres e-mail i potwierdź go, aby dokończyć zakładanie konta."
   },
   "settings": {
     "title": "Ustawienia strony",

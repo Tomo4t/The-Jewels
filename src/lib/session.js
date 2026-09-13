@@ -11,6 +11,7 @@ const state = {
   moderationQueue: true,
   googleSignIn: false,
   emailVerification: false,
+  emailRequired: false,
   loaded: false,
   apiAvailable: true,
 };
@@ -49,6 +50,16 @@ export const session = {
   get emailVerification() {
     return state.emailVerification;
   },
+
+  /** An account is not finished until its address is confirmed. */
+  get emailRequired() {
+    return state.emailRequired;
+  },
+
+  /** Signed in, but the account still has a step left before it is usable. */
+  get setupPending() {
+    return Boolean(state.user) && state.emailRequired && !state.user.emailVerified;
+  },
   get emailVerified() {
     return Boolean(state.user?.emailVerified);
   },
@@ -72,6 +83,7 @@ export const session = {
       state.moderationQueue = data.moderationQueue !== false;
       state.googleSignIn = data.googleSignIn === true;
       state.emailVerification = data.emailVerification === true;
+      state.emailRequired = data.emailRequired === true;
       state.apiAvailable = true;
     } catch {
       // No backend (static hosting, or the server is down). Reading still works.

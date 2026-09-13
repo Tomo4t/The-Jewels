@@ -136,6 +136,26 @@ export async function render(params = {}) {
 
       ${verifyNotice}
 
+      ${
+        session.setupPending
+          ? `<section class="account-section setup-pending" role="status">
+               <h2>${escapeHTML(t('profile.finishSetupTitle'))}</h2>
+               <p>${escapeHTML(
+                 user.email
+                   ? t('profile.finishSetupSent', { email: user.email })
+                   : t('profile.finishSetupNoEmail')
+               )}</p>
+               ${
+                 user.email
+                   ? `<button type="button" class="button button--primary" id="resend-verify-setup">
+                        ${escapeHTML(t('auth.resendVerification'))}
+                      </button>`
+                   : ''
+               }
+             </section>`
+          : ''
+      }
+
       <section class="account-section">
         <dl class="account-facts">
           <div>
@@ -279,7 +299,7 @@ export function mount() {
     return undefined;
   });
 
-  bind(document.getElementById('resend-verify'), 'click', async (event) => {
+  const onResend = async (event) => {
     const button = event.currentTarget;
     button.disabled = true;
     try {
@@ -296,7 +316,10 @@ export function mount() {
     } finally {
       button.disabled = false;
     }
-  });
+  };
+
+  bind(document.getElementById('resend-verify'), 'click', onResend);
+  bind(document.getElementById('resend-verify-setup'), 'click', onResend);
 
   // --- password ---
   const passwordForm = document.getElementById('password-form');
