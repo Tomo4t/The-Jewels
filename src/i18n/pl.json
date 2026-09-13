@@ -20,7 +20,9 @@
     "sound": "Włącz lub wyłącz dźwięk",
     "account": "Konto",
     "admin": "Panel administratora",
-    "skipToContent": "Przejdź do treści"
+    "skipToContent": "Przejdź do treści",
+    "fanart": "Fan art",
+    "profile": "Profil"
   },
   "common": {
     "loading": "Wczytywanie…",
@@ -103,7 +105,15 @@
     "googleCancelled": "Logowanie przez Google zostało anulowane.",
     "googleExpired": "Ta próba logowania wygasła. Spróbuj ponownie.",
     "googleFailed": "Logowanie przez Google nie powiodło się. Spróbuj ponownie.",
-    "accountBanned": "To konto zostało zawieszone."
+    "accountBanned": "To konto zostało zawieszone.",
+    "forgotPassword": "Nie pamiętasz hasła?",
+    "resetTitle": "Ustaw nowe hasło",
+    "resetSent": "Jeśli ten adres ma konto, link do zmiany hasła jest już w drodze.",
+    "resetDone": "Hasło zmienione. Jesteś zalogowany.",
+    "resetInvalid": "Ten link jest nieprawidłowy lub wygasł.",
+    "sendResetLink": "Wyślij link",
+    "backToSignIn": "Wróć do logowania",
+    "notVerifiedToComment": "Potwierdź swój adres e-mail, zanim dodasz komentarz."
   },
   "comments": {
     "title": "Komentarze",
@@ -187,5 +197,36 @@
     "noPassword": "To konto loguje się przez Google i nie ma hasła.",
     "usernameLabel": "Nazwa użytkownika",
     "memberSince": "Konto od"
+  },
+  "fanart": {
+    "title": "Fan art",
+    "comingSoon": "Wkrótce",
+    "blurb": "Galeria prac przysłanych przez czytelników. Jeszcze nie działa — zajrzyj później."
+  },
+  "profile": {
+    "myComments": "Twoje komentarze",
+    "noComments": "Nie masz jeszcze żadnych wpisów.",
+    "statusVisible": "Opublikowany",
+    "statusPending": "Czeka na zatwierdzenie",
+    "statusRejected": "Odrzucony",
+    "moderationQueue": "Czeka na Ciebie",
+    "queueEmpty": "Nic nie czeka na zatwierdzenie.",
+    "approve": "Zatwierdź",
+    "reject": "Odrzuć",
+    "onChapter": "Rozdział {n}",
+    "signOutConfirm": "Wyloguj się",
+    "adminPanel": "Panel administratora",
+    "loadMore": "Pokaż więcej",
+    "commentApproved": "Komentarz opublikowany.",
+    "commentRejected": "Komentarz odrzucony."
+  },
+  "settings": {
+    "title": "Ustawienia strony",
+    "moderationQueue": "Wstrzymuj komentarze do zatwierdzenia",
+    "requireVerifiedEmail": "Wymagaj potwierdzonego e-maila do komentowania",
+    "allowRegistration": "Zezwalaj na nowe konta",
+    "fromEnv": "z konfiguracji",
+    "fromAdmin": "zmienione tutaj",
+    "saved": "Ustawienie zapisane."
   }
 }

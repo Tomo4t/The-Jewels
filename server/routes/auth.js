@@ -241,7 +241,7 @@ router.get(
         claimedFrom: result.displaced.length ? result.displaced : undefined,
       });
     }
-    res.redirect(302, absoluteUrl(`/#account?verified=${result ? '1' : '0'}`));
+    res.redirect(302, absoluteUrl(`/#profile?verified=${result ? '1' : '0'}`));
   })
 );
 

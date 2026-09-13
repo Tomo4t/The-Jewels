@@ -201,11 +201,11 @@ footer,
   align-items: flex-start;
   gap: 12px;
   padding: 16px;
-  /* Sized to its contents rather than a fixed 220px, which left a wide empty
-     column beside short labels. */
+  /* Sized to its contents. Everything inside is now an icon, so the panel is a
+     narrow column rather than a list of labels. */
   width: max-content;
-  min-width: 9.5rem;
-  max-width: min(15rem, calc(100vw - 32px));
+  min-width: 0;
+  max-width: min(12rem, calc(100vw - 32px));
   border-radius: 14px;
   background-color: var(--color-dropdown-bg);
   border: 1px solid var(--color-dropdown-border);
@@ -225,7 +225,7 @@ footer,
 
 .navbar.is-collapsed .nav-right-actions .icon-btn,
 .navbar.is-collapsed .nav-right-actions .dropdown > button {
-  justify-content: flex-start;
+  justify-content: center;
   width: 100%;
 }
 

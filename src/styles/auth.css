@@ -199,3 +199,226 @@ html.dark .button--google:hover:not(:disabled) {
     padding: var(--space-4);
   }
 }
+
+/* --- profile ---------------------------------------------------------------- */
+
+.profile-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.profile-head h1 {
+  margin: 0;
+}
+
+.profile-head-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Icon-only controls. Every one carries a title and an aria-label, because a
+   glyph on its own tells a screen reader nothing. */
+.icon-action {
+  display: inline-grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.icon-action img {
+  width: 1.1rem;
+  height: 1.1rem;
+  filter: var(--icon-filter-content);
+}
+
+.icon-action:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  transform: translateY(-1px);
+}
+
+.icon-action:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.icon-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.icon-action.is-signout:hover:not(:disabled) {
+  border-color: var(--color-danger);
+}
+
+.icon-action.is-approve {
+  color: var(--color-success);
+}
+
+.icon-action.is-reject {
+  color: var(--color-danger);
+}
+
+.count-pill {
+  display: inline-block;
+  margin-left: var(--space-2);
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- a user's own comments -------------------------------------------------- */
+
+.mine-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.mine-item {
+  position: relative;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.mine-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.mine-where {
+  color: var(--color-link);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.mine-where:hover {
+  text-decoration: underline;
+}
+
+.mine-status {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.mine-status.is-visible {
+  color: var(--color-success);
+}
+
+.mine-status.is-pending {
+  color: var(--color-warning);
+}
+
+.mine-status.is-rejected {
+  color: var(--color-danger);
+}
+
+.mine-item:has(.mine-status.is-pending) {
+  border-left-color: var(--color-warning);
+}
+
+.mine-item:has(.mine-status.is-rejected) {
+  border-left-color: var(--color-danger);
+}
+
+.mine-author {
+  margin: 0 0 var(--space-2);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.mine-body {
+  margin: 0 0 var(--space-2);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--color-text);
+}
+
+.mine-flag {
+  margin: 0 0 var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+  font-size: 0.8rem;
+}
+
+.mine-time {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+}
+
+.mine-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+/* --- coming soon ------------------------------------------------------------ */
+
+.coming-soon {
+  max-width: 30rem;
+  margin: clamp(var(--space-6), 10vh, 6rem) auto;
+  padding-inline: var(--space-4);
+  text-align: center;
+}
+
+.coming-soon-mark {
+  width: 3.5rem;
+  height: 3.5rem;
+  margin-bottom: var(--space-4);
+  filter: var(--icon-filter-content);
+  opacity: 0.55;
+}
+
+.coming-soon-flag {
+  margin: 0 0 var(--space-2);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-link);
+}
+
+.coming-soon h1 {
+  margin: 0 0 var(--space-3);
+  font-size: 1.6rem;
+  color: var(--color-text);
+}
+
+.coming-soon-blurb {
+  margin: 0 0 var(--space-5);
+  color: var(--color-text-muted);
+}

@@ -79,6 +79,14 @@
         >
           <img src="/images/contact.svg" alt="" aria-hidden="true" />
         </a>
+        <a
+          class="icon-btn"
+          href="#fanart"
+          data-sound="ui"
+          data-i18n-attr="title:nav.fanart aria-label:nav.fanart"
+        >
+          <img src="/images/fanart.svg" alt="" aria-hidden="true" />
+        </a>
       </div>
 
       <div class="nav-title">
@@ -99,13 +107,16 @@
         </button>
 
         <div class="nav-right-actions" id="nav-right-actions">
-          <a class="nav-link" id="admin-link" href="/admin" data-i18n="nav.admin" hidden
-            >Admin panel</a
+          <a
+            class="icon-btn"
+            id="account-action"
+            href="#signin"
+            data-sound="ui"
+            data-i18n-attr="title:auth.signIn aria-label:auth.signIn"
+            hidden
           >
-          <a class="nav-link" id="account-link" href="#account" data-i18n="nav.account" hidden
-            >Account</a
-          >
-          <a class="nav-link" id="account-action" href="#signin" data-sound="ui" hidden>Sign in</a>
+            <img src="/images/account.svg" alt="" aria-hidden="true" />
+          </a>
 
           <div class="dropdown" id="language-dropdown">
             <button

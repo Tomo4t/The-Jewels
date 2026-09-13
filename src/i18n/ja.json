@@ -20,7 +20,9 @@
     "sound": "音のオン・オフ",
     "account": "アカウント",
     "admin": "管理画面",
-    "skipToContent": "本文へスキップ"
+    "skipToContent": "本文へスキップ",
+    "fanart": "ファンアート",
+    "profile": "プロフィール"
   },
   "common": {
     "loading": "読み込み中…",
@@ -103,7 +105,15 @@
     "googleCancelled": "Google ログインがキャンセルされました。",
     "googleExpired": "ログインの試行が期限切れになりました。もう一度お試しください。",
     "googleFailed": "Google ログインに失敗しました。もう一度お試しください。",
-    "accountBanned": "このアカウントは停止されています。"
+    "accountBanned": "このアカウントは停止されています。",
+    "forgotPassword": "パスワードをお忘れですか？",
+    "resetTitle": "新しいパスワードを設定",
+    "resetSent": "そのアドレスにアカウントがあれば、再設定リンクを送信しました。",
+    "resetDone": "パスワードを変更しました。ログイン済みです。",
+    "resetInvalid": "この再設定リンクは無効か、有効期限が切れています。",
+    "sendResetLink": "再設定リンクを送る",
+    "backToSignIn": "ログインに戻る",
+    "notVerifiedToComment": "コメントするにはメールアドレスの確認が必要です。"
   },
   "comments": {
     "title": "コメント",
@@ -187,5 +197,36 @@
     "noPassword": "このアカウントは Google でログインするため、パスワードはありません。",
     "usernameLabel": "ユーザー名",
     "memberSince": "登録日"
+  },
+  "fanart": {
+    "title": "ファンアート",
+    "comingSoon": "近日公開",
+    "blurb": "読者のみなさんの作品を集めたギャラリーです。まだ公開前です。またのぞいてみてください。"
+  },
+  "profile": {
+    "myComments": "あなたのコメント",
+    "noComments": "まだ投稿はありません。",
+    "statusVisible": "公開中",
+    "statusPending": "承認待ち",
+    "statusRejected": "非承認",
+    "moderationQueue": "承認待ちの投稿",
+    "queueEmpty": "承認待ちの投稿はありません。",
+    "approve": "承認",
+    "reject": "却下",
+    "onChapter": "第{n}話",
+    "signOutConfirm": "ログアウト",
+    "adminPanel": "管理パネル",
+    "loadMore": "もっと見る",
+    "commentApproved": "コメントを公開しました。",
+    "commentRejected": "コメントを却下しました。"
+  },
+  "settings": {
+    "title": "サイト設定",
+    "moderationQueue": "コメントを承認制にする",
+    "requireVerifiedEmail": "コメントにメール認証を必須にする",
+    "allowRegistration": "新規登録を許可する",
+    "fromEnv": "設定ファイルの値",
+    "fromAdmin": "ここで変更済み",
+    "saved": "設定を保存しました。"
   }
 }

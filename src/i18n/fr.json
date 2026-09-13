@@ -20,7 +20,9 @@
     "sound": "Activer ou couper le son",
     "account": "Compte",
     "admin": "Panneau d’administration",
-    "skipToContent": "Aller au contenu"
+    "skipToContent": "Aller au contenu",
+    "fanart": "Fan art",
+    "profile": "Profil"
   },
   "common": {
     "loading": "Chargement…",
@@ -103,7 +105,15 @@
     "googleCancelled": "La connexion Google a été annulée.",
     "googleExpired": "Cette tentative de connexion a expiré. Veuillez réessayer.",
     "googleFailed": "La connexion Google n'a pas fonctionné. Veuillez réessayer.",
-    "accountBanned": "Ce compte a été suspendu."
+    "accountBanned": "Ce compte a été suspendu.",
+    "forgotPassword": "Mot de passe oublié ?",
+    "resetTitle": "Définir un nouveau mot de passe",
+    "resetSent": "Si cette adresse a un compte, le lien est en route.",
+    "resetDone": "Mot de passe modifié. Vous êtes connecté.",
+    "resetInvalid": "Ce lien est invalide ou a expiré.",
+    "sendResetLink": "Envoyer le lien",
+    "backToSignIn": "Retour à la connexion",
+    "notVerifiedToComment": "Confirmez votre adresse e-mail avant de publier un commentaire."
   },
   "comments": {
     "title": "Commentaires",
@@ -187,5 +197,36 @@
     "noPassword": "Ce compte se connecte avec Google et n'a pas de mot de passe.",
     "usernameLabel": "Nom d'utilisateur",
     "memberSince": "Membre depuis"
+  },
+  "fanart": {
+    "title": "Fan art",
+    "comingSoon": "Bientôt disponible",
+    "blurb": "Une galerie pour les créations des lecteurs. Elle n'est pas encore ouverte — revenez bientôt."
+  },
+  "profile": {
+    "myComments": "Vos commentaires",
+    "noComments": "Vous n'avez encore rien publié.",
+    "statusVisible": "Publié",
+    "statusPending": "En attente de validation",
+    "statusRejected": "Refusé",
+    "moderationQueue": "En attente de vous",
+    "queueEmpty": "Rien n'attend de validation.",
+    "approve": "Valider",
+    "reject": "Refuser",
+    "onChapter": "Chapitre {n}",
+    "signOutConfirm": "Se déconnecter",
+    "adminPanel": "Panneau d'administration",
+    "loadMore": "Afficher plus",
+    "commentApproved": "Commentaire publié.",
+    "commentRejected": "Commentaire refusé."
+  },
+  "settings": {
+    "title": "Paramètres du site",
+    "moderationQueue": "Retenir les commentaires pour validation",
+    "requireVerifiedEmail": "Exiger un e-mail confirmé pour commenter",
+    "allowRegistration": "Autoriser les nouveaux comptes",
+    "fromEnv": "depuis la configuration",
+    "fromAdmin": "modifié ici",
+    "saved": "Paramètre enregistré."
   }
 }

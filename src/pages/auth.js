@@ -123,6 +123,14 @@ function page(mode) {
             </button>
           </form>
 
+          ${
+            isRegister
+              ? ''
+              : `<p class="auth-switch">
+                   <a href="${buildHash('reset')}">${escapeHTML(t('auth.forgotPassword'))}</a>
+                 </p>`
+          }
+
           <p class="auth-switch">
             ${escapeHTML(isRegister ? t('auth.haveAccount') : t('auth.needAccount'))}
             <a href="${buildHash(isRegister ? 'signin' : 'signup')}">

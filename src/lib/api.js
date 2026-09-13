@@ -205,6 +205,17 @@ export const api = {
 
   // moderation + admin
   moderationQueue: () => request('/api/comments/moderation/queue'),
+  myComments: ({ limit = 50, offset = 0 } = {}) =>
+    request(`/api/comments/mine?limit=${limit}&offset=${offset}`),
+  adminSettings: () => request('/api/admin/settings'),
+  updateAdminSettings: (changes) =>
+    request('/api/admin/settings', { method: 'PATCH', body: changes }),
+  forgotPassword: (email) =>
+    request('/api/auth/password/forgot', { method: 'POST', body: { email } }),
+  checkResetToken: (token) =>
+    request(`/api/auth/password/reset?token=${encodeURIComponent(token)}`),
+  resetPassword: (token, password) =>
+    request('/api/auth/password/reset', { method: 'POST', body: { token, password } }),
   moderate: (id, action) =>
     request(`/api/comments/${Number(id)}/moderate`, { method: 'POST', body: { action } }),
   adminChapters: () => request('/api/admin/chapters'),

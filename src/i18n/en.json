@@ -20,7 +20,9 @@
     "sound": "Toggle sound",
     "account": "Account",
     "admin": "Admin panel",
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "fanart": "Fan art",
+    "profile": "Profile"
   },
   "common": {
     "loading": "Loading…",
@@ -103,7 +105,15 @@
     "googleCancelled": "Google sign-in was cancelled.",
     "googleExpired": "That sign-in attempt expired. Please try again.",
     "googleFailed": "Google sign-in did not work. Please try again.",
-    "accountBanned": "This account has been suspended."
+    "accountBanned": "This account has been suspended.",
+    "forgotPassword": "Forgot your password?",
+    "resetTitle": "Set a new password",
+    "resetSent": "If that address has an account, a reset link is on its way.",
+    "resetDone": "Password changed. You are signed in.",
+    "resetInvalid": "That reset link is invalid or has expired.",
+    "sendResetLink": "Send reset link",
+    "backToSignIn": "Back to sign in",
+    "notVerifiedToComment": "Confirm your email address before posting a comment."
   },
   "comments": {
     "title": "Comments",
@@ -187,5 +197,36 @@
     "noPassword": "This account signs in with Google and has no password.",
     "usernameLabel": "Username",
     "memberSince": "Member since"
+  },
+  "fanart": {
+    "title": "Fan art",
+    "comingSoon": "Coming soon",
+    "blurb": "A gallery for art readers have made. It is not open yet — check back."
+  },
+  "profile": {
+    "myComments": "Your comments",
+    "noComments": "You have not posted anything yet.",
+    "statusVisible": "Published",
+    "statusPending": "Awaiting approval",
+    "statusRejected": "Not approved",
+    "moderationQueue": "Waiting for you",
+    "queueEmpty": "Nothing is waiting for approval.",
+    "approve": "Approve",
+    "reject": "Reject",
+    "onChapter": "Chapter {n}",
+    "signOutConfirm": "Sign out",
+    "adminPanel": "Admin panel",
+    "loadMore": "Show more",
+    "commentApproved": "Comment published.",
+    "commentRejected": "Comment rejected."
+  },
+  "settings": {
+    "title": "Site settings",
+    "moderationQueue": "Hold comments for approval",
+    "requireVerifiedEmail": "Require a confirmed email to comment",
+    "allowRegistration": "Allow new accounts",
+    "fromEnv": "from configuration",
+    "fromAdmin": "changed here",
+    "saved": "Setting saved."
   }
 }

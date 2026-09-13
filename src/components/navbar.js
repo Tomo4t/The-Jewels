@@ -134,12 +134,8 @@ export function initNavbar() {
   });
 
   // --- sign in / out ---
-  $('#account-action')?.addEventListener('click', async (event) => {
-    if (!session.isSignedIn) return; // the anchor navigates to #signin on its own
-    event.preventDefault();
-    await session.signOut();
-    closeMenu();
-  });
+  // Signing out is a profile-page action now; the navbar icon is pure
+  // navigation and needs no handler of its own.
 
   document.addEventListener('click', (event) => {
     if (!navbar?.contains(event.target)) closeMenu();
@@ -181,30 +177,15 @@ export function updateNavbar() {
   });
 
   const account = $('#account-action');
-  const accountLink = $('#account-link');
-  const adminLink = $('#admin-link');
 
-  if (accountLink) {
-    accountLink.hidden = !session.apiAvailable || !session.isSignedIn;
-    accountLink.textContent = t('nav.account');
-  }
-
+  // One icon with two destinations: the profile when there is somebody to show
+  // a profile for, the sign-in page otherwise. Signing out and the admin panel
+  // both live on the profile page now, so the navbar stays four icons a side.
   if (account) {
-    if (!session.apiAvailable) {
-      account.hidden = true;
-    } else if (session.isSignedIn) {
-      account.hidden = false;
-      account.textContent = t('auth.signOut');
-      account.removeAttribute('href');
-      account.setAttribute('role', 'button');
-      account.tabIndex = 0;
-    } else {
-      account.hidden = false;
-      account.textContent = t('auth.signIn');
-      account.setAttribute('href', '#signin');
-      account.removeAttribute('role');
-    }
+    account.hidden = !session.apiAvailable;
+    const label = session.isSignedIn ? t('nav.profile') : t('auth.signIn');
+    account.setAttribute('href', session.isSignedIn ? '#profile' : '#signin');
+    account.setAttribute('title', label);
+    account.setAttribute('aria-label', label);
   }
-
-  if (adminLink) adminLink.hidden = !session.isAdmin;
 }

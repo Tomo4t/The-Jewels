@@ -340,7 +340,12 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 0.4rem 0.85rem 0.4rem 0.7rem;
+  /* Icon only, so it is square rather than a pill with a label in it. The
+     accessible name lives on the anchor's title and aria-label. */
+  width: 2.25rem;
+  height: 2.25rem;
+  justify-content: center;
+  padding: 0;
   border: 1px solid var(--color-border);
   border-radius: 999px;
   background: var(--color-surface-raised);

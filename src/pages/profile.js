@@ -6,19 +6,64 @@ import api, { ApiError } from '../lib/api.js';
 import { toastSuccess, toastError } from '../components/toast.js';
 
 /**
- * The signed-in user's own settings: the address on the account, whether it has
- * been confirmed, and the password. Everything here is scoped to the current
- * user; moderation and other people's accounts live in the admin page.
+ * The signed-in user's own page: who they are, the address on the account, the
+ * password, and everything they have written -- including the comments still
+ * waiting on a moderator, since not being able to see those is exactly the
+ * confusion this answers.
+ *
+ * Moderators additionally get the approval queue here, so the everyday job does
+ * not require opening the admin panel.
  */
 
 export function title() {
-  return t('account.title');
+  return t('profile.title') || t('account.title');
 }
+
+const STATUS_LABEL = {
+  visible: 'profile.statusVisible',
+  pending: 'profile.statusPending',
+  rejected: 'profile.statusRejected',
+};
 
 const badge = (verified) =>
   `<span class="verify-badge${verified ? ' is-verified' : ''}">
      ${escapeHTML(verified ? t('auth.verified') : t('auth.unverified'))}
    </span>`;
+
+const commentCard = (comment, { moderation = false } = {}) => {
+  const status = comment.status || 'visible';
+  const href = buildHash('reader', { chapter: comment.chapter, lang: comment.lang });
+
+  return `
+    <li class="mine-item" data-comment="${comment.id}">
+      <div class="mine-head">
+        <a class="mine-where" href="${href}">
+          ${escapeHTML(t('profile.onChapter', { n: comment.chapter }))}
+        </a>
+        <span class="mine-status is-${escapeHTML(status)}">
+          ${escapeHTML(t(STATUS_LABEL[status] || STATUS_LABEL.visible))}
+        </span>
+      </div>
+      ${moderation ? `<p class="mine-author">${escapeHTML(comment.author?.displayName || comment.author?.username || '')}</p>` : ''}
+      <p class="mine-body">${escapeHTML(comment.body || '')}</p>
+      ${comment.flagReason ? `<p class="mine-flag">${escapeHTML(comment.flagReason)}</p>` : ''}
+      <time class="mine-time" datetime="${escapeHTML(comment.createdAt)}">
+        ${escapeHTML(formatDate(comment.createdAt))}
+      </time>
+      ${
+        moderation
+          ? `<div class="mine-actions">
+               <button type="button" class="icon-action is-approve" data-act="approve"
+                       title="${escapeHTML(t('profile.approve'))}"
+                       aria-label="${escapeHTML(t('profile.approve'))}">&#10003;</button>
+               <button type="button" class="icon-action is-reject" data-act="reject"
+                       title="${escapeHTML(t('profile.reject'))}"
+                       aria-label="${escapeHTML(t('profile.reject'))}">&#10005;</button>
+             </div>`
+          : ''
+      }
+    </li>`;
+};
 
 export async function render(params = {}) {
   if (!session.loaded) await session.refresh();
@@ -39,7 +84,6 @@ export async function render(params = {}) {
 
   const user = session.user;
 
-  // The verification link redirects back here with the outcome in the hash.
   const verifyNotice =
     params.verified === '1'
       ? `<p class="form-success" role="status">${escapeHTML(t('auth.verifySuccess'))}</p>`
@@ -47,9 +91,46 @@ export async function render(params = {}) {
         ? `<p class="form-error" role="alert">${escapeHTML(t('auth.verifyFailed'))}</p>`
         : '';
 
+  // Both lists are fetched up front so the page arrives complete rather than
+  // filling in underneath the reader.
+  let mine = { comments: [], total: 0 };
+  try {
+    mine = await api.myComments({ limit: 50 });
+  } catch {
+    mine = { comments: [], total: 0 };
+  }
+
+  let queue = null;
+  if (session.isModerator) {
+    try {
+      queue = await api.moderationQueue();
+    } catch {
+      queue = null;
+    }
+  }
+
   return `
     <div class="account-page">
-      <h1>${escapeHTML(t('account.title'))}</h1>
+      <div class="profile-head">
+        <h1>${escapeHTML(t('account.title'))}</h1>
+        <div class="profile-head-actions">
+          ${
+            session.isAdmin
+              ? `<a class="icon-action" href="/admin"
+                    title="${escapeHTML(t('profile.adminPanel'))}"
+                    aria-label="${escapeHTML(t('profile.adminPanel'))}">
+                   <img src="/images/admin.svg" alt="" aria-hidden="true">
+                 </a>`
+              : ''
+          }
+          <button type="button" class="icon-action is-signout" id="sign-out"
+                  title="${escapeHTML(t('auth.signOut'))}"
+                  aria-label="${escapeHTML(t('auth.signOut'))}">
+            <img src="/images/logout.svg" alt="" aria-hidden="true">
+          </button>
+        </div>
+      </div>
+
       ${verifyNotice}
 
       <section class="account-section">
@@ -67,7 +148,6 @@ export async function render(params = {}) {
 
       <section class="account-section">
         <h2>${escapeHTML(t('account.emailSection'))}</h2>
-
         ${
           user.email
             ? `<p class="account-email">
@@ -83,7 +163,6 @@ export async function render(params = {}) {
                }`
             : `<p class="empty-note">${escapeHTML(t('account.noEmail'))}</p>`
         }
-
         <form id="email-form" class="account-form" novalidate>
           <p class="form-error" id="email-error" role="alert" hidden></p>
           <label class="field">
@@ -95,15 +174,6 @@ export async function render(params = {}) {
           </button>
         </form>
       </section>
-
-      ${
-        user.linkedGoogle
-          ? `<section class="account-section">
-               <h2>${escapeHTML(t('account.signInMethods'))}</h2>
-               <p class="account-note">${escapeHTML(t('account.googleLinked'))}</p>
-             </section>`
-          : ''
-      }
 
       <section class="account-section">
         <h2>${escapeHTML(t('account.passwordSection'))}</h2>
@@ -117,8 +187,7 @@ export async function render(params = {}) {
                  </label>
                  <label class="field">
                    <span>${escapeHTML(t('account.newPassword'))}</span>
-                   <input name="newPassword" type="password" autocomplete="new-password"
-                          required minlength="10">
+                   <input name="newPassword" type="password" autocomplete="new-password" required minlength="10">
                  </label>
                  <p class="field-hint">${escapeHTML(t('auth.passwordRules'))}</p>
                  <button type="submit" class="button button--primary">
@@ -127,6 +196,31 @@ export async function render(params = {}) {
                </form>`
             : `<p class="account-note">${escapeHTML(t('account.noPassword'))}</p>`
         }
+        ${user.linkedGoogle ? `<p class="account-note">${escapeHTML(t('account.googleLinked'))}</p>` : ''}
+      </section>
+
+      ${
+        queue
+          ? `<section class="account-section" id="queue-section">
+               <h2>${escapeHTML(t('profile.moderationQueue'))} <span class="count-pill">${queue.total ?? queue.items?.length ?? 0}</span></h2>
+               ${
+                 (queue.items || []).length
+                   ? `<ul class="mine-list" id="queue-list">
+                        ${queue.items.map((c) => commentCard(c, { moderation: true })).join('')}
+                      </ul>`
+                   : `<p class="empty-note">${escapeHTML(t('profile.queueEmpty'))}</p>`
+               }
+             </section>`
+          : ''
+      }
+
+      <section class="account-section">
+        <h2>${escapeHTML(t('profile.myComments'))} <span class="count-pill">${mine.total}</span></h2>
+        ${
+          mine.comments.length
+            ? `<ul class="mine-list">${mine.comments.map((c) => commentCard(c)).join('')}</ul>`
+            : `<p class="empty-note">${escapeHTML(t('profile.noComments'))}</p>`
+        }
       </section>
     </div>
   `;
@@ -134,26 +228,29 @@ export async function render(params = {}) {
 
 export function mount() {
   const cleanups = [];
-
   const bind = (node, event, handler) => {
     if (!node) return;
     node.addEventListener(event, handler);
     cleanups.push(() => node.removeEventListener(event, handler));
   };
-
   const fail = (box, message) => {
     box.textContent = message;
     box.hidden = false;
   };
 
-  // --- change or add the address ---
+  bind(document.getElementById('sign-out'), 'click', async (event) => {
+    event.currentTarget.disabled = true;
+    await session.signOut();
+    navigate('home', {}, { replace: true });
+  });
+
+  // --- email ---
   const emailForm = document.getElementById('email-form');
   const emailError = document.getElementById('email-error');
 
   bind(emailForm, 'submit', async (event) => {
     event.preventDefault();
     emailError.hidden = true;
-
     const value = String(new FormData(emailForm).get('email') || '').trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)) {
       return fail(emailError, t('auth.emailInvalid'));
@@ -166,7 +263,7 @@ export function mount() {
       toastSuccess(t('account.emailUpdated'));
       if (verification?.status === 'sent') toastSuccess(t('auth.verifySent'));
       else if (verification?.status === 'send_failed') toastError(t('auth.verifySendFailed'));
-      navigate('account', {}, { replace: true });
+      navigate('profile', {}, { replace: true });
     } catch (err) {
       const map = {
         email_taken: t('auth.emailTaken'),
@@ -179,7 +276,6 @@ export function mount() {
     return undefined;
   });
 
-  // --- resend the confirmation link ---
   bind(document.getElementById('resend-verify'), 'click', async (event) => {
     const button = event.currentTarget;
     button.disabled = true;
@@ -199,14 +295,13 @@ export function mount() {
     }
   });
 
-  // --- change the password ---
+  // --- password ---
   const passwordForm = document.getElementById('password-form');
   const passwordError = document.getElementById('password-error');
 
   bind(passwordForm, 'submit', async (event) => {
     event.preventDefault();
     passwordError.hidden = true;
-
     const data = Object.fromEntries(new FormData(passwordForm));
     const next = String(data.newPassword || '');
     if (next.length < 10) return fail(passwordError, t('auth.passwordRules'));
@@ -230,6 +325,34 @@ export function mount() {
       submit.disabled = false;
     }
     return undefined;
+  });
+
+  // --- moderation queue, handled by delegation so the list can shrink ---
+  const queueList = document.getElementById('queue-list');
+  bind(queueList, 'click', async (event) => {
+    const button = event.target.closest('[data-act]');
+    if (!button) return;
+
+    const item = button.closest('[data-comment]');
+    const id = Number(item?.dataset.comment);
+    const action = button.dataset.act;
+    if (!id || !action) return;
+
+    item.querySelectorAll('[data-act]').forEach((b) => {
+      b.disabled = true;
+    });
+
+    try {
+      await api.moderate(id, action);
+      toastSuccess(t(action === 'approve' ? 'profile.commentApproved' : 'profile.commentRejected'));
+      item.remove();
+      if (!queueList.children.length) navigate('profile', {}, { replace: true });
+    } catch {
+      toastError(t('common.error'));
+      item.querySelectorAll('[data-act]').forEach((b) => {
+        b.disabled = false;
+      });
+    }
   });
 
   return () => cleanups.forEach((fn) => fn());

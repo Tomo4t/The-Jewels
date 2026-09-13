@@ -20,7 +20,9 @@
     "sound": "Activar o silenciar el sonido",
     "account": "Cuenta",
     "admin": "Panel de administración",
-    "skipToContent": "Saltar al contenido"
+    "skipToContent": "Saltar al contenido",
+    "fanart": "Fan art",
+    "profile": "Perfil"
   },
   "common": {
     "loading": "Cargando…",
@@ -103,7 +105,15 @@
     "googleCancelled": "Se canceló el inicio de sesión con Google.",
     "googleExpired": "Ese intento de inicio de sesión caducó. Inténtalo de nuevo.",
     "googleFailed": "El inicio de sesión con Google no funcionó. Inténtalo de nuevo.",
-    "accountBanned": "Esta cuenta ha sido suspendida."
+    "accountBanned": "Esta cuenta ha sido suspendida.",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "resetTitle": "Establece una contraseña nueva",
+    "resetSent": "Si esa dirección tiene cuenta, el enlace ya va en camino.",
+    "resetDone": "Contraseña cambiada. Has iniciado sesión.",
+    "resetInvalid": "Ese enlace no es válido o ha caducado.",
+    "sendResetLink": "Enviar enlace",
+    "backToSignIn": "Volver a iniciar sesión",
+    "notVerifiedToComment": "Confirma tu correo antes de publicar un comentario."
   },
   "comments": {
     "title": "Comentarios",
@@ -187,5 +197,36 @@
     "noPassword": "Esta cuenta inicia sesión con Google y no tiene contraseña.",
     "usernameLabel": "Nombre de usuario",
     "memberSince": "Miembro desde"
+  },
+  "fanart": {
+    "title": "Fan art",
+    "comingSoon": "Próximamente",
+    "blurb": "Una galería con el arte que hacen los lectores. Todavía no está abierta — vuelve pronto."
+  },
+  "profile": {
+    "myComments": "Tus comentarios",
+    "noComments": "Todavía no has publicado nada.",
+    "statusVisible": "Publicado",
+    "statusPending": "Pendiente de aprobación",
+    "statusRejected": "No aprobado",
+    "moderationQueue": "Pendiente de ti",
+    "queueEmpty": "No hay nada esperando aprobación.",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "onChapter": "Capítulo {n}",
+    "signOutConfirm": "Cerrar sesión",
+    "adminPanel": "Panel de administración",
+    "loadMore": "Ver más",
+    "commentApproved": "Comentario publicado.",
+    "commentRejected": "Comentario rechazado."
+  },
+  "settings": {
+    "title": "Ajustes del sitio",
+    "moderationQueue": "Retener comentarios para aprobación",
+    "requireVerifiedEmail": "Exigir correo confirmado para comentar",
+    "allowRegistration": "Permitir cuentas nuevas",
+    "fromEnv": "desde la configuración",
+    "fromAdmin": "cambiado aquí",
+    "saved": "Ajuste guardado."
   }
 }
