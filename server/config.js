@@ -73,6 +73,27 @@ export const config = {
 };
 
 /**
+ * Origins the API will accept state-changing requests from.
+ *
+ * `publicOrigin` is the canonical site address, but a Railway service also keeps
+ * answering on its `*.up.railway.app` hostname after a custom domain is attached,
+ * and `EXTRA_ORIGINS` lets an operator allow a staging host without a redeploy of
+ * the whole config. All three are normalised the same way.
+ */
+const normaliseOrigin = (value) => value.trim().replace(/\/+$/, '');
+
+export const allowedOrigins = new Set(
+  [
+    config.publicOrigin,
+    platformOrigin(),
+    `http://localhost:${config.port}`,
+    ...(process.env.EXTRA_ORIGINS || '').split(',').map(normaliseOrigin),
+  ]
+    .map(normaliseOrigin)
+    .filter(Boolean)
+);
+
+/**
  * Fail fast on misconfiguration rather than booting something insecure.
  */
 export function validateConfig() {

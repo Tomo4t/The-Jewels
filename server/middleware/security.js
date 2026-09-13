@@ -1,5 +1,5 @@
 import rateLimit from 'express-rate-limit';
-import config from '../config.js';
+import config, { allowedOrigins } from '../config.js';
 import { ApiError } from './errors.js';
 
 /**
@@ -23,7 +23,7 @@ export function requireSameOrigin(req, _res, next) {
     return;
   }
 
-  const allowed = new Set([config.publicOrigin, `http://localhost:${config.port}`]);
+  const allowed = new Set(allowedOrigins);
   if (!config.isProduction) {
     allowed.add('http://localhost:5173');
     allowed.add('http://127.0.0.1:5173');
