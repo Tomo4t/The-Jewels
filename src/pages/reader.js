@@ -312,8 +312,21 @@ function renderScroll(book) {
   const scrollToPage = (index, { smooth = false } = {}) => {
     const target = inner.querySelector(`[data-index="${index}"]`);
     if (!target) return;
+
+    // Measured against the pane, not read off offsetTop. offsetTop is relative
+    // to the nearest POSITIONED ancestor, which is not this pane, so it carried
+    // the height of the bar and the toolbar with it and every jump overshot by
+    // that much -- the page arrived with its first hundred pixels already cut
+    // off above the top edge.
+    const top =
+      target.getBoundingClientRect().top - inner.getBoundingClientRect().top + inner.scrollTop;
+
+    // Centred in the pane rather than flush to its top, so a page that is
+    // shorter than the pane sits in the middle of it.
+    const slack = Math.max(0, (inner.clientHeight - target.offsetHeight) / 2);
+
     inner.scrollTo({
-      top: target.offsetTop,
+      top: Math.max(0, top - slack),
       behavior: smooth && !prefersReducedMotion() ? 'smooth' : 'auto',
     });
   };

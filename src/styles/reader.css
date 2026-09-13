@@ -120,6 +120,10 @@ html.dark .mode-btn.active img {
 }
 
 .Wepcomic-inner {
+  /* Positioned, so a page's offsetTop is measured from the pane rather than
+     from whatever happened to be the nearest positioned ancestor. */
+  position: relative;
+
   /* Without an explicit width this is a shrink-to-fit flex item, so its width
      came from the pages' own min-content -- the full 1080px of the artwork.
      On a desktop that rendered a 1080x1600 page inside a pane only 100vh tall,
