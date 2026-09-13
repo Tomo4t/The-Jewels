@@ -71,14 +71,15 @@ async function render() {
     currentCleanup = null;
   }
 
-  const loader = routes.get(name) || routes.get('notFound');
+  const resolved = routes.has(name) ? name : 'notFound';
+  const loader = routes.get(resolved);
   outlet.setAttribute('aria-busy', 'true');
 
   let page;
   try {
     page = await loader();
   } catch (err) {
-    console.error(`[router] could not load "${name}"`, err);
+    console.error(`[router] could not load "${resolved}"`, err);
     outlet.innerHTML = `<div class="page-error"><p>${t('common.error')}</p></div>`;
     outlet.removeAttribute('aria-busy');
     return;
@@ -95,11 +96,11 @@ async function render() {
     if (result instanceof Node) outlet.append(result);
     else outlet.innerHTML = String(result ?? '');
 
-    currentRoute = name;
+    currentRoute = resolved;
     // Named distinctly from the [data-route] trigger attribute: a `data-route`
     // on <body> would make every click on the page match the delegated
     // handler below and have its default action cancelled.
-    document.body.dataset.activeRoute = name;
+    document.body.dataset.activeRoute = resolved;
 
     if (typeof page.mount === 'function') {
       currentCleanup = (await page.mount(params, outlet)) || null;
@@ -110,7 +111,7 @@ async function render() {
       document.title = 'The Jewels';
     }
   } catch (err) {
-    console.error(`[router] "${name}" failed to render`, err);
+    console.error(`[router] "${resolved}" failed to render`, err);
     outlet.innerHTML = `<div class="page-error"><p>${t('common.error')}</p></div>`;
   } finally {
     if (token === renderToken) outlet.removeAttribute('aria-busy');

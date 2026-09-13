@@ -156,7 +156,7 @@
 }
 
 .comment-signin a {
-  color: var(--color-accent);
+  color: var(--color-link);
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;

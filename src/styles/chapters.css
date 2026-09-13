@@ -3,6 +3,11 @@
    ========================================================================== */
 
 .chapters-shelf-container {
+  /* --shelf-cols is set by the page script to match chaptersPerRow(). */
+  --shelf-cols: 5;
+  --shelf-card: 200px;
+  --shelf-gap: 1.2rem;
+
   display: flex;
   flex-direction: column;
   padding: 2rem;
@@ -10,10 +15,20 @@
   align-items: center;
 }
 
+/* One width for every row and every shelf line, so a final row holding a single
+   book starts at the same edge as the full rows above it. */
+.shelf-row,
+.shelf-line {
+  width: min(
+    100%,
+    calc(var(--shelf-cols) * var(--shelf-card) + (var(--shelf-cols) - 1) * var(--shelf-gap))
+  );
+}
+
 .shelf-row {
   display: flex;
-  gap: 1.2rem;
-  justify-content: center;
+  gap: var(--shelf-gap);
+  justify-content: flex-start;
   flex-wrap: nowrap;
 }
 
@@ -55,26 +70,24 @@
 }
 
 .shelf-line {
-  height: 8px;
+  height: 6px;
   background: var(--color-text-muted);
   border-radius: 4px;
-  width: 0;
-  margin: 1rem auto;
-  animation: growLine 0.6s ease-out forwards;
+  margin: 1rem 0;
+  /* Grown with a transform rather than width, so the resting width stays the
+     row width above and the line survives the animation being skipped. */
+  transform-origin: left center;
+  animation: growLine 0.6s ease-out both;
 }
 
 @keyframes growLine {
   from {
-    width: 0;
     opacity: 0;
-    height: 8px;
-    transform: translateY(12px);
+    transform: scaleX(0) translateY(12px);
   }
   to {
-    width: 80%;
     opacity: 1;
-    height: 6px;
-    transform: translateY(0);
+    transform: scaleX(1) translateY(0);
   }
 }
 
@@ -87,6 +100,10 @@
   }
 }
 @media (max-width: 480px) {
+  .chapters-shelf-container {
+    --shelf-card: 150px;
+  }
+
   .chapter-box {
     width: 150px;
     text-align: center;
@@ -95,10 +112,21 @@
 }
 
 @media (max-width: 350px) {
+  .chapters-shelf-container {
+    --shelf-card: 120px;
+  }
+
   .chapter-box {
     width: 120px;
     text-align: center;
     animation: fadeInUp 0.4s ease both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chapter-box,
+  .shelf-line {
+    animation: none;
   }
 }
 /* --- additions ----------------------------------------------------------- */

@@ -139,9 +139,15 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
-  color: white;
-  padding: 0.5em;
+  background: linear-gradient(
+    to top,
+    rgb(0 0 0 / 88%) 0%,
+    rgb(0 0 0 / 72%) 55%,
+    rgb(0 0 0 / 0%) 100%
+  );
+  color: #fff;
+  padding: 1.6em 0.6em 0.6em;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 70%);
   font-size: 1rem;
   text-align: center;
 }
@@ -215,7 +221,7 @@
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  opacity: 0.85;
+  color: rgb(255 255 255 / 92%);
 }
 
 .cover-name {

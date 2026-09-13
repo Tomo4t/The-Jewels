@@ -29,12 +29,12 @@
   /* --- navbar ----------------------------------------------------------- */
   --color-navbar: #b18e3c;
   --color-title-bg: #d4af37;
-  --color-title-text: #faf6e9;
+  --color-title-text: #2c1e00;
 
   /* --- icons ------------------------------------------------------------ */
-  --color-icon: brightness(0) invert(1);
-  --color-icon-hover: brightness(0) invert(0.4);
-  --color-sound-muted: brightness(0) invert(0.6);
+  --color-icon: brightness(0) invert(0.08);
+  --color-icon-hover: brightness(0) invert(0.22);
+  --color-sound-muted: brightness(0) invert(0.45);
   /* Icons drawn on page backgrounds rather than on the coloured navbar. */
   --icon-filter-content: brightness(0) invert(0.35);
 
@@ -53,6 +53,10 @@
   --color-accent: #d4af37;
   --color-accent-hover: #40e0d0;
   --color-accent-contrast: #2c1e00;
+  /* Text-on-background counterpart to --color-accent, which is fill-only:
+     #d4af37 as text measures 2.0:1 on --color-bg. This measures 6.5:1. */
+  --color-link: #7a5400;
+  --color-link-hover: #5a3d00;
   --color-focus: #1f6feb;
 
   /* --- feedback --------------------------------------------------------- */
@@ -126,6 +130,8 @@ html.dark {
   --color-accent: #a471c2;
   --color-accent-hover: #40e0d0;
   --color-accent-contrast: #ffffff;
+  --color-link: #e0bd4c;
+  --color-link-hover: #f0d270;
   --color-focus: #7aa7ff;
 
   --color-danger: #ff8a80;

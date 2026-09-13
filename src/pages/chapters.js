@@ -78,7 +78,7 @@ export async function render() {
   return `
     <div class="chapters-page">
       <h1 class="visually-hidden">${escapeHTML(t('chapters.title'))}</h1>
-      <div class="chapters-shelf-container">${shelves}</div>
+      <div class="chapters-shelf-container" style="--shelf-cols: ${perRow}">${shelves}</div>
     </div>
   `;
 }

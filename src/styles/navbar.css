@@ -613,6 +613,8 @@ html {
 .language-option {
   display: block;
   width: 100%;
+  /* Inherited colour measured 1.9:1 on the dropdown surface. */
+  color: var(--color-text);
   padding: 0.45rem 0.9rem;
   border: 0;
   background: none;
@@ -628,7 +630,7 @@ html {
 
 .language-option[aria-current='true'] {
   font-weight: 700;
-  color: var(--color-accent);
+  color: var(--color-link-hover);
 }
 
 /* The old rules assumed anchors inside the dropdown. */
