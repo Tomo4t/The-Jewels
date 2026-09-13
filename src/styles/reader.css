@@ -161,6 +161,14 @@ html.dark .mode-btn.active img {
   width: 100%;
   height: auto;
   display: block;
+
+  /* The page reserves its shape before the image arrives, so the column has its
+     real height from the first frame. Without this, the pages are lazy and
+     measure nothing until they load -- and scrolling to a page landed at the
+     top of an empty column. The default is the artwork's own 1080x1600; each
+     image publishes its exact ratio here once it has loaded, so a chapter drawn
+     to any other shape still fills its slot with nothing above or below it. */
+  aspect-ratio: var(--page-ratio, 27 / 40);
 }
 
 .book {

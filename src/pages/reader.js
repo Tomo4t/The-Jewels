@@ -302,14 +302,26 @@ function renderScroll(book) {
 
   book.append(inner);
 
-  const goTo = (index) => {
+  /**
+   * Moves the column only.
+   *
+   * `scrollIntoView` walks every scrollable ancestor, the document included, so
+   * entering scroll mode yanked the whole window down to put the pane in view.
+   * Setting the pane's own scrollTop leaves the page where the reader left it.
+   */
+  const scrollToPage = (index, { smooth = false } = {}) => {
     const target = inner.querySelector(`[data-index="${index}"]`);
     if (!target) return;
-    play('flip');
-    target.scrollIntoView({
-      behavior: prefersReducedMotion() ? 'auto' : 'smooth',
-      block: 'start',
+    inner.scrollTo({
+      top: target.offsetTop,
+      behavior: smooth && !prefersReducedMotion() ? 'smooth' : 'auto',
     });
+  };
+
+  const goTo = (index) => {
+    if (index < 0 || index >= state.total) return;
+    play('flip');
+    scrollToPage(index, { smooth: true });
     setPage(index, { announcePage: true });
   };
 
@@ -333,9 +345,36 @@ function renderScroll(book) {
   inner.querySelectorAll('.page-scroll').forEach((node) => observer.observe(node));
   state.cleanups.push(() => observer.disconnect());
 
-  window.setTimeout(() => {
-    inner.querySelector(`[data-index="${state.page}"]`)?.scrollIntoView({ block: 'start' });
-  }, 0);
+  // Every page reserves its shape before its image arrives (the CSS carries a
+  // default ratio), so the column has its true height immediately and landing
+  // on a page is accurate. Once an image is in, it publishes its own exact
+  // ratio, and the pane re-pins in case that moved anything above the target.
+  let settling = true;
+  const pin = () => settling && scrollToPage(state.page);
+
+  inner.querySelectorAll('img.page-iner').forEach((img) => {
+    const measure = () => {
+      if (img.naturalWidth && img.naturalHeight) {
+        img.style.setProperty('--page-ratio', `${img.naturalWidth} / ${img.naturalHeight}`);
+      }
+      pin();
+    };
+    if (img.complete) measure();
+    else img.addEventListener('load', measure, { once: true });
+  });
+
+  pin();
+
+  // Anything the reader does themselves ends the settling window at once, so a
+  // late-loading image can never drag them back to where they started.
+  const release = () => {
+    settling = false;
+  };
+  inner.addEventListener('pointerdown', release, { once: true, passive: true });
+  inner.addEventListener('wheel', release, { once: true, passive: true });
+  inner.addEventListener('touchstart', release, { once: true, passive: true });
+  const releaseTimer = window.setTimeout(release, 1500);
+  state.cleanups.push(() => window.clearTimeout(releaseTimer));
 }
 
 /** One page at a time. */
