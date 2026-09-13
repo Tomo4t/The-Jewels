@@ -1,4 +1,5 @@
 import { t } from './lib/i18n.js';
+import { applyRouteGradient } from './lib/gradient.js';
 
 /**
  * Hash router.
@@ -101,6 +102,7 @@ async function render() {
     // on <body> would make every click on the page match the delegated
     // handler below and have its default action cancelled.
     document.body.dataset.activeRoute = resolved;
+    applyRouteGradient(resolved);
 
     if (typeof page.mount === 'function') {
       currentCleanup = (await page.mount(params, outlet)) || null;

@@ -333,17 +333,43 @@
   padding: var(--space-4) var(--space-4) 0;
 }
 
+/* This was bare muted text with an arrow beside it, which read as a stray label
+   rather than the way back. It now carries the same chrome as the other
+   controls on the page. */
 .reader-back {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  padding: 0.4rem 0.85rem 0.4rem 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--color-text-muted);
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .reader-back:hover {
-  color: var(--color-accent-hover);
+  border-color: var(--color-accent);
+  background: var(--color-surface);
+  transform: translateX(-2px);
+}
+
+.reader-back:active {
+  transform: translateX(-2px) scale(0.97);
+}
+
+.reader-back img,
+.reader-back svg {
+  width: 1rem;
+  height: 1rem;
+  filter: var(--icon-filter-content);
 }
 
 .reader-title {

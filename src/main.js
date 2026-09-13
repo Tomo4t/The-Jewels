@@ -5,7 +5,8 @@ import { bindGlobalSounds } from './lib/sound.js';
 import { initParticles } from './lib/particles.js';
 import { loadLanguage, preferredLanguage, translateDOM } from './lib/i18n.js';
 import { initNavbar } from './components/navbar.js';
-import { initRouter, registerRoute } from './router.js';
+import { initRouter, registerRoute, currentRouteName } from './router.js';
+import { refreshRouteGradient } from './lib/gradient.js';
 import session from './lib/session.js';
 
 registerRoute('home', () => import('./pages/home.js'));
@@ -43,4 +44,10 @@ bootstrap().catch((err) => {
     outlet.innerHTML =
       '<div class="page-error"><p>Something went wrong loading the site.</p></div>';
   }
+});
+
+// The gradient tokens are redefined per theme, so the wash has to be rebuilt
+// whenever the theme changes rather than staying on the old palette.
+document.addEventListener('themechange', () => {
+  refreshRouteGradient(currentRouteName());
 });

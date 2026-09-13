@@ -201,7 +201,11 @@ footer,
   align-items: flex-start;
   gap: 12px;
   padding: 16px;
-  width: min(220px, calc(100vw - 32px));
+  /* Sized to its contents rather than a fixed 220px, which left a wide empty
+     column beside short labels. */
+  width: max-content;
+  min-width: 9.5rem;
+  max-width: min(15rem, calc(100vw - 32px));
   border-radius: 14px;
   background-color: var(--color-dropdown-bg);
   border: 1px solid var(--color-dropdown-border);
