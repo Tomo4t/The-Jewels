@@ -16,7 +16,10 @@ import { toastSuccess, toastError } from '../components/toast.js';
  */
 
 export function title() {
-  return t('profile.title') || t('account.title');
+  // t() returns the key itself when a string is missing, so `||` never falls
+  // through -- the page was titled "profile.title". There is one heading for
+  // this page and it lives under account.
+  return t('account.title');
 }
 
 const STATUS_LABEL = {
