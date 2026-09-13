@@ -63,12 +63,13 @@
 }
 
 .reader-toggle {
+  grid-column: 3;
+  justify-self: end;
   display: flex;
-  justify-content: center;
   align-items: center;
   gap: var(--space-2);
   flex-wrap: wrap;
-  margin: var(--space-4) auto;
+  margin: 0;
 }
 
 /* Mode buttons carry the same chrome as every other control on the site. They
@@ -144,12 +145,29 @@ html.dark .mode-btn.active img {
   overflow: hidden;
 }
 
+/* Card and scroll modes size their own pages; only the book needs the box. */
+.book[data-mode='card'],
+.book[data-mode='scroll'] {
+  overflow: visible;
+}
+
 .book-inner {
   position: relative;
-  width: 90vw;
-  max-width: 450px;
-  height: 700px;
-  aspect-ratio: 7 / 10;
+
+  /* Height leads, width follows the page ratio, and both are bounded by the
+     window -- so the spread fits any screen from one rule.
+     
+     It used to be four fixed-pixel blocks, one per breakpoint, each setting a
+     width, a height AND an aspect-ratio. `height` wins over `aspect-ratio`, so
+     the ratio never applied and none of the four pairs actually matched the
+     ratio they declared. On a laptop that ran the page off the bottom.
+     
+     2/3 is the real shape of the artwork (the pages are 800x1200 and
+     1080x1600), so `object-fit: cover` has nothing to crop. */
+  height: min(700px, 68vh);
+  width: auto;
+  aspect-ratio: 2 / 3;
+  max-width: min(90vw, 450px);
   perspective: 1500px;
   transition: transform 0.3s ease;
 }
@@ -189,7 +207,6 @@ html.dark .mode-btn.active img {
 .page-iner {
   width: 100%;
   height: auto;
-  max-height: 1000px; /* or whatever max fits your screen */
   display: block;
   margin: 0 auto;
 }
@@ -272,34 +289,12 @@ html.dark .mode-btn.active img {
     flex-direction: row;
     gap: 10px;
   }
-
-  .reader-toggle {
-    max-width: 100%;
-    justify-content: center;
-  }
-
-  .book-inner {
-    width: 350px;
-    height: 550px;
-    aspect-ratio: 3 / 4;
-  }
 }
 
 @media (max-width: 768px) {
   .navbtns {
     flex-direction: row;
     gap: 10px;
-  }
-
-  .reader-toggle {
-    max-width: 100%;
-    justify-content: center;
-  }
-
-  .book-inner {
-    width: 250px;
-    height: 400px;
-    aspect-ratio: 3 / 4;
   }
 
   .card-page {
@@ -311,54 +306,50 @@ html.dark .mode-btn.active img {
     flex-direction: row;
     gap: 10px;
   }
-
-  .reader-toggle {
-    max-width: 100%;
-    justify-content: center;
-  }
-
-  .book-inner {
-    width: 200px;
-    height: 300px;
-    aspect-ratio: 3 / 4;
-  }
 }
 @media (max-width: 400px) {
   .navbtns {
     flex-direction: row;
     gap: 10px;
   }
+}
 
-  .reader-toggle {
-    max-width: 100%;
-    justify-content: center;
+/* Below this the title and the three buttons cannot share a row without the
+   title being squeezed to nothing, so they stack and both centre. */
+@media (max-width: 560px) {
+  .reader-toolbar {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: var(--space-2);
   }
 
-  .book-inner {
-    width: 175px;
-    height: 265px;
-    aspect-ratio: 3 / 4;
+  .reader-title,
+  .reader-toggle {
+    grid-column: 1;
+    justify-self: center;
   }
 }
 
 /* --- toolbar, indicator and hints ---------------------------------------- */
 
 .reader-toolbar {
-  display: flex;
+  /* Three columns with equal outer tracks, so the title centres on the toolbar
+     itself rather than on the space the mode buttons happen to leave. The
+     buttons previously carried `margin: auto`, which on a flex child eats all
+     the free space and shoved the title hard against the left edge. */
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  /* With the back link gone the title is the only thing in the row, so it
-     centres on the page rather than on whatever is left beside it. */
-  justify-content: center;
   gap: var(--space-3);
-  flex-wrap: wrap;
   max-width: 1100px;
   margin: 0 auto;
   padding: var(--space-4) var(--space-4) 0;
 }
 
 .reader-title {
-  flex: 0 1 auto;
+  grid-column: 2;
   margin: 0;
+  min-width: 0;
   text-align: center;
   font-size: 1.05rem;
   color: var(--color-text);
