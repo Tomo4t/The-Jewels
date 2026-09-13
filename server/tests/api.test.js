@@ -656,6 +656,7 @@ describe('the verification gate on commenting', () => {
   test('an unverified account is refused, and told why', async () => {
     const { setSetting, clearSettingsCache } = await import('../services/settings.js');
     setSetting('requireVerifiedEmail', true, null);
+    process.env.RESEND_API_KEY = 'test-key-so-the-gate-applies';
 
     const client = makeClient();
     await client('/api/auth/register', {
@@ -671,6 +672,7 @@ describe('the verification gate on commenting', () => {
     assert.equal(status, 403);
     assert.equal(body.error.code, 'email_not_verified');
 
+    process.env.RESEND_API_KEY = '';
     setSetting('requireVerifiedEmail', false, null);
     clearSettingsCache();
   });
@@ -686,6 +688,7 @@ describe('the verification gate on commenting', () => {
       body: json({ username: 'verified-user', password: 'a-long-enough-password' }),
     });
 
+    process.env.RESEND_API_KEY = 'test-key-so-the-gate-applies';
     const user = findByUsername('verified-user');
     setEmail(user.id, 'verified-user@example.com');
     markEmailVerified(user.id);
@@ -696,6 +699,7 @@ describe('the verification gate on commenting', () => {
     });
     assert.equal(status, 201);
 
+    process.env.RESEND_API_KEY = '';
     setSetting('requireVerifiedEmail', false, null);
     clearSettingsCache();
   });
@@ -704,6 +708,7 @@ describe('the verification gate on commenting', () => {
     const { setSetting, clearSettingsCache } = await import('../services/settings.js');
     const { findByUsername, setRole } = await import('../services/users.js');
     setSetting('requireVerifiedEmail', true, null);
+    process.env.RESEND_API_KEY = 'test-key-so-the-gate-applies';
 
     const client = makeClient();
     await client('/api/auth/register', {
@@ -718,6 +723,7 @@ describe('the verification gate on commenting', () => {
     });
     assert.equal(status, 201);
 
+    process.env.RESEND_API_KEY = '';
     setSetting('requireVerifiedEmail', false, null);
     clearSettingsCache();
   });
@@ -849,5 +855,30 @@ describe('runtime settings', () => {
     });
     assert.equal(status, 400);
     assert.equal(body.error.code, 'validation_failed');
+  });
+});
+
+describe('the verification gate stands down without a mail provider', () => {
+  test('an unverified account can still comment when nothing can send mail', async () => {
+    const { setSetting, clearSettingsCache } = await import('../services/settings.js');
+    setSetting('requireVerifiedEmail', true, null);
+
+    const client = makeClient();
+    await client('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'no-mail-gate', password: 'a-long-enough-password' }),
+    });
+
+    // RESEND_API_KEY is unset in this suite, so confirming an address is
+    // impossible. Enforcing the requirement here would lock every reader out
+    // of commenting with no way back in, so it must not be enforced.
+    const { status } = await client('/api/comments', {
+      method: 'POST',
+      body: json({ lang: 'en', chapter: 1, body: 'Nothing can send me a link.' }),
+    });
+    assert.equal(status, 201);
+
+    setSetting('requireVerifiedEmail', false, null);
+    clearSettingsCache();
   });
 });

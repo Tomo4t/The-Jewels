@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import config from '../config.js';
+import config, { mailEnabled } from '../config.js';
 import { audit } from '../db.js';
 import { ApiError, asyncRoute } from '../middleware/errors.js';
 import { commentLimiter } from '../middleware/security.js';
@@ -81,7 +81,11 @@ router.post(
 
     // Posting can be held behind a confirmed address. Reading never is, and
     // moderators are exempt so a site cannot lock out the people who run it.
-    if (getSetting('requireVerifiedEmail') && !isModerator(req.user)) {
+    //
+    // The gate also stands down when no mail provider is configured. Confirming
+    // an address would be impossible in that state, so enforcing it would lock
+    // every ordinary reader out of commenting with no way back in.
+    if (getSetting('requireVerifiedEmail') && mailEnabled() && !isModerator(req.user)) {
       const me = findById(req.user.id);
       if (!me?.email_verified_at) {
         throw ApiError.forbidden(

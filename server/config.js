@@ -97,8 +97,14 @@ export const config = {
   },
 };
 
-/** True when outbound email is configured well enough to send anything. */
-export const mailEnabled = () => Boolean(config.mail.resendApiKey);
+/**
+ * True when outbound email is configured well enough to send anything.
+ *
+ * Read from the environment rather than the frozen config so a test can switch
+ * it without reimporting the whole server. Both read the same variable, so
+ * behaviour in a real deployment is identical either way.
+ */
+export const mailEnabled = () => Boolean((process.env.RESEND_API_KEY || '').trim());
 
 /** True when both halves of the Google OAuth client are present. */
 export const googleEnabled = () => Boolean(config.google.clientId && config.google.clientSecret);
