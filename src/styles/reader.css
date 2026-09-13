@@ -138,29 +138,29 @@ html.dark .mode-btn.active img {
   height: min(var(--page-h), calc(90vw * 3 / 2));
 
   overflow-y: auto;
-  /* One page per pane, and it snaps -- so the reader never stops halfway
-     between two pages. */
-  scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
   padding-bottom: 0;
 }
 
+/* Each page is exactly as tall as its own artwork at this column width, so
+   pages butt against each other with nothing between them. Forcing every page
+   to the pane's height was what put bands above and below: the pages are
+   1080x1600, and a box locked to a different ratio has to letterbox whatever it
+   holds. Nothing is padded, margined or baseline-aligned here either -- an
+   inline image alone would leave a few pixels of line-box under every page. */
 .page-scroll {
   width: 100%;
-  height: 100%;
   padding: 0;
   margin: 0;
   box-sizing: border-box;
   line-height: 0;
-  scroll-snap-align: start;
+  font-size: 0;
 }
 
-/* The pane is already the page's shape, so the page simply fills it. */
 .page-scroll .page-iner {
   width: 100%;
-  height: 100%;
+  height: auto;
   display: block;
-  object-fit: contain;
 }
 
 .book {

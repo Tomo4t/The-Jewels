@@ -203,12 +203,12 @@ function navButtons(onPrev, onNext, { visible = true } = {}) {
   const nav = document.createElement('div');
   nav.className = 'navbtns';
   nav.innerHTML = `
-    <button type="button" id="prev-btn" class="navbtnL" data-sound="flip"
+    <button type="button" id="prev-btn" class="navbtnL"
             title="${escapeHTML(t('reader.previousPage'))}"
             aria-label="${escapeHTML(t('reader.previousPage'))}">
       <img src="/images/button-book.svg" alt="" aria-hidden="true">
     </button>
-    <button type="button" id="next-btn" class="navbtnR" data-sound="flip"
+    <button type="button" id="next-btn" class="navbtnR"
             title="${escapeHTML(t('reader.nextPage'))}"
             aria-label="${escapeHTML(t('reader.nextPage'))}">
       <img src="/images/button-book.svg" alt="" aria-hidden="true">
@@ -369,6 +369,22 @@ function renderCard(book) {
       apply();
     }
   );
+
+  // Click the right half of the page to go forward, the left half to go back --
+  // the swipe gesture, with a mouse. Swiping is untouched.
+  const onClick = (event) => {
+    // The second click of a double-click belongs to the fullscreen gesture, so
+    // a double-click opens fullscreen instead of turning two pages.
+    if (event.detail > 1) return;
+    const card = event.target.closest('.card-page.show');
+    if (!card || !state?.actions) return;
+    const box = card.getBoundingClientRect();
+    if (event.clientX >= box.left + box.width / 2) state.actions.next();
+    else state.actions.prev();
+  };
+
+  inner.addEventListener('click', onClick);
+  state.cleanups.push(() => inner.removeEventListener('click', onClick));
 
   apply({ silent: true });
 }
