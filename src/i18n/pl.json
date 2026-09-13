@@ -1,5 +1,10 @@
 {
-  "meta": { "code": "pl", "name": "Polski", "dir": "ltr", "locale": "pl-PL" },
+  "meta": {
+    "code": "pl",
+    "name": "Polski",
+    "dir": "ltr",
+    "locale": "pl-PL"
+  },
   "site": {
     "title": "The Jewels",
     "tagline": "Autorski webkomiks autorstwa Tomo",
@@ -57,7 +62,9 @@
     "notFound": "Nie znaleziono takiego rozdziału.",
     "fullscreenHint": "Dotknij strony dwukrotnie, aby otworzyć pełny ekran"
   },
-  "contact": { "title": "Wszystkie oficjalne profile twórcy" },
+  "contact": {
+    "title": "Wszystkie oficjalne profile twórcy"
+  },
   "auth": {
     "signIn": "Zaloguj się",
     "signUp": "Załóż konto",
@@ -77,7 +84,26 @@
     "passwordMismatch": "Hasła nie są takie same.",
     "rateLimited": "Zbyt wiele prób. Odczekaj minutę i spróbuj ponownie.",
     "welcome": "Witaj ponownie, {name}.",
-    "accountCreated": "Konto zostało założone. Jesteś zalogowany."
+    "accountCreated": "Konto zostało założone. Jesteś zalogowany.",
+    "email": "E-mail",
+    "emailOptional": "E-mail (opcjonalnie)",
+    "emailHint": "Służy wyłącznie do potwierdzenia adresu. Daje oznaczenie zweryfikowanego autora przy komentarzach.",
+    "emailTaken": "Ten e-mail należy już do innego konta.",
+    "emailInvalid": "To nie wygląda na adres e-mail.",
+    "orDivider": "lub",
+    "continueWithGoogle": "Kontynuuj z Google",
+    "verified": "Zweryfikowany",
+    "unverified": "Niepotwierdzony",
+    "verifySent": "Sprawdź skrzynkę — wysłaliśmy link potwierdzający.",
+    "verifySendFailed": "Nie udało się wysłać e-maila potwierdzającego. Spróbuj ponownie ze strony konta.",
+    "verifySuccess": "Adres e-mail potwierdzony.",
+    "verifyFailed": "Ten link potwierdzający jest nieprawidłowy lub wygasł.",
+    "resendVerification": "Wyślij potwierdzenie ponownie",
+    "alreadyVerified": "Ten adres jest już potwierdzony.",
+    "googleCancelled": "Logowanie przez Google zostało anulowane.",
+    "googleExpired": "Ta próba logowania wygasła. Spróbuj ponownie.",
+    "googleFailed": "Logowanie przez Google nie powiodło się. Spróbuj ponownie.",
+    "accountBanned": "To konto zostało zawieszone."
   },
   "comments": {
     "title": "Komentarze",
@@ -100,7 +126,8 @@
     "loadMore": "Wczytaj więcej komentarzy",
     "author": "Autor",
     "moderator": "Moderator",
-    "admin": "Administrator"
+    "admin": "Administrator",
+    "verifiedBadge": "Zweryfikowany e-mail"
   },
   "admin": {
     "title": "Panel administratora",
@@ -127,7 +154,11 @@
     "reject": "Odrzuć",
     "flagReason": "Oznaczono: {reason}",
     "role": "Rola",
-    "roles": { "user": "Użytkownik", "moderator": "Moderator", "admin": "Administrator" },
+    "roles": {
+      "user": "Użytkownik",
+      "moderator": "Moderator",
+      "admin": "Administrator"
+    },
     "banUser": "Zablokuj",
     "unbanUser": "Odblokuj",
     "confirmDeleteChapter": "Usunąć ten rozdział i wszystkie jego strony? Tej operacji nie można cofnąć."
@@ -137,5 +168,24 @@
     "notFoundHint": "Taka strona nie istnieje. Zajrzyj do listy rozdziałów.",
     "offline": "Brak połączenia z serwerem. Wyświetlamy dostępne treści.",
     "forbidden": "Nie masz uprawnień do tej operacji."
+  },
+  "account": {
+    "title": "Twoje konto",
+    "emailSection": "E-mail",
+    "noEmail": "To konto nie ma adresu e-mail.",
+    "addEmail": "Dodaj e-mail",
+    "changeEmail": "Zmień e-mail",
+    "save": "Zapisz",
+    "emailUpdated": "E-mail zaktualizowany.",
+    "passwordSection": "Hasło",
+    "changePassword": "Zmień hasło",
+    "currentPassword": "Obecne hasło",
+    "newPassword": "Nowe hasło",
+    "passwordChanged": "Hasło zmienione.",
+    "signInMethods": "Sposób logowania",
+    "googleLinked": "Konto Google połączone",
+    "noPassword": "To konto loguje się przez Google i nie ma hasła.",
+    "usernameLabel": "Nazwa użytkownika",
+    "memberSince": "Konto od"
   }
 }

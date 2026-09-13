@@ -48,7 +48,7 @@ const limiter = (windowMs, max, code, message) =>
 /** Brute-force protection on credential endpoints. */
 export const authLimiter = limiter(
   15 * 60 * 1000,
-  20,
+  config.authRateLimit,
   'auth_rate_limited',
   'Too many attempts. Please wait a few minutes and try again.'
 );

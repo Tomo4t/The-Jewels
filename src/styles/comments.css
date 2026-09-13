@@ -171,3 +171,19 @@
     flex-wrap: wrap;
   }
 }
+
+/* A quiet marker that the author confirmed their address. Carries a title and
+   an aria-label because a bare tick means nothing on its own. */
+.comment-verified {
+  display: inline-grid;
+  place-items: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 999px;
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: help;
+}

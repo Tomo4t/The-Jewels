@@ -1,19 +1,33 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import config from '../config.js';
+import config, { absoluteUrl, googleEnabled, mailEnabled } from '../config.js';
 import { audit } from '../db.js';
 import { ApiError, asyncRoute } from '../middleware/errors.js';
 import { authLimiter } from '../middleware/security.js';
 import { attachUser, requireAuth, sessionCookieOptions } from '../middleware/auth.js';
+import { sendVerificationEmail } from '../services/email.js';
 import {
   USERNAME_RE,
+  EMAIL_RE,
   MIN_PASSWORD_LENGTH,
+  consumeOAuthState,
   countUsers,
+  createEmailToken,
+  createOAuthState,
   createSession,
   createUser,
   destroySession,
+  findByEmail,
+  findByGoogleSub,
+  findById,
   findByUsername,
-  toPublicUser,
+  linkGoogle,
+  markEmailVerified,
+  normaliseEmail,
+  redeemEmailToken,
+  setEmail,
+  suggestUsername,
+  toPrivateUser,
   verifyPassword,
 } from '../services/users.js';
 
@@ -26,6 +40,13 @@ const credentials = z.object({
     .regex(USERNAME_RE, '3–24 characters: letters, numbers, underscore or hyphen.'),
   password: z.string().min(MIN_PASSWORD_LENGTH, `At least ${MIN_PASSWORD_LENGTH} characters.`),
   displayName: z.string().trim().min(1).max(40).optional(),
+  email: z
+    .string()
+    .trim()
+    .max(254)
+    .regex(EMAIL_RE, 'That does not look like an email address.')
+    .optional()
+    .or(z.literal('')),
 });
 
 const parse = (schema, payload) => {
@@ -43,10 +64,15 @@ const parse = (schema, payload) => {
 router.get(
   '/me',
   asyncRoute(async (req, res) => {
+    const full = req.user ? findById(req.user.id) : null;
     res.json({
-      user: req.user,
+      user: full ? toPrivateUser(full) : null,
       registrationOpen: config.allowRegistration,
       moderationQueue: config.moderationQueue,
+      // The sign-in page hides what is not configured rather than offering a
+      // button that would only ever return an error.
+      googleSignIn: googleEnabled(),
+      emailVerification: mailEnabled(),
     });
   })
 );
@@ -59,22 +85,28 @@ router.post(
       throw ApiError.forbidden('registration_closed', 'New sign-ups are currently closed.');
     }
 
-    const { username, password, displayName } = parse(credentials, req.body);
+    const { username, password, displayName, email } = parse(credentials, req.body);
+    const address = normaliseEmail(email);
 
     if (findByUsername(username)) {
       throw ApiError.conflict('username_taken', 'That username is already taken.');
+    }
+    if (address && findByEmail(address)) {
+      throw ApiError.conflict('email_taken', 'That email is already on another account.');
     }
 
     // The very first account to exist becomes the administrator, so a fresh
     // deployment is usable without shell access.
     const role = countUsers() === 0 ? 'admin' : 'user';
 
-    const user = await createUser({ username, password, displayName, role });
+    const user = await createUser({ username, password, displayName, role, email: address });
     const token = createSession(user.id, req.get('user-agent'));
     res.cookie(config.sessionCookieName, token, sessionCookieOptions());
 
-    audit(user.id, 'user.register', 'user', user.id, { role });
-    res.status(201).json({ user: toPublicUser(user) });
+    audit(user.id, 'user.register', 'user', user.id, { role, email: Boolean(address) });
+
+    const verification = await startVerification(user);
+    res.status(201).json({ user: toPrivateUser(findById(user.id)), verification });
   })
 );
 
@@ -101,7 +133,7 @@ router.post(
 
     const token = createSession(user.id, req.get('user-agent'));
     res.cookie(config.sessionCookieName, token, sessionCookieOptions());
-    res.json({ user: toPublicUser(user) });
+    res.json({ user: toPrivateUser(user) });
   })
 );
 
@@ -143,6 +175,233 @@ router.post(
     res.cookie(config.sessionCookieName, token, sessionCookieOptions());
     audit(req.user.id, 'user.password_changed', 'user', req.user.id);
     res.json({ ok: true });
+  })
+);
+
+/**
+ * Issues a verification link and mails it.
+ *
+ * Never throws: an account with no address, or a mail provider having a bad
+ * afternoon, must not turn a successful registration into a failure. The return
+ * value tells the caller what actually happened so the UI can be honest about it.
+ */
+async function startVerification(user) {
+  if (!user.email) return { status: 'no_email' };
+  if (!mailEnabled()) return { status: 'not_configured' };
+
+  const token = createEmailToken(user.id, user.email);
+  const link = absoluteUrl(`/api/auth/verify?token=${encodeURIComponent(token)}`);
+  const result = await sendVerificationEmail({
+    to: user.email,
+    displayName: user.display_name,
+    link,
+  });
+  return { status: result.sent ? 'sent' : 'send_failed' };
+}
+
+/**
+ * Redeems a verification link.
+ *
+ * A GET the user reaches by clicking in their mail client, so it answers with a
+ * redirect into the app rather than JSON. Every failure lands on the same
+ * screen: the reasons are not usefully distinguishable to the person, and
+ * spelling them out would tell a stranger whether a token existed.
+ */
+router.get(
+  '/verify',
+  asyncRoute(async (req, res) => {
+    const user = redeemEmailToken(String(req.query.token || ''));
+    if (user) audit(user.id, 'user.email_verified', 'user', user.id);
+    res.redirect(302, absoluteUrl(`/#account?verified=${user ? '1' : '0'}`));
+  })
+);
+
+router.post(
+  '/verify/resend',
+  requireAuth,
+  authLimiter,
+  asyncRoute(async (req, res) => {
+    const user = findById(req.user.id);
+    if (!user.email) {
+      throw ApiError.badRequest('no_email', 'Add an email address first.');
+    }
+    if (user.email_verified_at) {
+      return res.json({ status: 'already_verified' });
+    }
+    const verification = await startVerification(user);
+    res.json(verification);
+  })
+);
+
+/** Set or change the address on the signed-in account. */
+router.put(
+  '/email',
+  requireAuth,
+  authLimiter,
+  asyncRoute(async (req, res) => {
+    const address = normaliseEmail(req.body?.email);
+    if (!address || !EMAIL_RE.test(address)) {
+      throw ApiError.badRequest('validation_failed', 'That does not look like an email address.', {
+        field: 'email',
+      });
+    }
+
+    const existing = findByEmail(address);
+    if (existing && existing.id !== req.user.id) {
+      throw ApiError.conflict('email_taken', 'That email is already on another account.');
+    }
+
+    setEmail(req.user.id, address);
+    audit(req.user.id, 'user.email_changed', 'user', req.user.id);
+
+    const verification = await startVerification(findById(req.user.id));
+    res.json({ user: toPrivateUser(findById(req.user.id)), verification });
+  })
+);
+
+// --- Google sign-in -------------------------------------------------------
+
+const GOOGLE_AUTH = 'https://accounts.google.com/o/oauth2/v2/auth';
+const GOOGLE_TOKEN = 'https://oauth2.googleapis.com/token';
+const GOOGLE_REDIRECT = () => absoluteUrl('/api/auth/google/callback');
+
+const requireGoogle = () => {
+  if (!googleEnabled()) {
+    throw ApiError.badRequest('google_not_configured', 'Google sign-in is not set up.');
+  }
+};
+
+router.get(
+  '/google',
+  authLimiter,
+  asyncRoute(async (req, res) => {
+    requireGoogle();
+    const state = createOAuthState(typeof req.query.next === 'string' ? req.query.next : null);
+
+    const url = new URL(GOOGLE_AUTH);
+    url.searchParams.set('client_id', config.google.clientId);
+    url.searchParams.set('redirect_uri', GOOGLE_REDIRECT());
+    url.searchParams.set('response_type', 'code');
+    url.searchParams.set('scope', 'openid email profile');
+    url.searchParams.set('state', state);
+    url.searchParams.set('prompt', 'select_account');
+    res.redirect(302, url.toString());
+  })
+);
+
+/**
+ * Reads the claims out of an ID token.
+ *
+ * The token arrived over TLS straight from Google's token endpoint, in exchange
+ * for our client secret, so the transport already establishes provenance and
+ * Google's own guidance allows skipping signature verification on this path.
+ * The registered claims are still checked, because those guard against a token
+ * minted for a different application or one that has expired.
+ */
+function claimsFromIdToken(idToken) {
+  const parts = String(idToken || '').split('.');
+  if (parts.length !== 3) return null;
+
+  let claims;
+  try {
+    claims = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+  } catch {
+    return null;
+  }
+
+  const issuers = ['accounts.google.com', 'https://accounts.google.com'];
+  if (!issuers.includes(claims.iss)) return null;
+  if (claims.aud !== config.google.clientId) return null;
+  if (!claims.exp || claims.exp * 1000 <= Date.now()) return null;
+  if (!claims.sub) return null;
+  return claims;
+}
+
+router.get(
+  '/google/callback',
+  authLimiter,
+  asyncRoute(async (req, res) => {
+    requireGoogle();
+
+    const fail = (reason) => res.redirect(302, absoluteUrl(`/#signin?google=${reason}`));
+
+    // The user pressed Cancel on Google's consent screen.
+    if (req.query.error) return fail('cancelled');
+
+    const stateRow = consumeOAuthState(String(req.query.state || ''));
+    if (!stateRow) return fail('expired');
+
+    const code = String(req.query.code || '');
+    if (!code) return fail('failed');
+
+    let tokens;
+    try {
+      const tokenRes = await fetch(GOOGLE_TOKEN, {
+        method: 'POST',
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          code,
+          client_id: config.google.clientId,
+          client_secret: config.google.clientSecret,
+          redirect_uri: GOOGLE_REDIRECT(),
+          grant_type: 'authorization_code',
+        }),
+        signal: AbortSignal.timeout(10000),
+      });
+      if (!tokenRes.ok) {
+        console.warn(`[google] token exchange returned ${tokenRes.status}`);
+        return fail('failed');
+      }
+      tokens = await tokenRes.json();
+    } catch (err) {
+      console.warn(`[google] token exchange failed: ${err.message}`);
+      return fail('failed');
+    }
+
+    const claims = claimsFromIdToken(tokens.id_token);
+    if (!claims) return fail('failed');
+
+    const email = normaliseEmail(claims.email);
+    const emailVerified = Boolean(claims.email_verified) && Boolean(email);
+
+    // 1. Known Google identity.
+    let user = findByGoogleSub(claims.sub);
+
+    // 2. An existing local account with the same address. Only ever linked when
+    //    Google says it verified that address -- otherwise anyone could claim
+    //    someone else's account by signing up to Google with their email.
+    if (!user && emailVerified) {
+      const byEmail = findByEmail(email);
+      if (byEmail) {
+        user = linkGoogle(byEmail.id, claims.sub);
+        if (!byEmail.email_verified_at) markEmailVerified(byEmail.id);
+        audit(user.id, 'user.google_linked', 'user', user.id);
+      }
+    }
+
+    // 3. Nobody yet: make an account. It has no password, so it can only ever
+    //    be reached back through Google.
+    if (!user) {
+      if (!config.allowRegistration) return fail('registration_closed');
+      const username = suggestUsername(claims.name || (email ? email.split('@')[0] : ''));
+      const role = countUsers() === 0 ? 'admin' : 'user';
+      user = await createUser({
+        username,
+        password: null,
+        displayName: claims.name || username,
+        role,
+        email: emailVerified ? email : null,
+        emailVerified,
+        googleSub: claims.sub,
+      });
+      audit(user.id, 'user.register', 'user', user.id, { role, via: 'google' });
+    }
+
+    if (user.status === 'banned') return fail('banned');
+
+    const token = createSession(user.id, req.get('user-agent'));
+    res.cookie(config.sessionCookieName, token, sessionCookieOptions());
+    res.redirect(302, absoluteUrl(stateRow.redirect_to || '/#home'));
   })
 );
 

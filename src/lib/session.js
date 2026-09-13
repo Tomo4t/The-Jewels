@@ -9,6 +9,8 @@ const state = {
   user: null,
   registrationOpen: true,
   moderationQueue: true,
+  googleSignIn: false,
+  emailVerification: false,
   loaded: false,
   apiAvailable: true,
 };
@@ -39,6 +41,17 @@ export const session = {
   get moderationQueue() {
     return state.moderationQueue;
   },
+  /** Whether the server has a Google client configured. */
+  get googleSignIn() {
+    return state.googleSignIn;
+  },
+  /** Whether the server can actually send a verification email. */
+  get emailVerification() {
+    return state.emailVerification;
+  },
+  get emailVerified() {
+    return Boolean(state.user?.emailVerified);
+  },
   get apiAvailable() {
     return state.apiAvailable;
   },
@@ -57,6 +70,8 @@ export const session = {
       state.user = data.user;
       state.registrationOpen = data.registrationOpen !== false;
       state.moderationQueue = data.moderationQueue !== false;
+      state.googleSignIn = data.googleSignIn === true;
+      state.emailVerification = data.emailVerification === true;
       state.apiAvailable = true;
     } catch {
       // No backend (static hosting, or the server is down). Reading still works.
@@ -82,7 +97,20 @@ export const session = {
     state.user = data.user;
     state.apiAvailable = true;
     emit();
-    return state.user;
+    // `verification` says whether a confirmation mail actually went out, so the
+    // page can promise an inbox check only when one is really on its way.
+    return { user: state.user, verification: data.verification };
+  },
+
+  async setEmail(email) {
+    const data = await api.setEmail(email);
+    state.user = data.user;
+    emit();
+    return data;
+  },
+
+  async resendVerification() {
+    return api.resendVerification();
   },
 
   async signOut() {

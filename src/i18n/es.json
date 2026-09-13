@@ -1,5 +1,10 @@
 {
-  "meta": { "code": "es", "name": "Español", "dir": "ltr", "locale": "es-ES" },
+  "meta": {
+    "code": "es",
+    "name": "Español",
+    "dir": "ltr",
+    "locale": "es-ES"
+  },
   "site": {
     "title": "The Jewels",
     "tagline": "Un webcómic original de Tomo",
@@ -57,7 +62,9 @@
     "notFound": "No se ha encontrado ese capítulo.",
     "fullscreenHint": "Toca dos veces una página para verla a pantalla completa"
   },
-  "contact": { "title": "Todas las redes oficiales del creador" },
+  "contact": {
+    "title": "Todas las redes oficiales del creador"
+  },
   "auth": {
     "signIn": "Iniciar sesión",
     "signUp": "Crear cuenta",
@@ -77,7 +84,26 @@
     "passwordMismatch": "Las contraseñas no coinciden.",
     "rateLimited": "Demasiados intentos. Espera un minuto e inténtalo de nuevo.",
     "welcome": "Bienvenido de nuevo, {name}.",
-    "accountCreated": "Cuenta creada. Ya has iniciado sesión."
+    "accountCreated": "Cuenta creada. Ya has iniciado sesión.",
+    "email": "Correo electrónico",
+    "emailOptional": "Correo electrónico (opcional)",
+    "emailHint": "Solo se usa para confirmar que la dirección es tuya. Añade una marca de verificado a tus comentarios.",
+    "emailTaken": "Ese correo ya pertenece a otra cuenta.",
+    "emailInvalid": "Eso no parece una dirección de correo.",
+    "orDivider": "o",
+    "continueWithGoogle": "Continuar con Google",
+    "verified": "Verificado",
+    "unverified": "Sin confirmar",
+    "verifySent": "Revisa tu bandeja de entrada: te enviamos un enlace de confirmación.",
+    "verifySendFailed": "No se pudo enviar el correo de confirmación. Puedes reintentarlo desde tu cuenta.",
+    "verifySuccess": "Correo confirmado.",
+    "verifyFailed": "Ese enlace de confirmación no es válido o ha caducado.",
+    "resendVerification": "Reenviar confirmación",
+    "alreadyVerified": "Esa dirección ya está confirmada.",
+    "googleCancelled": "Se canceló el inicio de sesión con Google.",
+    "googleExpired": "Ese intento de inicio de sesión caducó. Inténtalo de nuevo.",
+    "googleFailed": "El inicio de sesión con Google no funcionó. Inténtalo de nuevo.",
+    "accountBanned": "Esta cuenta ha sido suspendida."
   },
   "comments": {
     "title": "Comentarios",
@@ -100,7 +126,8 @@
     "loadMore": "Cargar más comentarios",
     "author": "Autor",
     "moderator": "Moderador",
-    "admin": "Administrador"
+    "admin": "Administrador",
+    "verifiedBadge": "Correo verificado"
   },
   "admin": {
     "title": "Panel de administración",
@@ -127,7 +154,11 @@
     "reject": "Rechazar",
     "flagReason": "Marcado: {reason}",
     "role": "Rol",
-    "roles": { "user": "Usuario", "moderator": "Moderador", "admin": "Administrador" },
+    "roles": {
+      "user": "Usuario",
+      "moderator": "Moderador",
+      "admin": "Administrador"
+    },
     "banUser": "Bloquear",
     "unbanUser": "Desbloquear",
     "confirmDeleteChapter": "¿Eliminar este capítulo y todas sus páginas? No se puede deshacer."
@@ -137,5 +168,24 @@
     "notFoundHint": "Esa página no existe. Prueba con la lista de capítulos.",
     "offline": "No se puede contactar con el servidor. Se muestra lo que está disponible.",
     "forbidden": "No tienes permiso para hacer eso."
+  },
+  "account": {
+    "title": "Tu cuenta",
+    "emailSection": "Correo electrónico",
+    "noEmail": "Esta cuenta no tiene correo electrónico.",
+    "addEmail": "Añadir correo",
+    "changeEmail": "Cambiar correo",
+    "save": "Guardar",
+    "emailUpdated": "Correo actualizado.",
+    "passwordSection": "Contraseña",
+    "changePassword": "Cambiar contraseña",
+    "currentPassword": "Contraseña actual",
+    "newPassword": "Nueva contraseña",
+    "passwordChanged": "Contraseña cambiada.",
+    "signInMethods": "Cómo inicias sesión",
+    "googleLinked": "Cuenta de Google vinculada",
+    "noPassword": "Esta cuenta inicia sesión con Google y no tiene contraseña.",
+    "usernameLabel": "Nombre de usuario",
+    "memberSince": "Miembro desde"
   }
 }

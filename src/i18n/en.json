@@ -84,7 +84,26 @@
     "passwordMismatch": "The two passwords do not match.",
     "rateLimited": "Too many attempts. Please wait a minute and try again.",
     "welcome": "Welcome back, {name}.",
-    "accountCreated": "Account created. You are signed in."
+    "accountCreated": "Account created. You are signed in.",
+    "email": "Email",
+    "emailOptional": "Email (optional)",
+    "emailHint": "Only used to confirm the address is yours. It earns a verified marker on your comments.",
+    "emailTaken": "That email is already on another account.",
+    "emailInvalid": "That does not look like an email address.",
+    "orDivider": "or",
+    "continueWithGoogle": "Continue with Google",
+    "verified": "Verified",
+    "unverified": "Not confirmed",
+    "verifySent": "Check your inbox for a confirmation link.",
+    "verifySendFailed": "The confirmation email could not be sent. You can try again from your account page.",
+    "verifySuccess": "Email confirmed.",
+    "verifyFailed": "That confirmation link is invalid or has expired.",
+    "resendVerification": "Resend confirmation",
+    "alreadyVerified": "That address is already confirmed.",
+    "googleCancelled": "Google sign-in was cancelled.",
+    "googleExpired": "That sign-in attempt expired. Please try again.",
+    "googleFailed": "Google sign-in did not work. Please try again.",
+    "accountBanned": "This account has been suspended."
   },
   "comments": {
     "title": "Comments",
@@ -107,7 +126,8 @@
     "loadMore": "Load more comments",
     "author": "Author",
     "moderator": "Moderator",
-    "admin": "Admin"
+    "admin": "Admin",
+    "verifiedBadge": "Verified email"
   },
   "admin": {
     "title": "Admin panel",
@@ -148,5 +168,24 @@
     "notFoundHint": "That page does not exist. Try the chapter list.",
     "offline": "Cannot reach the server. Showing what is available.",
     "forbidden": "You do not have permission to do that."
+  },
+  "account": {
+    "title": "Your account",
+    "emailSection": "Email",
+    "noEmail": "No email address on this account.",
+    "addEmail": "Add an email",
+    "changeEmail": "Change email",
+    "save": "Save",
+    "emailUpdated": "Email updated.",
+    "passwordSection": "Password",
+    "changePassword": "Change password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "passwordChanged": "Password changed.",
+    "signInMethods": "How you sign in",
+    "googleLinked": "Google account linked",
+    "noPassword": "This account signs in with Google and has no password.",
+    "usernameLabel": "Username",
+    "memberSince": "Member since"
   }
 }

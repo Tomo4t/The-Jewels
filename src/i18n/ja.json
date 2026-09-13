@@ -84,7 +84,26 @@
     "passwordMismatch": "パスワードが一致しません。",
     "rateLimited": "試行回数が多すぎます。しばらく待ってからお試しください。",
     "welcome": "おかえりなさい、{name} さん。",
-    "accountCreated": "アカウントを作成し、ログインしました。"
+    "accountCreated": "アカウントを作成し、ログインしました。",
+    "email": "メールアドレス",
+    "emailOptional": "メールアドレス（任意）",
+    "emailHint": "本人確認にのみ使用します。コメントに認証済みマークが付きます。",
+    "emailTaken": "そのメールアドレスは別のアカウントで使用されています。",
+    "emailInvalid": "メールアドレスの形式が正しくありません。",
+    "orDivider": "または",
+    "continueWithGoogle": "Google で続行",
+    "verified": "認証済み",
+    "unverified": "未確認",
+    "verifySent": "確認リンクを送信しました。受信トレイをご確認ください。",
+    "verifySendFailed": "確認メールを送信できませんでした。アカウントページから再試行できます。",
+    "verifySuccess": "メールアドレスを確認しました。",
+    "verifyFailed": "この確認リンクは無効か、有効期限が切れています。",
+    "resendVerification": "確認メールを再送",
+    "alreadyVerified": "このアドレスは確認済みです。",
+    "googleCancelled": "Google ログインがキャンセルされました。",
+    "googleExpired": "ログインの試行が期限切れになりました。もう一度お試しください。",
+    "googleFailed": "Google ログインに失敗しました。もう一度お試しください。",
+    "accountBanned": "このアカウントは停止されています。"
   },
   "comments": {
     "title": "コメント",
@@ -107,7 +126,8 @@
     "loadMore": "コメントをもっと見る",
     "author": "作者",
     "moderator": "モデレーター",
-    "admin": "管理者"
+    "admin": "管理者",
+    "verifiedBadge": "メール認証済み"
   },
   "admin": {
     "title": "管理画面",
@@ -148,5 +168,24 @@
     "notFoundHint": "そのページは存在しません。章一覧をご覧ください。",
     "offline": "サーバーに接続できません。利用可能な内容を表示しています。",
     "forbidden": "この操作を行う権限がありません。"
+  },
+  "account": {
+    "title": "アカウント",
+    "emailSection": "メールアドレス",
+    "noEmail": "このアカウントにメールアドレスは登録されていません。",
+    "addEmail": "メールアドレスを追加",
+    "changeEmail": "メールアドレスを変更",
+    "save": "保存",
+    "emailUpdated": "メールアドレスを更新しました。",
+    "passwordSection": "パスワード",
+    "changePassword": "パスワードを変更",
+    "currentPassword": "現在のパスワード",
+    "newPassword": "新しいパスワード",
+    "passwordChanged": "パスワードを変更しました。",
+    "signInMethods": "ログイン方法",
+    "googleLinked": "Google アカウント連携済み",
+    "noPassword": "このアカウントは Google でログインするため、パスワードはありません。",
+    "usernameLabel": "ユーザー名",
+    "memberSince": "登録日"
   }
 }

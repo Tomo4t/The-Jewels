@@ -7,7 +7,7 @@ const SELECT = `
   SELECT c.id, c.lang, c.chapter, c.parent_id, c.user_id, c.body, c.status,
          c.flag_reason, c.flag_score, c.flag_source, c.edited,
          c.created_at, c.updated_at,
-         u.username, u.display_name, u.role
+         u.username, u.display_name, u.role, u.email_verified_at
   FROM comments c
   JOIN users u ON u.id = c.user_id
 `;
@@ -35,6 +35,7 @@ export function present(row, viewer) {
       username: row.username,
       displayName: row.display_name,
       role: row.role,
+      emailVerified: Boolean(row.email_verified_at),
     },
     canEdit: own && row.status !== 'deleted' && withinEditWindow(row),
     canDelete: (own || mod) && row.status !== 'deleted',

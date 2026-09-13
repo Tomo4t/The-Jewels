@@ -1,5 +1,10 @@
 {
-  "meta": { "code": "fr", "name": "Français", "dir": "ltr", "locale": "fr-FR" },
+  "meta": {
+    "code": "fr",
+    "name": "Français",
+    "dir": "ltr",
+    "locale": "fr-FR"
+  },
   "site": {
     "title": "The Jewels",
     "tagline": "Une bande dessinée en ligne originale de Tomo",
@@ -57,7 +62,9 @@
     "notFound": "Ce chapitre est introuvable.",
     "fullscreenHint": "Touchez deux fois une page pour le plein écran"
   },
-  "contact": { "title": "Tous les réseaux officiels du créateur" },
+  "contact": {
+    "title": "Tous les réseaux officiels du créateur"
+  },
   "auth": {
     "signIn": "Se connecter",
     "signUp": "Créer un compte",
@@ -77,7 +84,26 @@
     "passwordMismatch": "Les deux mots de passe ne correspondent pas.",
     "rateLimited": "Trop de tentatives. Patientez une minute avant de réessayer.",
     "welcome": "Bon retour, {name}.",
-    "accountCreated": "Compte créé. Vous êtes connecté."
+    "accountCreated": "Compte créé. Vous êtes connecté.",
+    "email": "E-mail",
+    "emailOptional": "E-mail (facultatif)",
+    "emailHint": "Sert uniquement à confirmer que l'adresse est la vôtre. Elle ajoute une mention vérifiée à vos commentaires.",
+    "emailTaken": "Cet e-mail appartient déjà à un autre compte.",
+    "emailInvalid": "Cela ne ressemble pas à une adresse e-mail.",
+    "orDivider": "ou",
+    "continueWithGoogle": "Continuer avec Google",
+    "verified": "Vérifié",
+    "unverified": "Non confirmé",
+    "verifySent": "Consultez votre boîte de réception : un lien de confirmation vous a été envoyé.",
+    "verifySendFailed": "L'e-mail de confirmation n'a pas pu être envoyé. Réessayez depuis votre compte.",
+    "verifySuccess": "E-mail confirmé.",
+    "verifyFailed": "Ce lien de confirmation est invalide ou a expiré.",
+    "resendVerification": "Renvoyer la confirmation",
+    "alreadyVerified": "Cette adresse est déjà confirmée.",
+    "googleCancelled": "La connexion Google a été annulée.",
+    "googleExpired": "Cette tentative de connexion a expiré. Veuillez réessayer.",
+    "googleFailed": "La connexion Google n'a pas fonctionné. Veuillez réessayer.",
+    "accountBanned": "Ce compte a été suspendu."
   },
   "comments": {
     "title": "Commentaires",
@@ -100,7 +126,8 @@
     "loadMore": "Charger plus de commentaires",
     "author": "Auteur",
     "moderator": "Modérateur",
-    "admin": "Administrateur"
+    "admin": "Administrateur",
+    "verifiedBadge": "E-mail vérifié"
   },
   "admin": {
     "title": "Panneau d’administration",
@@ -127,7 +154,11 @@
     "reject": "Rejeter",
     "flagReason": "Signalé : {reason}",
     "role": "Rôle",
-    "roles": { "user": "Utilisateur", "moderator": "Modérateur", "admin": "Administrateur" },
+    "roles": {
+      "user": "Utilisateur",
+      "moderator": "Modérateur",
+      "admin": "Administrateur"
+    },
     "banUser": "Bannir",
     "unbanUser": "Réintégrer",
     "confirmDeleteChapter": "Supprimer ce chapitre et toutes ses pages ? Cette action est irréversible."
@@ -137,5 +168,24 @@
     "notFoundHint": "Cette page n’existe pas. Essayez la liste des chapitres.",
     "offline": "Impossible de joindre le serveur. Affichage du contenu disponible.",
     "forbidden": "Vous n’avez pas la permission de faire cela."
+  },
+  "account": {
+    "title": "Votre compte",
+    "emailSection": "E-mail",
+    "noEmail": "Aucune adresse e-mail sur ce compte.",
+    "addEmail": "Ajouter un e-mail",
+    "changeEmail": "Changer d'e-mail",
+    "save": "Enregistrer",
+    "emailUpdated": "E-mail mis à jour.",
+    "passwordSection": "Mot de passe",
+    "changePassword": "Changer de mot de passe",
+    "currentPassword": "Mot de passe actuel",
+    "newPassword": "Nouveau mot de passe",
+    "passwordChanged": "Mot de passe modifié.",
+    "signInMethods": "Comment vous vous connectez",
+    "googleLinked": "Compte Google lié",
+    "noPassword": "Ce compte se connecte avec Google et n'a pas de mot de passe.",
+    "usernameLabel": "Nom d'utilisateur",
+    "memberSince": "Membre depuis"
   }
 }

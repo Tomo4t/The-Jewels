@@ -192,6 +192,13 @@ function header(comment) {
     }),
     badge &&
       el('span', { class: `comment-badge comment-badge--${comment.author.role}`, text: badge }),
+    comment.author.emailVerified &&
+      el('span', {
+        class: 'comment-verified',
+        title: t('comments.verifiedBadge'),
+        'aria-label': t('comments.verifiedBadge'),
+        text: '\u2713',
+      }),
     el('time', {
       class: 'comment-time',
       datetime: comment.createdAt,

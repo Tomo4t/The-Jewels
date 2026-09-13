@@ -14,6 +14,7 @@ registerRoute('reader', () => import('./pages/reader.js'));
 registerRoute('contact', () => import('./pages/contact.js'));
 registerRoute('signin', () => import('./pages/auth.js').then((m) => m.signIn));
 registerRoute('signup', () => import('./pages/auth.js').then((m) => m.signUp));
+registerRoute('account', () => import('./pages/account.js'));
 registerRoute('notFound', () => import('./pages/notFound.js'));
 
 async function bootstrap() {

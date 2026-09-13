@@ -40,6 +40,9 @@ process.env.SESSION_SECRET = 'test-secret-that-is-definitely-long-enough-for-tes
 process.env.MODERATION_QUEUE = 'true';
 process.env.ALLOW_REGISTRATION = 'true';
 process.env.ANTHROPIC_API_KEY = '';
+// The credential limiter is real and works; the suite simply makes more auth
+// calls than a production budget allows, so it is raised rather than bypassed.
+process.env.AUTH_RATE_LIMIT = '500';
 
 let server;
 let base;
@@ -54,7 +57,11 @@ const makeClient = () => {
       headers['content-type'] = 'application/json';
     }
 
-    const res = await fetch(`${base}${path}`, { ...options, headers });
+    const res = await fetch(`${base}${path}`, {
+      redirect: 'manual',
+      ...options,
+      headers,
+    });
     const setCookie = res.headers.getSetCookie?.() || [];
     for (const entry of setCookie) {
       const [pair] = entry.split(';');
@@ -68,7 +75,7 @@ const makeClient = () => {
     } catch {
       json = { raw: text };
     }
-    return { status: res.status, body: json };
+    return { status: res.status, body: json, location: res.headers.get('location') };
   };
 };
 
@@ -446,5 +453,135 @@ describe('admin', () => {
   test('path traversal in a language is refused', async () => {
     const { status } = await asAdmin('/api/admin/chapters/..%2F..%2Fetc/1', { method: 'DELETE' });
     assert.ok(status === 400 || status === 404, `expected 400/404, got ${status}`);
+  });
+});
+
+describe('email and identity', () => {
+  test('/me reports the features that are actually configured', async () => {
+    const client = makeClient();
+    const { body } = await client('/api/auth/me');
+    // Neither RESEND_API_KEY nor a Google client is set in the test environment,
+    // so both must read false rather than being assumed on.
+    assert.equal(body.googleSignIn, false);
+    assert.equal(body.emailVerification, false);
+  });
+
+  test('an account can be created with an email and starts unverified', async () => {
+    const client = makeClient();
+    const { status, body } = await client('/api/auth/register', {
+      method: 'POST',
+      body: json({
+        username: 'mailer-one',
+        password: 'a-long-enough-password',
+        email: 'Mailer.One@Example.COM',
+      }),
+    });
+    assert.equal(status, 201);
+    assert.equal(body.user.emailVerified, false);
+    // Addresses are stored lowercased so lookups and uniqueness agree.
+    assert.equal(body.user.email, 'mailer.one@example.com');
+    // No mail provider is configured, so nothing was claimed to have been sent.
+    assert.equal(body.verification.status, 'not_configured');
+  });
+
+  test('a malformed email is refused', async () => {
+    const client = makeClient();
+    const { status, body } = await client('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'mailer-bad', password: 'a-long-enough-password', email: 'nope' }),
+    });
+    assert.equal(status, 400);
+    assert.equal(body.error.code, 'validation_failed');
+  });
+
+  test('an address already in use is refused, case-insensitively', async () => {
+    const client = makeClient();
+    const { status, body } = await client('/api/auth/register', {
+      method: 'POST',
+      body: json({
+        username: 'mailer-two',
+        password: 'a-long-enough-password',
+        email: 'MAILER.ONE@example.com',
+      }),
+    });
+    assert.equal(status, 409);
+    assert.equal(body.error.code, 'email_taken');
+  });
+
+  test('registering without an email still works', async () => {
+    const client = makeClient();
+    const { status, body } = await client('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'no-mail', password: 'a-long-enough-password' }),
+    });
+    assert.equal(status, 201);
+    assert.equal(body.user.email, null);
+    assert.equal(body.verification.status, 'no_email');
+  });
+
+  test('changing the address needs a session', async () => {
+    const client = makeClient();
+    const { status } = await client('/api/auth/email', {
+      method: 'PUT',
+      body: json({ email: 'someone@example.com' }),
+    });
+    assert.equal(status, 401);
+  });
+
+  test('the owner can set an address, and it lands unverified', async () => {
+    const client = makeClient();
+    await client('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'setter', password: 'a-long-enough-password' }),
+    });
+
+    const { status, body } = await client('/api/auth/email', {
+      method: 'PUT',
+      body: json({ email: 'setter@example.com' }),
+    });
+    assert.equal(status, 200);
+    assert.equal(body.user.email, 'setter@example.com');
+    assert.equal(body.user.emailVerified, false);
+  });
+
+  test('an address belonging to someone else is refused', async () => {
+    const client = makeClient();
+    await client('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'thief', password: 'a-long-enough-password' }),
+    });
+
+    const { status, body } = await client('/api/auth/email', {
+      method: 'PUT',
+      body: json({ email: 'setter@example.com' }),
+    });
+    assert.equal(status, 409);
+    assert.equal(body.error.code, 'email_taken');
+  });
+
+  test('a bogus verification link redirects as a failure rather than erroring', async () => {
+    const client = makeClient();
+    const { status, location } = await client('/api/auth/verify?token=not-a-real-token-at-all');
+    assert.equal(status, 302);
+    assert.match(location, /verified=0/);
+  });
+
+  test('resending needs an address on the account', async () => {
+    const client = makeClient();
+    await client('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'resender', password: 'a-long-enough-password' }),
+    });
+
+    const { status, body } = await client('/api/auth/verify/resend', { method: 'POST' });
+    assert.equal(status, 400);
+    assert.equal(body.error.code, 'no_email');
+  });
+
+  test('Google sign-in reports itself unconfigured rather than half-working', async () => {
+    const client = makeClient();
+    const { status, body } = await client('/api/auth/google');
+    assert.equal(status, 400);
+    assert.equal(body.error.code, 'google_not_configured');
   });
 });

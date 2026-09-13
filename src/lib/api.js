@@ -190,6 +190,10 @@ export const api = {
     request('/api/auth/login', { method: 'POST', body: { username, password } }),
   register: (payload) => request('/api/auth/register', { method: 'POST', body: payload }),
   logout: () => request('/api/auth/logout', { method: 'POST' }),
+  setEmail: (email) => request('/api/auth/email', { method: 'PUT', body: { email } }),
+  resendVerification: () => request('/api/auth/verify/resend', { method: 'POST' }),
+  changePassword: (currentPassword, newPassword) =>
+    request('/api/auth/password', { method: 'POST', body: { currentPassword, newPassword } }),
 
   // comments
   comments: (lang, chapter) =>

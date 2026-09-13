@@ -39,3 +39,163 @@
     padding: var(--space-5) var(--space-4);
   }
 }
+
+/* --- Google sign-in ------------------------------------------------------- */
+
+/* Google's brand guidance fixes these colours, so they are literals rather than
+   tokens: a white button with #1f1f1f text in light, #131314 with #e3e3e3 in
+   dark. Both pass AA against their own surface. */
+.button--google {
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  border-color: #747775;
+  background: #fff;
+  color: #1f1f1f;
+  text-decoration: none;
+}
+
+.button--google:hover:not(:disabled) {
+  border-color: #747775;
+  background: #f7f8f8;
+}
+
+html.dark .button--google {
+  border-color: #8e918f;
+  background: #131314;
+  color: #e3e3e3;
+}
+
+html.dark .button--google:hover:not(:disabled) {
+  border-color: #8e918f;
+  background: #1e1f20;
+}
+
+.google-mark {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex: 0 0 auto;
+}
+
+/* --- "or" rule between the two sign-in routes ----------------------------- */
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-4);
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* --- account page --------------------------------------------------------- */
+
+.account-page {
+  max-width: 34rem;
+  margin: clamp(var(--space-5), 6vh, 3.5rem) auto;
+  padding-inline: var(--space-4);
+}
+
+.account-page > h1 {
+  margin: 0 0 var(--space-5);
+  font-size: 1.5rem;
+  color: var(--color-text);
+}
+
+.account-section {
+  margin-bottom: var(--space-5);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-raised);
+}
+
+.account-section h2 {
+  margin: 0 0 var(--space-4);
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.account-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+}
+
+.account-facts dt {
+  margin-bottom: var(--space-1);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.account-facts dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.account-email {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-4);
+}
+
+.account-email-address {
+  font-weight: 600;
+  word-break: break-all;
+  color: var(--color-text);
+}
+
+.account-note {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.account-form {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+/* --- verification markers -------------------------------------------------- */
+
+.verify-badge {
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.verify-badge.is-verified {
+  border-color: color-mix(in srgb, var(--color-success) 45%, transparent);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+@media (max-width: 480px) {
+  .account-section {
+    padding: var(--space-4);
+  }
+}

@@ -167,7 +167,13 @@ export function updateNavbar() {
   });
 
   const account = $('#account-action');
+  const accountLink = $('#account-link');
   const adminLink = $('#admin-link');
+
+  if (accountLink) {
+    accountLink.hidden = !session.apiAvailable || !session.isSignedIn;
+    accountLink.textContent = t('nav.account');
+  }
 
   if (account) {
     if (!session.apiAvailable) {

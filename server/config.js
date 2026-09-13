@@ -50,11 +50,30 @@ export const config = {
   sessionCookieName: 'jewels_session',
   sessionTtlDays: int(process.env.SESSION_TTL_DAYS, 30),
 
+  // Attempts allowed per 15 minutes on the credential endpoints. Configurable so
+  // the test suite can exercise those routes freely without tripping it.
+  authRateLimit: int(process.env.AUTH_RATE_LIMIT, 20),
+
   allowRegistration: bool(process.env.ALLOW_REGISTRATION, true),
   moderationQueue: bool(process.env.MODERATION_QUEUE, true),
 
   anthropicApiKey: (process.env.ANTHROPIC_API_KEY || '').trim(),
   moderationModel: (process.env.MODERATION_MODEL || 'claude-haiku-4-5').trim(),
+
+  // Outbound email. Without a key nothing is sent and verification simply never
+  // starts -- accounts still work, they just stay unverified.
+  mail: {
+    resendApiKey: (process.env.RESEND_API_KEY || '').trim(),
+    from: (process.env.MAIL_FROM || 'The Jewels <onboarding@resend.dev>').trim(),
+    verifyTtlHours: int(process.env.EMAIL_VERIFY_TTL_HOURS, 48),
+  },
+
+  // Google sign-in. Without both halves the button stays hidden and the routes
+  // report that it is not configured, rather than half-working.
+  google: {
+    clientId: (process.env.GOOGLE_CLIENT_ID || '').trim(),
+    clientSecret: (process.env.GOOGLE_CLIENT_SECRET || '').trim(),
+  },
 
   // Content rules
   languages: ['en', 'ja', 'pl', 'es', 'fr'],
@@ -71,6 +90,16 @@ export const config = {
     allowedMime: ['image/jpeg', 'image/png', 'image/webp'],
   },
 };
+
+/** True when outbound email is configured well enough to send anything. */
+export const mailEnabled = () => Boolean(config.mail.resendApiKey);
+
+/** True when both halves of the Google OAuth client are present. */
+export const googleEnabled = () => Boolean(config.google.clientId && config.google.clientSecret);
+
+/** Absolute URL on the public site. */
+export const absoluteUrl = (path) =>
+  `${config.publicOrigin.replace(/\/+$/, '')}${path.startsWith('/') ? path : `/${path}`}`;
 
 /**
  * Origins the API will accept state-changing requests from.
