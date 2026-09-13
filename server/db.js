@@ -100,8 +100,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email
 CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google
   ON users(google_sub) WHERE google_sub IS NOT NULL;
 
--- Verification links. Only the SHA-256 of the token is stored, so a leaked
--- database cannot be replayed as a set of live verification links.
+-- Verification and password-reset links. Only the SHA-256 of the token is
+-- stored, so a leaked database cannot be replayed as a set of live links.
 CREATE TABLE IF NOT EXISTS email_tokens (
   token_hash  TEXT    PRIMARY KEY,
   user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -112,6 +112,16 @@ CREATE TABLE IF NOT EXISTS email_tokens (
 );
 CREATE INDEX IF NOT EXISTS idx_email_tokens_user ON email_tokens(user_id);
 
+-- Settings an administrator can change while the site is running. Anything
+-- absent here falls back to the environment, so a fresh deployment behaves
+-- exactly as its configuration says until somebody changes something.
+CREATE TABLE IF NOT EXISTS settings (
+  key        TEXT PRIMARY KEY,
+  value      TEXT NOT NULL,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_by INTEGER REFERENCES users(id) ON DELETE SET NULL
+);
+
 -- Short-lived CSRF state for the OAuth round trip.
 CREATE TABLE IF NOT EXISTS oauth_states (
   state       TEXT    PRIMARY KEY,
@@ -120,6 +130,11 @@ CREATE TABLE IF NOT EXISTS oauth_states (
   expires_at  TEXT    NOT NULL
 );
 `);
+
+// The token table shipped carrying verification links only. Reset links share
+// it, so rows need to say which they are; everything already stored is a
+// verification link.
+addColumn('email_tokens', 'purpose', "TEXT NOT NULL DEFAULT 'verify'");
 
 /** Remove expired sessions. Cheap enough to run on boot and on a timer. */
 export function pruneSessions() {

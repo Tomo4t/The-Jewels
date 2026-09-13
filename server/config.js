@@ -56,6 +56,9 @@ export const config = {
 
   allowRegistration: bool(process.env.ALLOW_REGISTRATION, true),
   moderationQueue: bool(process.env.MODERATION_QUEUE, true),
+  // Starting default only; an administrator can change this at runtime and the
+  // stored value wins from then on.
+  requireVerifiedEmail: bool(process.env.REQUIRE_VERIFIED_EMAIL, true),
 
   anthropicApiKey: (process.env.ANTHROPIC_API_KEY || '').trim(),
   moderationModel: (process.env.MODERATION_MODEL || 'claude-haiku-4-5').trim(),
@@ -66,6 +69,9 @@ export const config = {
     resendApiKey: (process.env.RESEND_API_KEY || '').trim(),
     from: (process.env.MAIL_FROM || 'The Jewels <onboarding@resend.dev>').trim(),
     verifyTtlHours: int(process.env.EMAIL_VERIFY_TTL_HOURS, 48),
+    // Reset links are far more dangerous than verification links if they leak
+    // from an inbox, so they live for hours rather than days.
+    resetTtlHours: int(process.env.PASSWORD_RESET_TTL_HOURS, 2),
   },
 
   // Google sign-in. Without both halves the button stays hidden and the routes

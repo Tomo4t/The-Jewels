@@ -7,6 +7,8 @@ import { requireAuth, requireRole, isModerator } from '../middleware/auth.js';
 import { assertLanguage, assertChapterNumber, readChapterMeta } from '../services/content.js';
 import { screenComment } from '../services/moderation.js';
 import * as comments from '../services/comments.js';
+import { getSetting } from '../services/settings.js';
+import { findById } from '../services/users.js';
 
 const router = Router();
 
@@ -42,6 +44,27 @@ router.get(
   })
 );
 
+/**
+ * GET /api/comments/mine
+ *
+ * Everything the signed-in user has written, newest first, including the ones
+ * still waiting on a moderator -- the point of the profile page is being able
+ * to see what has and has not gone live.
+ */
+router.get(
+  '/mine',
+  requireAuth,
+  asyncRoute(async (req, res) => {
+    const limit = Math.min(Math.max(Number(req.query.limit) || 50, 1), 100);
+    const offset = Math.max(Number(req.query.offset) || 0, 0);
+    const { rows, total } = comments.listForUser(req.user.id, { limit, offset });
+    res.json({
+      total,
+      comments: rows.map((row) => comments.present(row, req.user)),
+    });
+  })
+);
+
 /** POST /api/comments */
 router.post(
   '/',
@@ -54,6 +77,18 @@ router.post(
 
     if (!(await readChapterMeta(lang, chapter))) {
       throw ApiError.notFound('chapter_not_found', 'That chapter does not exist.');
+    }
+
+    // Posting can be held behind a confirmed address. Reading never is, and
+    // moderators are exempt so a site cannot lock out the people who run it.
+    if (getSetting('requireVerifiedEmail') && !isModerator(req.user)) {
+      const me = findById(req.user.id);
+      if (!me?.email_verified_at) {
+        throw ApiError.forbidden(
+          'email_not_verified',
+          'Confirm your email address before posting a comment.'
+        );
+      }
     }
 
     let parentId = null;

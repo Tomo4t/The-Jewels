@@ -8,6 +8,7 @@ import db, { audit } from '../db.js';
 import { ApiError, asyncRoute } from '../middleware/errors.js';
 import { uploadLimiter } from '../middleware/security.js';
 import { requireRole } from '../middleware/auth.js';
+import { DEFINITIONS, allSettings, setSetting } from '../services/settings.js';
 import {
   assertChapterNumber,
   assertInsideContent,
@@ -305,6 +306,55 @@ router.get(
       )
       .all(limit);
     res.json({ entries: rows });
+  })
+);
+
+// --- runtime settings -------------------------------------------------------
+
+/**
+ * GET /api/admin/settings
+ *
+ * Each setting reports where its current value came from, so it is obvious
+ * whether a site is running on what its .env says or on something an
+ * administrator changed afterwards.
+ */
+router.get(
+  '/settings',
+  requireRole('admin'),
+  asyncRoute(async (_req, res) => {
+    res.json({ settings: allSettings() });
+  })
+);
+
+/** PATCH /api/admin/settings  { key: value, ... } */
+router.patch(
+  '/settings',
+  requireRole('admin'),
+  asyncRoute(async (req, res) => {
+    const payload = req.body && typeof req.body === 'object' ? req.body : {};
+    const keys = Object.keys(payload);
+
+    if (!keys.length) {
+      throw ApiError.badRequest('no_changes', 'No settings were supplied.');
+    }
+
+    const unknown = keys.filter((key) => !DEFINITIONS[key]);
+    if (unknown.length) {
+      throw ApiError.badRequest('unknown_setting', `Not a setting: ${unknown.join(', ')}.`);
+    }
+
+    for (const key of keys) {
+      const definition = DEFINITIONS[key];
+      const raw = payload[key];
+      if (definition.type === 'boolean' && typeof raw !== 'boolean') {
+        throw ApiError.badRequest('validation_failed', `${key} must be true or false.`, {
+          field: key,
+        });
+      }
+      setSetting(key, raw, req.user.id);
+    }
+
+    res.json({ settings: allSettings() });
   })
 );
 

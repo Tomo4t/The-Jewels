@@ -87,4 +87,45 @@ export function sendVerificationEmail({ to, displayName, link }) {
   return send({ to, subject: 'Confirm your email · The Jewels', html, text });
 }
 
-export default { sendVerificationEmail };
+/** Sent when somebody asks to reset a forgotten password. */
+export function sendPasswordResetEmail({ to, displayName, link }) {
+  const name = displayName || 'there';
+  const hours = config.mail.resetTtlHours;
+
+  const text = [
+    `Hi ${name},`,
+    '',
+    'Use this link to set a new password for your account at The Jewels:',
+    '',
+    link,
+    '',
+    `The link works for ${hours} hours and can only be used once.`,
+    'If you did not ask for this, ignore it -- your password has not changed.',
+  ].join('\n');
+
+  const html = `<!doctype html>
+<html><body style="margin:0;padding:24px;background:#fdf9ef;font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#2c1e00">
+  <div style="max-width:34rem;margin:0 auto;background:#fffdf8;border:1px solid #e0d5bd;border-radius:12px;padding:28px">
+    <p style="margin:0 0 1rem">Hi ${escapeHTML(name)},</p>
+    <p style="margin:0 0 1.4rem">Use this link to set a new password for your account at The&nbsp;Jewels.</p>
+    <p style="margin:0 0 1.4rem">
+      <a href="${escapeHTML(link)}"
+         style="display:inline-block;background:#d4af37;color:#2c1e00;font-weight:600;text-decoration:none;padding:12px 22px;border-radius:8px">
+        Set a new password
+      </a>
+    </p>
+    <p style="margin:0 0 1rem;font-size:.9rem;color:#7a5f30">
+      Or paste this into your browser:<br>
+      <span style="word-break:break-all">${escapeHTML(link)}</span>
+    </p>
+    <p style="margin:0;font-size:.9rem;color:#7a5f30">
+      The link works for ${hours} hours and can only be used once. If you did not
+      ask for this, ignore it &mdash; your password has not changed.
+    </p>
+  </div>
+</body></html>`;
+
+  return send({ to, subject: 'Reset your password \u00b7 The Jewels', html, text });
+}
+
+export default { sendVerificationEmail, sendPasswordResetEmail };

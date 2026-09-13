@@ -202,6 +202,18 @@ export function findByEmail(email) {
   return db.prepare('SELECT * FROM users WHERE email = ?').get(value);
 }
 
+/**
+ * Whether an address is spoken for in a way that should block someone else
+ * taking it. An address nobody ever confirmed does not block: the claim flow
+ * hands it to whoever proves ownership.
+ */
+export function emailIsClaimable(email, forUserId = null) {
+  const holder = findByEmail(email);
+  if (!holder) return true;
+  if (forUserId && holder.id === forUserId) return true;
+  return !holder.email_verified_at;
+}
+
 export function findByGoogleSub(sub) {
   if (!sub) return undefined;
   return db.prepare('SELECT * FROM users WHERE google_sub = ?').get(String(sub));
@@ -214,6 +226,15 @@ export function setEmail(userId, email) {
     userId
   );
   return findById(userId);
+}
+
+/** The account currently holding an address, if it has been confirmed. */
+export function verifiedHolderOf(email) {
+  const value = normaliseEmail(email);
+  if (!value) return undefined;
+  return db
+    .prepare('SELECT * FROM users WHERE email = ? AND email_verified_at IS NOT NULL')
+    .get(value);
 }
 
 export function markEmailVerified(userId) {
@@ -254,14 +275,17 @@ export function suggestUsername(seed) {
 // Same shape as sessions: the link carries a random token, the database holds
 // only its hash, so the table is useless to anyone who steals it.
 
-export function createEmailToken(userId, email) {
+export function createEmailToken(userId, email, purpose = 'verify') {
   const token = randomBytes(32).toString('base64url');
-  // One live link per account: issuing a new one retires the old.
-  db.prepare('DELETE FROM email_tokens WHERE user_id = ?').run(userId);
+  const hours = purpose === 'reset' ? config.mail.resetTtlHours : config.mail.verifyTtlHours;
+
+  // One live link per account per purpose: issuing a new one retires the old,
+  // so a forwarded or re-requested link cannot be used twice over.
+  db.prepare('DELETE FROM email_tokens WHERE user_id = ? AND purpose = ?').run(userId, purpose);
   db.prepare(
-    `INSERT INTO email_tokens (token_hash, user_id, email, expires_at)
-     VALUES (?, ?, ?, datetime('now', ?))`
-  ).run(hashToken(token), userId, normaliseEmail(email), `+${config.mail.verifyTtlHours} hours`);
+    `INSERT INTO email_tokens (token_hash, user_id, email, purpose, expires_at)
+     VALUES (?, ?, ?, ?, datetime('now', ?))`
+  ).run(hashToken(token), userId, normaliseEmail(email), purpose, `+${hours} hours`);
   return token;
 }
 
@@ -270,24 +294,99 @@ export function createEmailToken(userId, email) {
  * token is unknown, expired, already used, or the address has changed since it
  * was issued -- all of which are the same answer to the caller.
  */
-export function redeemEmailToken(token) {
+/** Looks a token up without spending it. */
+export function peekEmailToken(token, purpose) {
   if (!token || typeof token !== 'string' || token.length < 20) return null;
-
   const row = db
     .prepare(
       `SELECT * FROM email_tokens
-       WHERE token_hash = ? AND used_at IS NULL AND expires_at > datetime('now')`
+       WHERE token_hash = ? AND purpose = ? AND used_at IS NULL
+         AND expires_at > datetime('now')`
     )
-    .get(hashToken(token));
+    .get(hashToken(token), purpose);
+  return row || null;
+}
+
+const spendToken = (tokenHash) =>
+  db
+    .prepare("UPDATE email_tokens SET used_at = datetime('now') WHERE token_hash = ?")
+    .run(tokenHash);
+
+/**
+ * Redeems a verification link.
+ *
+ * The link proves one thing: whoever opened it controls `row.email`, and it was
+ * issued to `row.user_id`. That is enough to settle a contested address, so
+ * this also handles claiming -- an address sitting on an account that never
+ * confirmed it is taken away and given to the person who proved ownership.
+ *
+ * A pending claim is never written to the account before this point. The unique
+ * index on users(email) would refuse it, and more importantly, typing somebody
+ * else's address should not take it from them until ownership is shown.
+ */
+export const redeemEmailToken = db.transaction((token) => {
+  const row = peekEmailToken(token, 'verify');
   if (!row) return null;
 
   const user = findById(row.user_id);
-  if (!user || user.email !== row.email) return null;
+  if (!user) return null;
 
-  db.prepare("UPDATE email_tokens SET used_at = datetime('now') WHERE token_hash = ?").run(
-    row.token_hash
+  // Somebody has since confirmed this address for themselves. Their claim is
+  // as strong as this one and got there first, so this link no longer carries.
+  const verifiedHolder = db
+    .prepare(
+      `SELECT id FROM users
+       WHERE email = ? AND id != ? AND email_verified_at IS NOT NULL`
+    )
+    .get(row.email, row.user_id);
+  if (verifiedHolder) return null;
+
+  spendToken(row.token_hash);
+
+  const displaced = db
+    .prepare('SELECT id FROM users WHERE email = ? AND id != ?')
+    .all(row.email, row.user_id);
+
+  for (const other of displaced) {
+    db.prepare('UPDATE users SET email = NULL, email_verified_at = NULL WHERE id = ?').run(
+      other.id
+    );
+    db.prepare('DELETE FROM email_tokens WHERE user_id = ?').run(other.id);
+  }
+
+  db.prepare("UPDATE users SET email = ?, email_verified_at = datetime('now') WHERE id = ?").run(
+    row.email,
+    row.user_id
   );
-  return markEmailVerified(row.user_id);
+
+  return { user: findById(row.user_id), displaced: displaced.map((o) => o.id) };
+});
+
+/**
+ * The address a still-live verification link was issued for. Used when the
+ * account itself carries no address because the request was a claim on one
+ * somebody else is holding.
+ */
+export function latestPendingAddress(userId) {
+  const row = db
+    .prepare(
+      `SELECT email FROM email_tokens
+       WHERE user_id = ? AND purpose = 'verify' AND used_at IS NULL
+         AND expires_at > datetime('now')
+       ORDER BY created_at DESC LIMIT 1`
+    )
+    .get(userId);
+  return row ? row.email : null;
+}
+
+/** Spends a reset link and returns the account it belongs to. */
+export function redeemResetToken(token) {
+  const row = peekEmailToken(token, 'reset');
+  if (!row) return null;
+  const user = findById(row.user_id);
+  if (!user || user.email !== row.email) return null;
+  spendToken(row.token_hash);
+  return user;
 }
 
 // --- OAuth state ----------------------------------------------------------

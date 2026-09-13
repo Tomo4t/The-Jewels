@@ -1,5 +1,6 @@
 import db from '../db.js';
 import config from '../config.js';
+import { getSetting } from './settings.js';
 
 /**
  * Two-stage comment moderation.
@@ -254,7 +255,10 @@ export async function screenComment(body, context) {
   }
 
   const flagged = score >= 0.4;
-  const status = flagged || config.moderationQueue ? 'pending' : 'visible';
+  // Read at screening time rather than boot, so an administrator turning the
+  // queue off takes effect on the next comment instead of the next deploy. A
+  // flagged comment is always held regardless of the setting.
+  const status = flagged || getSetting('moderationQueue') ? 'pending' : 'visible';
 
   return {
     status,

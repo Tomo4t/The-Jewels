@@ -43,6 +43,9 @@ process.env.ANTHROPIC_API_KEY = '';
 // The credential limiter is real and works; the suite simply makes more auth
 // calls than a production budget allows, so it is raised rather than bypassed.
 process.env.AUTH_RATE_LIMIT = '500';
+// The comment suites predate the verification gate and post from accounts with
+// no address. The gate gets its own tests below, which switch it on explicitly.
+process.env.REQUIRE_VERIFIED_EMAIL = 'false';
 
 let server;
 let base;
@@ -494,7 +497,7 @@ describe('email and identity', () => {
     assert.equal(body.error.code, 'validation_failed');
   });
 
-  test('an address already in use is refused, case-insensitively', async () => {
+  test('an address nobody has confirmed does not block a second signup', async () => {
     const client = makeClient();
     const { status, body } = await client('/api/auth/register', {
       method: 'POST',
@@ -504,8 +507,12 @@ describe('email and identity', () => {
         email: 'MAILER.ONE@example.com',
       }),
     });
-    assert.equal(status, 409);
-    assert.equal(body.error.code, 'email_taken');
+    // mailer-one typed this address and never proved it was theirs, so it is
+    // still up for grabs. The account is created without it -- proving
+    // ownership is what would attach it.
+    assert.equal(status, 201);
+    assert.equal(body.user.email, null);
+    assert.equal(body.verification.claiming, true);
   });
 
   test('registering without an email still works', async () => {
@@ -544,11 +551,33 @@ describe('email and identity', () => {
     assert.equal(body.user.emailVerified, false);
   });
 
-  test('an address belonging to someone else is refused', async () => {
+  test('an unconfirmed address is claimable, but is not taken until proven', async () => {
     const client = makeClient();
     await client('/api/auth/register', {
       method: 'POST',
-      body: json({ username: 'thief', password: 'a-long-enough-password' }),
+      body: json({ username: 'claimer', password: 'a-long-enough-password' }),
+    });
+
+    const { status, body } = await client('/api/auth/email', {
+      method: 'PUT',
+      body: json({ email: 'setter@example.com' }),
+    });
+
+    assert.equal(status, 200);
+    assert.equal(body.verification.claiming, true);
+    // Crucially the address is NOT moved yet. Typing somebody else's address
+    // must never take it from them on its own.
+    assert.equal(body.user.email, null);
+  });
+
+  test('a confirmed address is refused outright', async () => {
+    const { markEmailVerified, findByUsername } = await import('../services/users.js');
+    markEmailVerified(findByUsername('setter').id);
+
+    const client = makeClient();
+    await client('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'latecomer', password: 'a-long-enough-password' }),
     });
 
     const { status, body } = await client('/api/auth/email', {
@@ -557,6 +586,43 @@ describe('email and identity', () => {
     });
     assert.equal(status, 409);
     assert.equal(body.error.code, 'email_taken');
+  });
+
+  test('a forgotten-password request never reveals whether an account exists', async () => {
+    const client = makeClient();
+    const known = await client('/api/auth/password/forgot', {
+      method: 'POST',
+      body: json({ email: 'setter@example.com' }),
+    });
+    const unknown = await client('/api/auth/password/forgot', {
+      method: 'POST',
+      body: json({ email: 'nobody-at-all@example.com' }),
+    });
+    const malformed = await client('/api/auth/password/forgot', {
+      method: 'POST',
+      body: json({ email: 'not-an-email' }),
+    });
+
+    assert.equal(known.status, 200);
+    assert.equal(unknown.status, 200);
+    assert.equal(malformed.status, 200);
+    // The point of the test: the three replies are byte-identical, so the
+    // endpoint cannot be used to find out which addresses have accounts.
+    assert.deepEqual(known.body, unknown.body);
+    assert.deepEqual(known.body, malformed.body);
+  });
+
+  test('a bogus reset link is reported invalid and refuses to set a password', async () => {
+    const client = makeClient();
+    const check = await client('/api/auth/password/reset?token=nope-nope-nope-nope-nope');
+    assert.equal(check.body.valid, false);
+
+    const attempt = await client('/api/auth/password/reset', {
+      method: 'POST',
+      body: json({ token: 'nope-nope-nope-nope-nope', password: 'a-long-enough-password' }),
+    });
+    assert.equal(attempt.status, 400);
+    assert.equal(attempt.body.error.code, 'invalid_token');
   });
 
   test('a bogus verification link redirects as a failure rather than erroring', async () => {
@@ -583,5 +649,205 @@ describe('email and identity', () => {
     const { status, body } = await client('/api/auth/google');
     assert.equal(status, 400);
     assert.equal(body.error.code, 'google_not_configured');
+  });
+});
+
+describe('the verification gate on commenting', () => {
+  test('an unverified account is refused, and told why', async () => {
+    const { setSetting, clearSettingsCache } = await import('../services/settings.js');
+    setSetting('requireVerifiedEmail', true, null);
+
+    const client = makeClient();
+    await client('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'gated-user', password: 'a-long-enough-password' }),
+    });
+
+    const { status, body } = await client('/api/comments', {
+      method: 'POST',
+      body: json({ lang: 'en', chapter: 1, body: 'Let me in please.' }),
+    });
+
+    assert.equal(status, 403);
+    assert.equal(body.error.code, 'email_not_verified');
+
+    setSetting('requireVerifiedEmail', false, null);
+    clearSettingsCache();
+  });
+
+  test('a verified account posts normally', async () => {
+    const { setSetting, clearSettingsCache } = await import('../services/settings.js');
+    const { markEmailVerified, findByUsername, setEmail } = await import('../services/users.js');
+    setSetting('requireVerifiedEmail', true, null);
+
+    const client = makeClient();
+    await client('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'verified-user', password: 'a-long-enough-password' }),
+    });
+
+    const user = findByUsername('verified-user');
+    setEmail(user.id, 'verified-user@example.com');
+    markEmailVerified(user.id);
+
+    const { status } = await client('/api/comments', {
+      method: 'POST',
+      body: json({ lang: 'en', chapter: 1, body: 'I confirmed my address.' }),
+    });
+    assert.equal(status, 201);
+
+    setSetting('requireVerifiedEmail', false, null);
+    clearSettingsCache();
+  });
+
+  test('a moderator is never locked out by the gate', async () => {
+    const { setSetting, clearSettingsCache } = await import('../services/settings.js');
+    const { findByUsername, setRole } = await import('../services/users.js');
+    setSetting('requireVerifiedEmail', true, null);
+
+    const client = makeClient();
+    await client('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'gated-mod', password: 'a-long-enough-password' }),
+    });
+    setRole(findByUsername('gated-mod').id, 'moderator');
+
+    const { status } = await client('/api/comments', {
+      method: 'POST',
+      body: json({ lang: 'en', chapter: 1, body: 'Moderating without an address.' }),
+    });
+    assert.equal(status, 201);
+
+    setSetting('requireVerifiedEmail', false, null);
+    clearSettingsCache();
+  });
+
+  test('a user sees their own comments, pending ones included', async () => {
+    const client = makeClient();
+    await client('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'feed-user', password: 'a-long-enough-password' }),
+    });
+    await client('/api/comments', {
+      method: 'POST',
+      body: json({ lang: 'en', chapter: 1, body: 'First thing I wrote.' }),
+    });
+    await client('/api/comments', {
+      method: 'POST',
+      body: json({ lang: 'en', chapter: 1, body: 'Second thing I wrote.' }),
+    });
+
+    const { status, body } = await client('/api/comments/mine');
+    assert.equal(status, 200);
+    assert.equal(body.total, 2);
+    // Newest first, so the profile reads like a timeline.
+    assert.match(body.comments[0].body, /Second thing/);
+  });
+
+  test('the feed needs a session', async () => {
+    const client = makeClient();
+    const { status } = await client('/api/comments/mine');
+    assert.equal(status, 401);
+  });
+});
+
+describe('runtime settings', () => {
+  const admin = makeClient();
+
+  test('only an admin can read them', async () => {
+    const stranger = makeClient();
+    await stranger('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'settings-nobody', password: 'a-long-enough-password' }),
+    });
+    const { status } = await stranger('/api/admin/settings');
+    assert.equal(status, 403);
+  });
+
+  test('they report where their value came from', async () => {
+    const { findByUsername, setRole } = await import('../services/users.js');
+    await admin('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'settings-admin', password: 'a-long-enough-password' }),
+    });
+    setRole(findByUsername('settings-admin').id, 'admin');
+
+    const { status, body } = await admin('/api/admin/settings');
+    assert.equal(status, 200);
+    // Nothing has been overridden yet, so every value still traces to the env.
+    assert.equal(body.settings.moderationQueue.source, 'environment');
+  });
+
+  test('changing one sticks and is marked as an admin override', async () => {
+    const { body } = await admin('/api/admin/settings', {
+      method: 'PATCH',
+      body: json({ moderationQueue: false }),
+    });
+    assert.equal(body.settings.moderationQueue.value, false);
+    assert.equal(body.settings.moderationQueue.source, 'admin');
+  });
+
+  test('with the queue off a comment goes straight live', async () => {
+    const client = makeClient();
+    await client('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'straight-through', password: 'a-long-enough-password' }),
+    });
+    const { status, body } = await client('/api/comments', {
+      method: 'POST',
+      body: json({ lang: 'en', chapter: 1, body: 'Should appear immediately.' }),
+    });
+    assert.equal(status, 201);
+    assert.equal(body.pending, false);
+
+    await admin('/api/admin/settings', {
+      method: 'PATCH',
+      body: json({ moderationQueue: true }),
+    });
+  });
+
+  test('a flagged comment is still held even with the queue off', async () => {
+    await admin('/api/admin/settings', {
+      method: 'PATCH',
+      body: json({ moderationQueue: false }),
+    });
+
+    const client = makeClient();
+    await client('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'flagged-through', password: 'a-long-enough-password' }),
+    });
+    const { body } = await client('/api/comments', {
+      method: 'POST',
+      body: json({
+        lang: 'en',
+        chapter: 1,
+        body: 'BUY CHEAP FOLLOWERS NOW!!! http://spam.example http://spam2.example',
+      }),
+    });
+    assert.equal(body.pending, true);
+
+    await admin('/api/admin/settings', {
+      method: 'PATCH',
+      body: json({ moderationQueue: true }),
+    });
+  });
+
+  test('an unknown key is refused rather than silently stored', async () => {
+    const { status, body } = await admin('/api/admin/settings', {
+      method: 'PATCH',
+      body: json({ notARealSetting: true }),
+    });
+    assert.equal(status, 400);
+    assert.equal(body.error.code, 'unknown_setting');
+  });
+
+  test('a boolean setting refuses a non-boolean', async () => {
+    const { status, body } = await admin('/api/admin/settings', {
+      method: 'PATCH',
+      body: json({ moderationQueue: 'yes please' }),
+    });
+    assert.equal(status, 400);
+    assert.equal(body.error.code, 'validation_failed');
   });
 });

@@ -165,6 +165,27 @@ export function moderate(id, status, moderatorId) {
   return findById(id);
 }
 
+/**
+ * One user's own comments, newest first. Deleted ones are left out -- they are
+ * gone as far as the author is concerned -- but pending and rejected ones are
+ * included, because not seeing them is exactly the confusion this answers.
+ */
+export function listForUser(userId, { limit = 50, offset = 0 } = {}) {
+  const rows = db
+    .prepare(
+      `${SELECT}
+       WHERE c.user_id = ? AND c.status != 'deleted'
+       ORDER BY c.created_at DESC LIMIT ? OFFSET ?`
+    )
+    .all(userId, limit, offset);
+
+  const { n } = db
+    .prepare("SELECT COUNT(*) AS n FROM comments WHERE user_id = ? AND status != 'deleted'")
+    .get(userId);
+
+  return { rows, total: n };
+}
+
 export function queue({ limit = 50, offset = 0 } = {}) {
   const rows = db
     .prepare(

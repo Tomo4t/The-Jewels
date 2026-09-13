@@ -1,11 +1,12 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import config, { absoluteUrl, googleEnabled, mailEnabled } from '../config.js';
+import { getSetting } from '../services/settings.js';
 import { audit } from '../db.js';
 import { ApiError, asyncRoute } from '../middleware/errors.js';
 import { authLimiter } from '../middleware/security.js';
 import { attachUser, requireAuth, sessionCookieOptions } from '../middleware/auth.js';
-import { sendVerificationEmail } from '../services/email.js';
+import { sendPasswordResetEmail, sendVerificationEmail } from '../services/email.js';
 import {
   USERNAME_RE,
   EMAIL_RE,
@@ -23,8 +24,14 @@ import {
   findByUsername,
   linkGoogle,
   markEmailVerified,
+  latestPendingAddress,
   normaliseEmail,
+  peekEmailToken,
   redeemEmailToken,
+  redeemResetToken,
+  setPassword,
+  destroyAllSessionsForUser,
+  verifiedHolderOf,
   setEmail,
   suggestUsername,
   toPrivateUser,
@@ -67,8 +74,9 @@ router.get(
     const full = req.user ? findById(req.user.id) : null;
     res.json({
       user: full ? toPrivateUser(full) : null,
-      registrationOpen: config.allowRegistration,
-      moderationQueue: config.moderationQueue,
+      registrationOpen: getSetting('allowRegistration'),
+      moderationQueue: getSetting('moderationQueue'),
+      requireVerifiedEmail: getSetting('requireVerifiedEmail'),
       // The sign-in page hides what is not configured rather than offering a
       // button that would only ever return an error.
       googleSignIn: googleEnabled(),
@@ -81,7 +89,7 @@ router.post(
   '/register',
   authLimiter,
   asyncRoute(async (req, res) => {
-    if (!config.allowRegistration) {
+    if (!getSetting('allowRegistration')) {
       throw ApiError.forbidden('registration_closed', 'New sign-ups are currently closed.');
     }
 
@@ -91,21 +99,31 @@ router.post(
     if (findByUsername(username)) {
       throw ApiError.conflict('username_taken', 'That username is already taken.');
     }
-    if (address && findByEmail(address)) {
+    // Only a confirmed holder blocks the address. One sitting unclaimed on an
+    // account that never confirmed it is up for grabs by whoever proves
+    // ownership, so it is left off this account until the link is opened.
+    if (address && verifiedHolderOf(address)) {
       throw ApiError.conflict('email_taken', 'That email is already on another account.');
     }
+    const contested = Boolean(address) && Boolean(findByEmail(address));
 
     // The very first account to exist becomes the administrator, so a fresh
     // deployment is usable without shell access.
     const role = countUsers() === 0 ? 'admin' : 'user';
 
-    const user = await createUser({ username, password, displayName, role, email: address });
+    const user = await createUser({
+      username,
+      password,
+      displayName,
+      role,
+      email: contested ? null : address,
+    });
     const token = createSession(user.id, req.get('user-agent'));
     res.cookie(config.sessionCookieName, token, sessionCookieOptions());
 
     audit(user.id, 'user.register', 'user', user.id, { role, email: Boolean(address) });
 
-    const verification = await startVerification(user);
+    const verification = await startVerification(user, address);
     res.status(201).json({ user: toPrivateUser(findById(user.id)), verification });
   })
 );
@@ -185,18 +203,25 @@ router.post(
  * afternoon, must not turn a successful registration into a failure. The return
  * value tells the caller what actually happened so the UI can be honest about it.
  */
-async function startVerification(user) {
-  if (!user.email) return { status: 'no_email' };
-  if (!mailEnabled()) return { status: 'not_configured' };
+async function startVerification(user, addressOverride = null) {
+  // `addressOverride` carries a claim: an address that is not on the account
+  // yet because somebody else is holding it unconfirmed. The link is still sent
+  // there, and redeeming it is what moves the address across.
+  const address = normaliseEmail(addressOverride) || user.email;
+  if (!address) return { status: 'no_email', claiming: false };
 
-  const token = createEmailToken(user.id, user.email);
+  const claiming = address !== user.email;
+  if (!mailEnabled()) return { status: 'not_configured', claiming };
+
+  const token = createEmailToken(user.id, address, 'verify');
   const link = absoluteUrl(`/api/auth/verify?token=${encodeURIComponent(token)}`);
   const result = await sendVerificationEmail({
-    to: user.email,
+    to: address,
     displayName: user.display_name,
     link,
   });
-  return { status: result.sent ? 'sent' : 'send_failed' };
+
+  return { status: result.sent ? 'sent' : 'send_failed', claiming };
 }
 
 /**
@@ -210,9 +235,13 @@ async function startVerification(user) {
 router.get(
   '/verify',
   asyncRoute(async (req, res) => {
-    const user = redeemEmailToken(String(req.query.token || ''));
-    if (user) audit(user.id, 'user.email_verified', 'user', user.id);
-    res.redirect(302, absoluteUrl(`/#account?verified=${user ? '1' : '0'}`));
+    const result = redeemEmailToken(String(req.query.token || ''));
+    if (result) {
+      audit(result.user.id, 'user.email_verified', 'user', result.user.id, {
+        claimedFrom: result.displaced.length ? result.displaced : undefined,
+      });
+    }
+    res.redirect(302, absoluteUrl(`/#account?verified=${result ? '1' : '0'}`));
   })
 );
 
@@ -222,13 +251,15 @@ router.post(
   authLimiter,
   asyncRoute(async (req, res) => {
     const user = findById(req.user.id);
-    if (!user.email) {
+    const address = user.email || latestPendingAddress(user.id);
+
+    if (!address) {
       throw ApiError.badRequest('no_email', 'Add an email address first.');
     }
-    if (user.email_verified_at) {
+    if (user.email === address && user.email_verified_at) {
       return res.json({ status: 'already_verified' });
     }
-    const verification = await startVerification(user);
+    const verification = await startVerification(user, address);
     res.json(verification);
   })
 );
@@ -246,16 +277,103 @@ router.put(
       });
     }
 
-    const existing = findByEmail(address);
-    if (existing && existing.id !== req.user.id) {
+    const confirmedHolder = verifiedHolderOf(address);
+    if (confirmedHolder && confirmedHolder.id !== req.user.id) {
       throw ApiError.conflict('email_taken', 'That email is already on another account.');
     }
 
-    setEmail(req.user.id, address);
-    audit(req.user.id, 'user.email_changed', 'user', req.user.id);
+    const holder = findByEmail(address);
+    const contested = Boolean(holder) && holder.id !== req.user.id;
 
-    const verification = await startVerification(findById(req.user.id));
+    // A contested address is not written to the account. The link is sent to it
+    // and redeeming that link is what moves it -- so typing somebody else's
+    // address never takes it from them on its own.
+    if (!contested) {
+      setEmail(req.user.id, address);
+      audit(req.user.id, 'user.email_changed', 'user', req.user.id);
+    }
+
+    const verification = await startVerification(findById(req.user.id), address);
     res.json({ user: toPrivateUser(findById(req.user.id)), verification });
+  })
+);
+
+// --- forgotten passwords ---------------------------------------------------
+
+/**
+ * Starts a password reset.
+ *
+ * Always answers the same way. Saying whether an address has an account turns
+ * this endpoint into a way of testing which of your users exist, and the person
+ * who legitimately forgot their password learns nothing extra from being told.
+ */
+router.post(
+  '/password/forgot',
+  authLimiter,
+  asyncRoute(async (req, res) => {
+    // Whether mail is configured is a property of the deployment, so it is
+    // settled before anything about the submitted address is looked at --
+    // otherwise the reply would differ between a known and an unknown address.
+    if (!mailEnabled()) return res.json({ status: 'not_configured' });
+
+    const address = normaliseEmail(req.body?.email);
+    const answer = { status: 'sent' };
+    if (!address || !EMAIL_RE.test(address)) return res.json(answer);
+
+    const user = verifiedHolderOf(address);
+    // Unconfirmed addresses are deliberately excluded: anyone can type an
+    // address they do not own, and a reset link sent to one would be a way of
+    // taking over an account by having typed its owner's address first.
+    if (!user) return res.json(answer);
+
+    const token = createEmailToken(user.id, address, 'reset');
+    await sendPasswordResetEmail({
+      to: address,
+      displayName: user.display_name,
+      link: absoluteUrl(`/#reset?token=${encodeURIComponent(token)}`),
+    });
+    audit(user.id, 'user.password_reset_requested', 'user', user.id);
+    res.json(answer);
+  })
+);
+
+/** Lets the reset page tell a live link from a dead one before asking for a password. */
+router.get(
+  '/password/reset',
+  asyncRoute(async (req, res) => {
+    const row = peekEmailToken(String(req.query.token || ''), 'reset');
+    res.json({ valid: Boolean(row) });
+  })
+);
+
+router.post(
+  '/password/reset',
+  authLimiter,
+  asyncRoute(async (req, res) => {
+    const nextPassword = String(req.body?.password || '');
+    if (nextPassword.length < MIN_PASSWORD_LENGTH) {
+      throw ApiError.badRequest(
+        'validation_failed',
+        `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`,
+        { field: 'password' }
+      );
+    }
+
+    const user = redeemResetToken(String(req.body?.token || ''));
+    if (!user) {
+      throw ApiError.badRequest('invalid_token', 'That reset link is invalid or has expired.');
+    }
+
+    await setPassword(user.id, nextPassword);
+    // Anyone already signed in as this account is signed out: if the reset was
+    // needed because somebody else had got in, leaving their session alive
+    // would defeat the point.
+    destroyAllSessionsForUser(user.id);
+    audit(user.id, 'user.password_reset', 'user', user.id);
+
+    const token = createSession(user.id, req.get('user-agent'));
+    res.cookie(config.sessionCookieName, token, sessionCookieOptions());
+    res.json({ user: toPrivateUser(findById(user.id)) });
   })
 );
 
@@ -382,7 +500,7 @@ router.get(
     // 3. Nobody yet: make an account. It has no password, so it can only ever
     //    be reached back through Google.
     if (!user) {
-      if (!config.allowRegistration) return fail('registration_closed');
+      if (!getSetting('allowRegistration')) return fail('registration_closed');
       const username = suggestUsername(claims.name || (email ? email.split('@')[0] : ''));
       const role = countUsers() === 0 ? 'admin' : 'user';
       user = await createUser({
