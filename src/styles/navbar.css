@@ -162,15 +162,16 @@ footer,
 }
 
 .navbar {
-  display: flex;
-  flex-wrap: nowrap;
-  justify-content: space-between;
+  /* Three columns with equal side tracks, so the title centres on the bar
+     itself rather than on whatever space the icon groups happen to leave. A
+     `1fr` track floors at its own content, so the wider side sets both and the
+     middle stays put. */
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   background-color: var(--color-navbar);
   padding: 10px 20px;
   height: 60px;
-
-  /* prevent squeeze causing misalignment */
   min-width: 0;
 }
 
@@ -179,12 +180,12 @@ footer,
   display: flex;
   align-items: center;
   gap: 14px;
-  flex: 0 0 auto;
+  min-width: 0;
 }
 
 /* The title is the only part that should give up room when space runs short. */
 .nav-title {
-  flex: 0 1 auto;
+  justify-self: center;
   min-width: 0;
 }
 
@@ -211,16 +212,17 @@ footer,
   display: none;
   position: absolute;
   top: calc(100% + 10px);
+  /* Anchored to the same edge as the burger and only as wide as one column of
+     icons, so the button sits centred over the list it opens rather than off
+     to one side of a wide panel. */
   right: 0;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
-  padding: 16px;
-  /* Sized to its contents. Everything inside is now an icon, so the panel is a
-     narrow column rather than a list of labels. */
+  padding: 10px;
   width: max-content;
   min-width: 0;
-  max-width: min(12rem, calc(100vw - 32px));
+  max-width: calc(100vw - 24px);
   border-radius: 14px;
   background-color: var(--color-dropdown-bg);
   border: 1px solid var(--color-dropdown-border);
@@ -235,19 +237,24 @@ footer,
 }
 
 .navbar.is-collapsed .nav-right-actions .dropdown {
-  align-self: stretch;
+  align-self: center;
 }
 
 .navbar.is-collapsed .nav-right-actions .icon-btn,
 .navbar.is-collapsed .nav-right-actions .dropdown > button {
   justify-content: center;
-  width: 100%;
+  width: auto;
 }
 
 .navbar.is-collapsed .nav-right-actions .dropdown-menu {
-  position: static;
-  width: 100%;
-  margin-top: 8px;
+  /* Language names do not fit a column sized for icons, so this one keeps its
+     own width and hangs off the panel's right edge instead of stretching it. */
+  position: absolute;
+  top: 0;
+  right: calc(100% + 8px);
+  width: max-content;
+  min-width: 8rem;
+  margin-top: 0;
   opacity: 0;
   pointer-events: none;
   transform: none;
@@ -281,7 +288,7 @@ html.dark .navbar.is-collapsed .nav-right-actions .dropdown-menu li a {
 }
 
 .nav-title {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: bold;
   background-color: var(--color-title-bg);
   color: var(--color-title-text);
@@ -292,9 +299,7 @@ html.dark .navbar.is-collapsed .nav-right-actions .dropdown-menu li a {
   display: flex;
   align-items: center;
 
-  flex-shrink: 0;
   max-width: 100%;
-  margin: 0 auto;
 }
 
 /* ICON BUTTONS */
@@ -679,8 +684,8 @@ html {
 
   .nav-title {
     min-width: 0;
-    font-size: 1.15rem;
-    padding: 3px 8px;
+    font-size: 1.4rem;
+    padding: 3px 10px;
   }
 
   .nav-title a {
@@ -736,8 +741,8 @@ html {
 
 @media (max-width: 400px) {
   .nav-title {
-    font-size: 1.05rem;
-    padding: 0 6px;
+    font-size: 1.25rem;
+    padding: 0 8px;
   }
   .icon-btn img {
     width: 22px;
@@ -751,8 +756,8 @@ html {
 
 @media (max-width: 360px) {
   .nav-title {
-    font-size: 0.9rem;
-    padding: 0 4px;
+    font-size: 1.05rem;
+    padding: 0 6px;
   }
   .icon-btn img {
     width: 20px;
