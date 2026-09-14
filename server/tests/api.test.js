@@ -444,13 +444,25 @@ describe('admin', () => {
     assert.equal(removed.status, 200);
   });
 
-  test('a malformed update date is refused', async () => {
+  test('an update is stamped when it is posted, whatever the client sends', async () => {
+    const before = Date.now();
     const { status, body } = await asAdmin('/api/admin/updates', {
       method: 'POST',
-      body: json({ lang: 'en', date: 'yesterday', body: 'Nope.' }),
+      // A date from the client is ignored entirely: the stamp is the moment
+      // the update was written, not whatever the browser claimed.
+      body: json({ lang: 'en', date: 'yesterday', body: 'Something happened.' }),
     });
-    assert.equal(status, 400);
-    assert.equal(body.error.code, 'bad_date');
+    assert.equal(status, 201);
+
+    const at = Date.parse(body.update.date);
+    assert.ok(!Number.isNaN(at), `"${body.update.date}" is not a real instant`);
+    assert.ok(at >= before - 1000 && at <= Date.now() + 1000, 'the stamp is not now');
+
+    // It has to carry a time, not just a day, or no reader can be shown it in
+    // their own zone.
+    assert.match(body.update.date, /T\d{2}:\d{2}/);
+
+    await asAdmin(`/api/admin/updates/en/${body.update.id}`, { method: 'DELETE' });
   });
 
   test('path traversal in a language is refused', async () => {
@@ -1281,5 +1293,255 @@ describe('a chapter with a date still to come', () => {
       method: 'PATCH',
       body: json({ releaseAt: null }),
     });
+  });
+});
+
+describe('putting a chapter up, and changing it afterwards', () => {
+  const tint = async (colour) => {
+    const sharp = (await import('sharp')).default;
+    return sharp({ create: { width: 40, height: 60, channels: 3, background: colour } })
+      .png()
+      .toBuffer();
+  };
+
+  const admin = makeClient();
+
+  test("the number is the site's to choose, and the date and archive come with it", async () => {
+    await admin('/api/auth/login', {
+      method: 'POST',
+      body: json({ username: 'tomo', password: 'a-very-long-password' }),
+    });
+
+    const png = await tint('#112233');
+    const soon = new Date(Date.now() + 7 * 86400000).toISOString();
+
+    const form = new FormData();
+    form.set('lang', 'es');
+    // No number at all: the author should never have to remember where they
+    // were, and a gap would hide every chapter after it.
+    form.set('title', 'Capítulo uno');
+    form.set('releaseAt', soon);
+    form.set('archived', 'true');
+    form.append('pages', new Blob([png], { type: 'image/png' }), 'a.png');
+
+    const first = await admin('/api/admin/chapters', { method: 'POST', body: form });
+    assert.equal(first.status, 201);
+    assert.equal(first.body.chapter.number, 1);
+
+    const detail = await admin('/api/content/chapters/es/1');
+    assert.equal(detail.body.releaseAt, soon);
+    assert.equal(detail.body.archived, true);
+    assert.equal(detail.body.released, false);
+
+    // The next one takes the next number without being told.
+    const second = new FormData();
+    second.set('lang', 'es');
+    second.set('title', 'Capítulo dos');
+    second.append('pages', new Blob([png], { type: 'image/png' }), 'a.png');
+    const next = await admin('/api/admin/chapters', { method: 'POST', body: second });
+    assert.equal(next.body.chapter.number, 2);
+  });
+
+  test('pages can be reordered, replaced, dropped and added in one go', async () => {
+    const red = await tint('#aa2222');
+    const blue = await tint('#2222aa');
+
+    const form = new FormData();
+    form.set('lang', 'fr');
+    form.set('title', 'Chapitre un');
+    for (const name of ['1.png', '2.png', '3.png']) {
+      form.append('pages', new Blob([red], { type: 'image/png' }), name);
+    }
+    const made = await admin('/api/admin/chapters', { method: 'POST', body: form });
+    assert.equal(made.body.chapter.pages, 3);
+
+    // Say what the chapter should end up as: page 3 first, then a brand new
+    // page, then page 1. Page 2 is not named, so it goes.
+    const edit = new FormData();
+    edit.set('layout', JSON.stringify(['keep:2', 'new:0', 'keep:0']));
+    edit.append('pages', new Blob([blue], { type: 'image/png' }), 'new.png');
+
+    const saved = await admin('/api/admin/chapters/fr/1/pages', { method: 'PUT', body: edit });
+    assert.equal(saved.status, 200);
+    assert.equal(saved.body.chapter.pages.length, 3);
+
+    const after = await admin('/api/content/chapters/fr/1');
+    assert.equal(after.body.pages.length, 3);
+    // Renumbered from zero, with no gaps, whatever was kept from where.
+    assert.match(after.body.pages[0], /page0\.webp$/);
+    assert.match(after.body.pages[2], /page2\.webp$/);
+    // The title survived an operation that only ever talked about pages.
+    assert.equal(after.body.title, 'Chapitre un');
+  });
+
+  test('a layout that names a page which is not there changes nothing', async () => {
+    const before = await admin('/api/content/chapters/fr/1');
+
+    const bad = new FormData();
+    bad.set('layout', JSON.stringify(['keep:0', 'keep:99']));
+    const { status, body } = await admin('/api/admin/chapters/fr/1/pages', {
+      method: 'PUT',
+      body: bad,
+    });
+    assert.equal(status, 400);
+    assert.equal(body.error.code, 'bad_layout');
+
+    // The chapter is exactly as it was: the staging directory is thrown away
+    // rather than swapped in half-built.
+    const after = await admin('/api/content/chapters/fr/1');
+    assert.equal(after.body.pages.length, before.body.pages.length);
+  });
+
+  test('an empty layout is refused, and a reader cannot rearrange anything', async () => {
+    const empty = new FormData();
+    empty.set('layout', JSON.stringify([]));
+    const none = await admin('/api/admin/chapters/fr/1/pages', { method: 'PUT', body: empty });
+    assert.equal(none.status, 400);
+
+    const reader = makeClient();
+    await reader('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'rearranger', password: 'a-long-enough-password' }),
+    });
+    const form = new FormData();
+    form.set('layout', JSON.stringify(['keep:0']));
+    const refused = await reader('/api/admin/chapters/fr/1/pages', { method: 'PUT', body: form });
+    assert.equal(refused.status, 403);
+  });
+});
+
+describe('deleting your own account', () => {
+  test('keeping the comments takes the name off them and closes the account', async () => {
+    // Published straight away, so the assertion is about the account going
+    // rather than about a comment that was never visible in the first place.
+    const { setSetting, clearSettingsCache } = await import('../services/settings.js');
+    setSetting('moderationQueue', false, null);
+    clearSettingsCache();
+
+    const client = makeClient();
+    await client('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'leaver', password: 'a-long-enough-password' }),
+    });
+    const posted = await client('/api/comments', {
+      method: 'POST',
+      body: json({ lang: 'en', chapter: 1, body: 'I was here.' }),
+    });
+    assert.equal(posted.status, 201);
+
+    // The password is the proof it is really them.
+    const wrong = await client('/api/auth/account', {
+      method: 'DELETE',
+      body: json({ mode: 'anonymise', password: 'not-the-password' }),
+    });
+    assert.equal(wrong.status, 400);
+    assert.equal(wrong.body.error.code, 'invalid_credentials');
+
+    const gone = await client('/api/auth/account', {
+      method: 'DELETE',
+      body: json({ mode: 'anonymise', password: 'a-long-enough-password' }),
+    });
+    assert.equal(gone.status, 200);
+
+    // The session dies with it.
+    const me = await client('/api/auth/me');
+    assert.equal(me.body.user, null);
+
+    // And it cannot be signed back into.
+    const back = await client('/api/auth/login', {
+      method: 'POST',
+      body: json({ username: 'leaver', password: 'a-long-enough-password' }),
+    });
+    assert.equal(back.status, 401);
+
+    // The comment is still on the chapter, with nobody's name on it.
+    const reader = makeClient();
+    const { body } = await reader('/api/comments?lang=en&chapter=1');
+    const left = body.comments.find((c) => c.body === 'I was here.');
+    assert.ok(left, 'the comment went with the account when it was meant to stay');
+    assert.equal(left.author.deleted, true);
+    assert.notEqual(left.author.username, 'leaver');
+
+    // The freed username is available to somebody else.
+    const newcomer = makeClient();
+    const retaken = await newcomer('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'leaver', password: 'a-different-long-password' }),
+    });
+    assert.equal(retaken.status, 201);
+
+    setSetting('moderationQueue', true, null);
+    clearSettingsCache();
+  });
+
+  test('removing everything takes the comments with it', async () => {
+    const client = makeClient();
+    await client('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'purger', password: 'a-long-enough-password' }),
+    });
+    await client('/api/comments', {
+      method: 'POST',
+      body: json({ lang: 'en', chapter: 1, body: 'Take this with me.' }),
+    });
+
+    const gone = await client('/api/auth/account', {
+      method: 'DELETE',
+      body: json({ mode: 'purge', password: 'a-long-enough-password' }),
+    });
+    assert.equal(gone.status, 200);
+
+    const reader = makeClient();
+    const { body } = await reader('/api/comments?lang=en&chapter=1');
+    assert.equal(
+      body.comments.find((c) => c.body === 'Take this with me.'),
+      undefined
+    );
+  });
+
+  test('the last administrator cannot delete themselves', async () => {
+    const admin = makeClient();
+    await admin('/api/auth/login', {
+      method: 'POST',
+      body: json({ username: 'tomo', password: 'a-very-long-password' }),
+    });
+
+    // Earlier suites promote people, so the count has to be brought down to
+    // one before the guard has anything to guard against.
+    const { users } = (await admin('/api/admin/users')).body;
+    const others = users.filter((u) => u.role === 'admin' && u.username !== 'tomo');
+    for (const other of others) {
+      await admin(`/api/admin/users/${other.id}`, {
+        method: 'PATCH',
+        body: json({ role: 'user' }),
+      });
+    }
+
+    const { status, body } = await admin('/api/auth/account', {
+      method: 'DELETE',
+      body: json({ mode: 'anonymise', password: 'a-very-long-password' }),
+    });
+    assert.equal(status, 400);
+    assert.equal(body.error.code, 'last_admin');
+
+    // Still signed in and still an admin.
+    const me = await admin('/api/auth/me');
+    assert.equal(me.body.user.role, 'admin');
+
+    for (const other of others) {
+      await admin(`/api/admin/users/${other.id}`, {
+        method: 'PATCH',
+        body: json({ role: 'admin' }),
+      });
+    }
+  });
+
+  test('a stranger cannot delete anybody', async () => {
+    const stranger = makeClient();
+    const { status } = await stranger('/api/auth/account', {
+      method: 'DELETE',
+      body: json({ mode: 'purge' }),
+    });
+    assert.equal(status, 401);
   });
 });

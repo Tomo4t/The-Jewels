@@ -187,8 +187,10 @@ function header(comment) {
     'div',
     { class: 'comment-header' },
     el('span', {
-      class: 'comment-author',
-      text: comment.author.displayName || comment.author.username,
+      class: `comment-author${comment.author.deleted ? ' is-deleted' : ''}`,
+      text: comment.author.deleted
+        ? t('comments.deletedAuthor')
+        : comment.author.displayName || comment.author.username,
     }),
     badge &&
       el('span', { class: `comment-badge comment-badge--${comment.author.role}`, text: badge }),

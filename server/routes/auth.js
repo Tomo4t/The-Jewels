@@ -9,6 +9,7 @@ import { attachUser, requireAuth, sessionCookieOptions } from '../middleware/aut
 import { sendPasswordResetEmail, sendVerificationEmail } from '../services/email.js';
 import {
   USERNAME_RE,
+  UNUSABLE_PASSWORD,
   EMAIL_RE,
   MIN_PASSWORD_LENGTH,
   consumeOAuthState,
@@ -33,6 +34,8 @@ import {
   destroyAllSessionsForUser,
   verifiedHolderOf,
   setEmail,
+  deleteAccount,
+  countAdmins,
   setDisplayName,
   setUsernameDuringSetup,
   markProfileSetupDone,
@@ -162,6 +165,61 @@ router.put(
     if (done) markProfileSetupDone(current.id);
 
     res.json({ user: toPrivateUser(findById(current.id)) });
+  })
+);
+
+/**
+ * Deleting your own account.
+ *
+ * Two things somebody can mean by it, so they say which:
+ *   'anonymise' keeps the comments and takes the name off them, so the
+ *               replies underneath still make sense
+ *   'purge'     removes the account and everything written from it
+ *
+ * Re-authentication is required either way. An account with a password proves
+ * it with the password; one that only ever signed in with Google has no
+ * password to give, so it types its own username instead -- enough to make
+ * this deliberate, which is what the step is for.
+ *
+ * There is no undo. Nothing here is recoverable afterwards.
+ */
+router.delete(
+  '/account',
+  authLimiter,
+  requireAuth,
+  asyncRoute(async (req, res) => {
+    const user = findById(req.user.id);
+    if (!user) throw ApiError.notFound('not_found', 'That account no longer exists.');
+
+    const mode = req.body?.mode === 'purge' ? 'purge' : 'anonymise';
+
+    if (user.password_hash !== UNUSABLE_PASSWORD) {
+      const password = String(req.body?.password || '');
+      if (!password || !(await verifyPassword(user, password))) {
+        throw ApiError.badRequest('invalid_credentials', 'That password is not right.', {
+          field: 'password',
+        });
+      }
+    } else if (String(req.body?.confirmUsername || '').trim() !== user.username) {
+      throw ApiError.badRequest('confirm_mismatch', 'Type your username exactly to confirm.', {
+        field: 'confirmUsername',
+      });
+    }
+
+    // The last administrator deleting themselves would leave the site with
+    // nobody able to publish a chapter or approve a comment.
+    if (user.role === 'admin' && countAdmins() <= 1) {
+      throw ApiError.badRequest(
+        'last_admin',
+        'You are the only administrator. Make somebody else an administrator first.'
+      );
+    }
+
+    audit(user.id, 'user.deleted', 'user', user.id, { mode });
+    deleteAccount(user.id, mode);
+
+    res.clearCookie(config.sessionCookieName, { ...sessionCookieOptions(), maxAge: undefined });
+    res.json({ ok: true, mode });
   })
 );
 

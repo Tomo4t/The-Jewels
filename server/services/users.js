@@ -28,6 +28,9 @@ export const toPublicUser = (row) =>
         status: row.status,
         createdAt: row.created_at,
         emailVerified: Boolean(row.email_verified_at),
+        // The comment stays; the person does not. The client says so in the
+        // reader's own language rather than storing an English placeholder.
+        deleted: Boolean(row.deleted_at),
       }
     : null;
 
@@ -47,7 +50,11 @@ export const toPrivateUser = (row) =>
     : null;
 
 export function findByUsername(username) {
-  return db.prepare('SELECT * FROM users WHERE username = ? COLLATE NOCASE').get(username);
+  // A deleted account is a headstone, not somebody who can sign in -- and its
+  // scrubbed username must not block a real person from taking that name.
+  return db
+    .prepare('SELECT * FROM users WHERE username = ? COLLATE NOCASE AND deleted_at IS NULL')
+    .get(username);
 }
 
 export function findById(id) {
@@ -156,7 +163,9 @@ export function readProgress(userId, lang = null) {
   if (lang) {
     return (
       db
-        .prepare('SELECT lang, chapter, page, updated_at FROM reading_progress WHERE user_id = ? AND lang = ?')
+        .prepare(
+          'SELECT lang, chapter, page, updated_at FROM reading_progress WHERE user_id = ? AND lang = ?'
+        )
         .get(userId, lang) || null
     );
   }
@@ -175,6 +184,47 @@ export function writeProgress(userId, lang, chapter, page) {
            updated_at = excluded.updated_at`
   ).run(userId, lang, chapter, page);
   return readProgress(userId, lang);
+}
+
+/**
+ * Deleting an account, the two ways somebody might mean it.
+ *
+ * 'purge' removes the row, and the database takes the comments, sessions,
+ * tokens and bookmarks with it.
+ *
+ * 'anonymise' keeps what they wrote and removes them from it. The row has to
+ * stay -- comments reference it and a cascade would take whole reply threads
+ * down with it -- so everything identifying is scrubbed out of it instead and
+ * it is marked as gone. Nothing can sign in to it afterwards: no address to
+ * reset from, no Google identity, and a password hash that matches nothing.
+ */
+export const deleteAccount = db.transaction((userId, mode) => {
+  const row = findById(userId);
+  if (!row) return false;
+
+  if (mode === 'purge') {
+    db.prepare('DELETE FROM users WHERE id = ?').run(userId);
+    return true;
+  }
+
+  db.prepare(
+    `UPDATE users
+        SET username = ?, display_name = ?, email = NULL, email_verified_at = NULL,
+            google_sub = NULL, password_hash = ?, deleted_at = datetime('now')
+      WHERE id = ?`
+  ).run(`deleted-${userId}`, `deleted-${userId}`, UNUSABLE_PASSWORD, userId);
+
+  db.prepare('DELETE FROM sessions WHERE user_id = ?').run(userId);
+  db.prepare('DELETE FROM email_tokens WHERE user_id = ?').run(userId);
+  db.prepare('DELETE FROM reading_progress WHERE user_id = ?').run(userId);
+  return true;
+});
+
+/** How many admins are left, so the last one cannot lock everybody out. */
+export function countAdmins() {
+  return db
+    .prepare("SELECT COUNT(*) AS n FROM users WHERE role = 'admin' AND deleted_at IS NULL")
+    .get().n;
 }
 
 export function setRole(userId, role) {
@@ -217,7 +267,8 @@ export function resolveSession(token) {
       `SELECT s.token_hash, u.*
        FROM sessions s
        JOIN users u ON u.id = s.user_id
-       WHERE s.token_hash = ? AND s.expires_at > datetime('now')`
+       WHERE s.token_hash = ? AND s.expires_at > datetime('now')
+         AND u.deleted_at IS NULL`
     )
     .get(hashToken(token));
 

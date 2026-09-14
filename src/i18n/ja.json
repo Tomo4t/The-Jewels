@@ -151,7 +151,8 @@
     "loadMore": "コメントをもっと見る",
     "author": "作者",
     "moderator": "モデレーター",
-    "admin": "管理者"
+    "admin": "管理者",
+    "deletedAuthor": "削除されたアカウント"
   },
   "admin": {
     "title": "管理画面",
@@ -165,14 +166,12 @@
     "uploadChapter": "章をアップロード",
     "chapterTitle": "章タイトル",
     "chapterDescription": "説明",
-    "chapterNumber": "章番号",
     "language": "言語",
     "dropPages": "ページ画像をドロップ、またはクリックして選択",
     "dropHint": "JPG・PNG・WebP対応。ファイル名順に並びます。ドラッグで並べ替えできます。",
     "publish": "章を公開",
     "deleteChapter": "章を削除",
     "newUpdate": "新しいお知らせ",
-    "updateDate": "日付",
     "updateBody": "本文",
     "queueEmpty": "確認待ちの項目はありません。",
     "approve": "承認",
@@ -213,8 +212,24 @@
       "scheduled": "予約済み",
       "live": "公開中",
       "scheduledToast": "公開日時を設定しました。",
-      "liveToast": "公開しました。"
-    }
+      "liveToast": "公開しました。",
+      "edit": "編集",
+      "saveDetails": "保存",
+      "savedDetails": "章を更新しました。",
+      "pages": "ページ",
+      "addPages": "ページを追加",
+      "savePages": "並び順を保存",
+      "savedPages": "ページを更新しました。",
+      "moveUp": "前へ",
+      "moveDown": "後ろへ",
+      "replace": "このページを差し替え",
+      "lastPage": "章にはページが少なくとも1枚必要です。章ごと削除してください。",
+      "willBeChapter": "第 {n} 章として公開されます。",
+      "uploadDateHint": "日時を空にすると今すぐ公開します。",
+      "uploadArchived": "いったんアーカイブする",
+      "uploadArchivedHint": "戻すまで誰にも見えないので、あとで仕上げられます。"
+    },
+    "updateStamped": "投稿した日時が自動で記録されます。"
   },
   "errors": {
     "notFound": "ページが見つかりません",
@@ -244,7 +259,17 @@
     "displayNameLabel": "表示名",
     "displayNameHint": "他の読者に表示される名前です。いつでも変更できます。",
     "displayNameSaved": "表示名を更新しました。",
-    "displayNameRequired": "表示名を入力してください。"
+    "displayNameRequired": "表示名を入力してください。",
+    "deleteSection": "アカウントを削除",
+    "deleteWarn": "元に戻すことはできません。",
+    "deleteKeep": "コメントは残し、名前だけ消す",
+    "deleteKeepHint": "コメントは「削除されたアカウント」として章に残ります。下の返信も意味が通ります。",
+    "deletePurge": "コメントもまとめて削除する",
+    "deletePurgeHint": "書いたものはすべてアカウントと一緒に消えます。返信が宙に浮くことがあります。",
+    "deleteConfirmPassword": "パスワード",
+    "deleteConfirmUsername": "確認のためユーザー名を入力してください",
+    "deleteButton": "アカウントを削除",
+    "deleteDone": "アカウントを削除しました。"
   },
   "fanart": {
     "title": "ファンアート",

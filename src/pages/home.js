@@ -1,5 +1,5 @@
 import { escapeHTML, textToHTML } from '../lib/dom.js';
-import { t, currentLanguage, formatDate } from '../lib/i18n.js';
+import { t, currentLanguage, formatDateTime } from '../lib/i18n.js';
 import { readJSON, KEYS } from '../lib/store.js';
 import { buildHash } from '../router.js';
 import api from '../lib/api.js';
@@ -86,7 +86,7 @@ async function mountUpdates(lang, signal) {
     box.classList.add('is-fading');
     window.setTimeout(() => {
       box.innerHTML = `
-        ${update.date ? `<p class="update-date">${escapeHTML(formatDate(update.date))}</p>` : ''}
+        ${update.date ? `<p class="update-date">${escapeHTML(formatDateTime(update.date))}</p>` : ''}
         <div class="update-message">${textToHTML(update.body)}</div>
       `;
       box.classList.remove('is-fading');

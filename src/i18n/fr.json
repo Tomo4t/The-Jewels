@@ -151,7 +151,8 @@
     "loadMore": "Charger plus de commentaires",
     "author": "Auteur",
     "moderator": "Modérateur",
-    "admin": "Administrateur"
+    "admin": "Administrateur",
+    "deletedAuthor": "Compte supprimé"
   },
   "admin": {
     "title": "Panneau d’administration",
@@ -165,14 +166,12 @@
     "uploadChapter": "Téléverser un chapitre",
     "chapterTitle": "Titre du chapitre",
     "chapterDescription": "Description",
-    "chapterNumber": "Numéro du chapitre",
     "language": "Langue",
     "dropPages": "Déposez les images des pages ici, ou cliquez pour les choisir",
     "dropHint": "JPG, PNG ou WebP. Elles sont triées par nom de fichier — glissez pour réordonner.",
     "publish": "Publier le chapitre",
     "deleteChapter": "Supprimer le chapitre",
     "newUpdate": "Nouvelle actualité",
-    "updateDate": "Date",
     "updateBody": "Message",
     "queueEmpty": "Rien en attente de vérification.",
     "approve": "Approuver",
@@ -213,8 +212,24 @@
       "scheduled": "Programmé",
       "live": "En ligne",
       "scheduledToast": "Date de parution définie.",
-      "liveToast": "Publié."
-    }
+      "liveToast": "Publié.",
+      "edit": "Modifier",
+      "saveDetails": "Enregistrer",
+      "savedDetails": "Chapitre mis à jour.",
+      "pages": "Pages",
+      "addPages": "Ajouter des pages",
+      "savePages": "Enregistrer l'ordre",
+      "savedPages": "Pages mises à jour.",
+      "moveUp": "Avancer",
+      "moveDown": "Reculer",
+      "replace": "Remplacer cette page",
+      "lastPage": "Un chapitre a besoin d'au moins une page. Supprimez plutôt le chapitre.",
+      "willBeChapter": "Ce sera le chapitre {n}.",
+      "uploadDateHint": "Laissez la date vide pour publier tout de suite.",
+      "uploadArchived": "L'archiver pour l'instant",
+      "uploadArchivedHint": "Personne ne le voit tant que vous ne le restaurez pas — vous pourrez finir plus tard."
+    },
+    "updateStamped": "La date et l'heure sont enregistrées au moment de la publication."
   },
   "errors": {
     "notFound": "Page introuvable",
@@ -244,7 +259,17 @@
     "displayNameLabel": "Nom affiché",
     "displayNameHint": "C'est le nom que voient les autres lecteurs. Vous pouvez le changer quand vous voulez.",
     "displayNameSaved": "Nom affiché mis à jour.",
-    "displayNameRequired": "Choisissez un nom affiché."
+    "displayNameRequired": "Choisissez un nom affiché.",
+    "deleteSection": "Supprimer votre compte",
+    "deleteWarn": "Cette action est irréversible.",
+    "deleteKeep": "Garder mes commentaires, retirer mon nom",
+    "deleteKeepHint": "Vos commentaires restent sur les chapitres sous « Compte supprimé ». Les réponses en dessous gardent leur sens.",
+    "deletePurge": "Supprimer aussi mes commentaires",
+    "deletePurgeHint": "Tout ce que vous avez écrit part avec le compte. Les réponses risquent de ne plus répondre à rien.",
+    "deleteConfirmPassword": "Votre mot de passe",
+    "deleteConfirmUsername": "Tapez votre nom d'utilisateur pour confirmer",
+    "deleteButton": "Supprimer mon compte",
+    "deleteDone": "Votre compte a été supprimé."
   },
   "fanart": {
     "title": "Fan art",

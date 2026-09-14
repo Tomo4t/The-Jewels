@@ -15,8 +15,11 @@ import {
   assertLanguage,
   deleteChapter,
   deleteUpdate,
+  chapterPageFiles,
+  getChapter,
   listChapters,
   listUpdates,
+  nextChapterNumber,
   readChapterMeta,
   writeChapterMeta,
   saveUpdate,
@@ -52,7 +55,8 @@ router.get(
   requireRole('admin'),
   asyncRoute(async (_req, res) => {
     const byLanguage = {};
-    for (const lang of config.languages) byLanguage[lang] = await listChapters(lang, { includeHidden: true });
+    for (const lang of config.languages)
+      byLanguage[lang] = await listChapters(lang, { includeHidden: true });
     res.json({ chapters: byLanguage });
   })
 );
@@ -73,7 +77,12 @@ router.post(
   upload.array('pages', config.upload.maxFiles),
   asyncRoute(async (req, res) => {
     const lang = assertLanguage(String(req.body.lang || ''));
-    const number = assertChapterNumber(req.body.number);
+    // The number is the site's business, not the author's: the reader walks
+    // 1..n, so a gap hides everything after it. An explicit number is still
+    // honoured, which is how a chapter gets replaced in place.
+    const number = req.body.number
+      ? assertChapterNumber(req.body.number)
+      : await nextChapterNumber(lang);
     const title = String(req.body.title || '')
       .trim()
       .slice(0, 120);
@@ -121,12 +130,27 @@ router.post(
         await fs.writeFile(join(staging, `page${index}.webp`), output);
       }
 
+      // Both optional, and both meant for the same thing: putting a chapter
+      // up before it is ready to be read.
+      let releaseAt = null;
+      if (req.body.releaseAt) {
+        const at = new Date(String(req.body.releaseAt));
+        if (Number.isNaN(at.getTime())) {
+          throw ApiError.badRequest('invalid_date', 'That is not a date and time.', {
+            field: 'releaseAt',
+          });
+        }
+        releaseAt = at.toISOString();
+      }
+
       const meta = {
         title,
         description,
         pages: files.length,
         ext: 'webp',
         publishedAt: new Date().toISOString(),
+        releaseAt,
+        archived: req.body.archived === 'true' || req.body.archived === true,
       };
       await fs.writeFile(join(staging, 'meta.json'), `${JSON.stringify(meta, null, 2)}\n`, 'utf8');
 
@@ -150,6 +174,101 @@ router.post(
     res.status(201).json({
       chapter: { lang, number, title, description, pages: files.length },
     });
+  })
+);
+
+/**
+ * Rearrange, replace, add or drop pages without re-uploading the chapter.
+ *
+ * The client sends the final page list it wants, in order, as `layout`:
+ *   "keep:2"  the existing page currently at index 2
+ *   "new:0"   the first file in this request's `pages`
+ * Anything not named is dropped. Saying what the chapter should end up as,
+ * rather than what to do to it, means reorder, replace, insert and delete are
+ * all the same operation and none of them can half-happen.
+ */
+router.put(
+  '/chapters/:lang/:number/pages',
+  requireRole('admin'),
+  uploadLimiter,
+  upload.array('pages', config.upload.maxFiles),
+  asyncRoute(async (req, res) => {
+    const lang = assertLanguage(req.params.lang);
+    const number = assertChapterNumber(req.params.number);
+
+    const meta = await readChapterMeta(lang, number);
+    if (!meta) throw ApiError.notFound('chapter_not_found', 'That chapter does not exist.');
+
+    let layout;
+    try {
+      layout = JSON.parse(String(req.body.layout || '[]'));
+    } catch {
+      throw ApiError.badRequest('bad_layout', 'The page order was not readable.');
+    }
+    if (!Array.isArray(layout) || !layout.length) {
+      throw ApiError.badRequest('no_pages', 'A chapter needs at least one page.');
+    }
+
+    const existing = await chapterPageFiles(lang, number);
+    const incoming = req.files || [];
+    const dir = assertInsideContent(join(config.contentDir, 'chapters', lang, `chapter${number}`));
+    const staging = `${dir}.incoming`;
+
+    await fs.rm(staging, { recursive: true, force: true });
+    await fs.mkdir(staging, { recursive: true });
+
+    try {
+      for (const [index, entry] of layout.entries()) {
+        const [kind, rawAt] = String(entry).split(':');
+        const at = Number(rawAt);
+
+        if (kind === 'keep') {
+          const file = existing[at];
+          if (!file) throw ApiError.badRequest('bad_layout', `There is no page ${at + 1} to keep.`);
+          // Copied rather than moved: the original has to survive until the
+          // swap, or a failure halfway would take the chapter with it.
+          await fs.copyFile(join(dir, file), join(staging, `page${index}.webp`));
+          continue;
+        }
+
+        if (kind === 'new') {
+          const file = incoming[at];
+          if (!file) throw ApiError.badRequest('bad_layout', 'A new page is missing from the upload.');
+          const output = await sharp(file.buffer, { failOn: 'error' })
+            .rotate()
+            .resize({ width: 1800, withoutEnlargement: true })
+            .webp({ quality: 82, effort: 4 })
+            .toBuffer();
+          await fs.writeFile(join(staging, `page${index}.webp`), output);
+          continue;
+        }
+
+        throw ApiError.badRequest('bad_layout', `Not a page: ${entry}`);
+      }
+
+      await fs.writeFile(
+        join(staging, 'meta.json'),
+        `${JSON.stringify({ ...meta, pages: layout.length, ext: 'webp' }, null, 2)}\n`,
+        'utf8'
+      );
+
+      await fs.rm(dir, { recursive: true, force: true });
+      await fs.rename(staging, dir);
+    } catch (err) {
+      await fs.rm(staging, { recursive: true, force: true });
+      if (err instanceof ApiError) throw err;
+      throw ApiError.badRequest(
+        'image_processing_failed',
+        `Could not process those images: ${err.message}`
+      );
+    }
+
+    await syncConfigFromDisk();
+    audit(req.user.id, 'chapter.pages_changed', 'chapter', `${lang}/${number}`, {
+      pages: layout.length,
+    });
+
+    res.json({ chapter: await getChapter(lang, number, { includeHidden: true }) });
   })
 );
 
@@ -254,18 +373,18 @@ router.post(
   requireRole('admin'),
   asyncRoute(async (req, res) => {
     const lang = assertLanguage(String(req.body?.lang || ''));
-    const date = String(req.body?.date || '').trim();
     const body = String(req.body?.body || '').trim();
 
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      throw ApiError.badRequest('bad_date', 'Date must look like 2026-09-12.');
-    }
     if (!body) throw ApiError.badRequest('missing_body', 'The update needs a message.');
     if (body.length > 2000) {
       throw ApiError.badRequest('body_too_long', 'Updates are limited to 2000 characters.');
     }
 
-    const saved = await saveUpdate(lang, { id: req.body?.id, date, body });
+    // No date comes in. An update is stamped with the moment it is posted --
+    // asking the author to type today's date is asking them to get it wrong,
+    // and the stored value has to be an instant anyway so that every reader
+    // sees it in their own zone.
+    const saved = await saveUpdate(lang, { id: req.body?.id, body });
     audit(req.user.id, 'update.saved', 'update', `${lang}/${saved.id}`);
     res.status(201).json({ update: saved });
   })

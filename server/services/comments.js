@@ -7,7 +7,7 @@ const SELECT = `
   SELECT c.id, c.lang, c.chapter, c.parent_id, c.user_id, c.body, c.status,
          c.flag_reason, c.flag_score, c.flag_source, c.edited,
          c.created_at, c.updated_at,
-         u.username, u.display_name, u.role, u.email_verified_at
+         u.username, u.display_name, u.role, u.email_verified_at, u.deleted_at
   FROM comments c
   JOIN users u ON u.id = c.user_id
 `;
@@ -32,8 +32,13 @@ export function present(row, viewer) {
     edited: !!row.edited,
     author: {
       id: row.user_id,
-      username: row.username,
-      displayName: row.display_name,
+      // Somebody who deleted their account but kept what they wrote. The row
+      // was scrubbed to `deleted-<id>`; sending that as a name would just be a
+      // different name. The client says "deleted account" in the reader's own
+      // language instead.
+      deleted: Boolean(row.deleted_at),
+      username: row.deleted_at ? null : row.username,
+      displayName: row.deleted_at ? null : row.display_name,
       role: row.role,
       emailVerified: Boolean(row.email_verified_at),
     },

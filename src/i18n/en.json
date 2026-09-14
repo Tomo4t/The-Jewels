@@ -151,7 +151,8 @@
     "loadMore": "Load more comments",
     "author": "Author",
     "moderator": "Moderator",
-    "admin": "Admin"
+    "admin": "Admin",
+    "deletedAuthor": "Deleted account"
   },
   "admin": {
     "title": "Admin panel",
@@ -165,14 +166,12 @@
     "uploadChapter": "Upload chapter",
     "chapterTitle": "Chapter title",
     "chapterDescription": "Description",
-    "chapterNumber": "Chapter number",
     "language": "Language",
     "dropPages": "Drop page images here, or click to choose",
     "dropHint": "JPG, PNG or WebP. They are ordered by filename — drag to reorder.",
     "publish": "Publish chapter",
     "deleteChapter": "Delete chapter",
     "newUpdate": "New update",
-    "updateDate": "Date",
     "updateBody": "Message",
     "queueEmpty": "Nothing waiting for review.",
     "approve": "Approve",
@@ -213,8 +212,24 @@
       "scheduled": "Scheduled",
       "live": "Live",
       "scheduledToast": "Release date set.",
-      "liveToast": "Published now."
-    }
+      "liveToast": "Published now.",
+      "edit": "Edit",
+      "saveDetails": "Save details",
+      "savedDetails": "Chapter updated.",
+      "pages": "Pages",
+      "addPages": "Add pages",
+      "savePages": "Save page order",
+      "savedPages": "Pages updated.",
+      "moveUp": "Move earlier",
+      "moveDown": "Move later",
+      "replace": "Replace this page",
+      "lastPage": "A chapter needs at least one page. Delete the chapter instead.",
+      "willBeChapter": "This will be chapter {n}.",
+      "uploadDateHint": "Leave the date empty to publish it now.",
+      "uploadArchived": "Archive it for now",
+      "uploadArchivedHint": "Nobody sees it until you bring it back, so you can finish setting it up later."
+    },
+    "updateStamped": "The date and time are recorded when you post it."
   },
   "errors": {
     "notFound": "Page not found",
@@ -244,7 +259,17 @@
     "displayNameLabel": "Display name",
     "displayNameHint": "This is the name other readers see. You can change it whenever you like.",
     "displayNameSaved": "Display name updated.",
-    "displayNameRequired": "Pick a display name."
+    "displayNameRequired": "Pick a display name.",
+    "deleteSection": "Delete your account",
+    "deleteWarn": "This cannot be undone.",
+    "deleteKeep": "Keep my comments, take my name off them",
+    "deleteKeepHint": "Your comments stay on the chapters as \"Deleted account\". Replies underneath still make sense.",
+    "deletePurge": "Remove my comments as well",
+    "deletePurgeHint": "Everything you have written goes with the account. Replies to it may end up answering nothing.",
+    "deleteConfirmPassword": "Your password",
+    "deleteConfirmUsername": "Type your username to confirm",
+    "deleteButton": "Delete my account",
+    "deleteDone": "Your account has been deleted."
   },
   "fanart": {
     "title": "Fan art",

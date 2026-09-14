@@ -151,7 +151,8 @@
     "loadMore": "Wczytaj więcej komentarzy",
     "author": "Autor",
     "moderator": "Moderator",
-    "admin": "Administrator"
+    "admin": "Administrator",
+    "deletedAuthor": "Usunięte konto"
   },
   "admin": {
     "title": "Panel administratora",
@@ -165,14 +166,12 @@
     "uploadChapter": "Wyślij rozdział",
     "chapterTitle": "Tytuł rozdziału",
     "chapterDescription": "Opis",
-    "chapterNumber": "Numer rozdziału",
     "language": "Język",
     "dropPages": "Przeciągnij tu obrazy stron albo kliknij, aby je wybrać",
     "dropHint": "JPG, PNG lub WebP. Kolejność według nazwy pliku — przeciągnij, aby zmienić.",
     "publish": "Opublikuj rozdział",
     "deleteChapter": "Usuń rozdział",
     "newUpdate": "Nowa aktualność",
-    "updateDate": "Data",
     "updateBody": "Treść",
     "queueEmpty": "Nic nie czeka na sprawdzenie.",
     "approve": "Zatwierdź",
@@ -213,8 +212,24 @@
       "scheduled": "Zaplanowany",
       "live": "Opublikowany",
       "scheduledToast": "Ustawiono datę premiery.",
-      "liveToast": "Opublikowano."
-    }
+      "liveToast": "Opublikowano.",
+      "edit": "Edytuj",
+      "saveDetails": "Zapisz",
+      "savedDetails": "Rozdział zaktualizowany.",
+      "pages": "Strony",
+      "addPages": "Dodaj strony",
+      "savePages": "Zapisz kolejność",
+      "savedPages": "Strony zaktualizowane.",
+      "moveUp": "Wcześniej",
+      "moveDown": "Później",
+      "replace": "Zamień tę stronę",
+      "lastPage": "Rozdział potrzebuje przynajmniej jednej strony. Usuń raczej cały rozdział.",
+      "willBeChapter": "To będzie rozdział {n}.",
+      "uploadDateHint": "Zostaw datę pustą, aby opublikować od razu.",
+      "uploadArchived": "Na razie zarchiwizuj",
+      "uploadArchivedHint": "Nikt go nie zobaczy, dopóki go nie przywrócisz — możesz dokończyć później."
+    },
+    "updateStamped": "Data i godzina zapisują się w chwili publikacji."
   },
   "errors": {
     "notFound": "Nie znaleziono strony",
@@ -244,7 +259,17 @@
     "displayNameLabel": "Nazwa wyświetlana",
     "displayNameHint": "To nazwa, którą widzą inni czytelnicy. Możesz ją zmienić w każdej chwili.",
     "displayNameSaved": "Nazwa wyświetlana zaktualizowana.",
-    "displayNameRequired": "Wybierz nazwę wyświetlaną."
+    "displayNameRequired": "Wybierz nazwę wyświetlaną.",
+    "deleteSection": "Usuń konto",
+    "deleteWarn": "Tego nie da się cofnąć.",
+    "deleteKeep": "Zostaw komentarze, usuń moje imię",
+    "deleteKeepHint": "Komentarze zostaną w rozdziałach jako „Usunięte konto”. Odpowiedzi pod nimi nadal mają sens.",
+    "deletePurge": "Usuń także moje komentarze",
+    "deletePurgeHint": "Wszystko, co napisałeś, zniknie razem z kontem. Odpowiedzi mogą zostać bez pytania.",
+    "deleteConfirmPassword": "Twoje hasło",
+    "deleteConfirmUsername": "Wpisz swoją nazwę użytkownika, aby potwierdzić",
+    "deleteButton": "Usuń moje konto",
+    "deleteDone": "Twoje konto zostało usunięte."
   },
   "fanart": {
     "title": "Fan art",

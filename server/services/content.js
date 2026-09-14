@@ -235,6 +235,28 @@ export async function getChapter(lang, n, { includeHidden = false } = {}) {
   };
 }
 
+/**
+ * The number a new chapter should get: one past the last unbroken one.
+ *
+ * The reader walks 1..n, so a gap would hide everything after it. Asking the
+ * author to type the number was asking them to remember where they were, and
+ * to be wrong about it exactly once.
+ */
+export async function nextChapterNumber(lang) {
+  assertLanguage(lang);
+  const cfg = await readConfig();
+  return (cfg.languages[lang]?.chapters || 0) + 1;
+}
+
+/** The page files of a chapter, in reading order. */
+export async function chapterPageFiles(lang, n) {
+  const dir = chapterDir(lang, n);
+  if (!existsSync(dir)) return [];
+  return (await fs.readdir(dir))
+    .filter((f) => /^page\d+\.(jpg|jpeg|png|webp)$/i.test(f))
+    .sort((a, b) => Number(a.match(/\d+/)[0]) - Number(b.match(/\d+/)[0]));
+}
+
 export async function deleteChapter(lang, n) {
   assertLanguage(lang);
   assertChapterNumber(n);
@@ -268,6 +290,13 @@ export async function listUpdates(lang) {
   return updates.sort((a, b) => b.id - a.id);
 }
 
+/**
+ * @param {object} update
+ * @param {number} [update.id] Overwrite an existing one; omitted means a new one.
+ * @param {string} [update.date] Only ever passed when rewriting history in a
+ *   test. An update is stamped with the moment it is written: asking an author
+ *   to type today's date is asking them to get it wrong.
+ */
 export async function saveUpdate(lang, { id, date, body }) {
   assertLanguage(lang);
   const dir = assertInsideContent(updatesDir(lang));
@@ -279,10 +308,13 @@ export async function saveUpdate(lang, { id, date, body }) {
     targetId = existing.reduce((max, f) => Math.max(max, Number(f.replace('.txt', ''))), 0) + 1;
   }
 
-  const content = `${String(date).trim()}\n${String(body).trim()}\n`;
+  // A full instant, not a bare day: the reader's clock decides which day that
+  // is for them, and it cannot do that from a date with no time in it.
+  const stamp = date ? String(date).trim() : new Date().toISOString();
+  const content = `${stamp}\n${String(body).trim()}\n`;
   await fs.writeFile(join(dir, `${targetId}.txt`), content, 'utf8');
   await syncConfigFromDisk();
-  return { id: targetId, date: String(date).trim(), body: String(body).trim() };
+  return { id: targetId, date: stamp, body: String(body).trim() };
 }
 
 export async function deleteUpdate(lang, id) {

@@ -1,5 +1,5 @@
 import { escapeHTML } from '../lib/dom.js';
-import { t, currentLanguage, formatDate } from '../lib/i18n.js';
+import { t, currentLanguage, formatDate, formatDateTime } from '../lib/i18n.js';
 import { buildHash } from '../router.js';
 import api from '../lib/api.js';
 
@@ -72,7 +72,7 @@ const chapterCard = (chapter, lang) => {
           <span class="chapter-countdown" role="timer">${escapeHTML(parts?.text || '')}</span>
           ${
             chapter.releaseAt
-              ? `<span class="chapter-when">${escapeHTML(formatDate(chapter.releaseAt))}</span>`
+              ? `<span class="chapter-when">${escapeHTML(formatDateTime(chapter.releaseAt))}</span>`
               : ''
           }
         </span>

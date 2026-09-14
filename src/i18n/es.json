@@ -151,7 +151,8 @@
     "loadMore": "Cargar más comentarios",
     "author": "Autor",
     "moderator": "Moderador",
-    "admin": "Administrador"
+    "admin": "Administrador",
+    "deletedAuthor": "Cuenta eliminada"
   },
   "admin": {
     "title": "Panel de administración",
@@ -165,14 +166,12 @@
     "uploadChapter": "Subir capítulo",
     "chapterTitle": "Título del capítulo",
     "chapterDescription": "Descripción",
-    "chapterNumber": "Número de capítulo",
     "language": "Idioma",
     "dropPages": "Arrastra aquí las imágenes de las páginas o haz clic para elegirlas",
     "dropHint": "JPG, PNG o WebP. Se ordenan por nombre de archivo; arrastra para reordenarlas.",
     "publish": "Publicar capítulo",
     "deleteChapter": "Eliminar capítulo",
     "newUpdate": "Nueva novedad",
-    "updateDate": "Fecha",
     "updateBody": "Mensaje",
     "queueEmpty": "No hay nada pendiente de revisión.",
     "approve": "Aprobar",
@@ -213,8 +212,24 @@
       "scheduled": "Programado",
       "live": "Publicado",
       "scheduledToast": "Fecha de publicación fijada.",
-      "liveToast": "Publicado ya."
-    }
+      "liveToast": "Publicado ya.",
+      "edit": "Editar",
+      "saveDetails": "Guardar",
+      "savedDetails": "Capítulo actualizado.",
+      "pages": "Páginas",
+      "addPages": "Añadir páginas",
+      "savePages": "Guardar el orden",
+      "savedPages": "Páginas actualizadas.",
+      "moveUp": "Mover antes",
+      "moveDown": "Mover después",
+      "replace": "Reemplazar esta página",
+      "lastPage": "Un capítulo necesita al menos una página. Borra el capítulo en su lugar.",
+      "willBeChapter": "Será el capítulo {n}.",
+      "uploadDateHint": "Deja la fecha vacía para publicarlo ya.",
+      "uploadArchived": "Archivarlo por ahora",
+      "uploadArchivedHint": "Nadie lo ve hasta que lo recuperes, así puedes terminarlo más tarde."
+    },
+    "updateStamped": "La fecha y la hora se registran al publicarlo."
   },
   "errors": {
     "notFound": "Página no encontrada",
@@ -244,7 +259,17 @@
     "displayNameLabel": "Nombre visible",
     "displayNameHint": "Es el nombre que ven los demás lectores. Puedes cambiarlo cuando quieras.",
     "displayNameSaved": "Nombre visible actualizado.",
-    "displayNameRequired": "Elige un nombre visible."
+    "displayNameRequired": "Elige un nombre visible.",
+    "deleteSection": "Eliminar tu cuenta",
+    "deleteWarn": "Esto no se puede deshacer.",
+    "deleteKeep": "Conservar mis comentarios y quitar mi nombre",
+    "deleteKeepHint": "Tus comentarios siguen en los capítulos como «Cuenta eliminada». Las respuestas de debajo siguen teniendo sentido.",
+    "deletePurge": "Eliminar también mis comentarios",
+    "deletePurgeHint": "Todo lo que has escrito se va con la cuenta. Las respuestas pueden quedarse sin nada a lo que responder.",
+    "deleteConfirmPassword": "Tu contraseña",
+    "deleteConfirmUsername": "Escribe tu nombre de usuario para confirmar",
+    "deleteButton": "Eliminar mi cuenta",
+    "deleteDone": "Tu cuenta ha sido eliminada."
   },
   "fanart": {
     "title": "Fan art",

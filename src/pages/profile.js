@@ -48,7 +48,7 @@ const commentCard = (comment, { moderation = false } = {}) => {
           ${escapeHTML(t(STATUS_LABEL[status] || STATUS_LABEL.visible))}
         </span>
       </div>
-      ${moderation ? `<p class="mine-author">${escapeHTML(comment.author?.displayName || comment.author?.username || '')}</p>` : ''}
+      ${moderation ? `<p class="mine-author">${escapeHTML(comment.author?.deleted ? t('comments.deletedAuthor') : comment.author?.displayName || comment.author?.username || '')}</p>` : ''}
       <p class="mine-body">${escapeHTML(comment.body || '')}</p>
       ${comment.flagReason ? `<p class="mine-flag">${escapeHTML(comment.flagReason)}</p>` : ''}
       <time class="mine-time" datetime="${escapeHTML(comment.createdAt)}">
@@ -298,6 +298,55 @@ export async function render(params = {}) {
           : ''
       }
 
+      <section class="account-section danger-section">
+        <h2>${escapeHTML(t('account.deleteSection'))}</h2>
+        <details class="setting" id="setting-delete">
+          <summary class="setting-summary">
+            <span class="setting-label">${escapeHTML(t('account.deleteSection'))}</span>
+            <span class="setting-value is-danger">${escapeHTML(t('account.deleteWarn'))}</span>
+          </summary>
+          <div class="setting-body">
+            <form id="delete-form" class="account-form" novalidate>
+              <p class="form-error" id="delete-error" role="alert" hidden></p>
+
+              <fieldset class="choice-set">
+                <label class="choice">
+                  <input type="radio" name="mode" value="anonymise" checked>
+                  <span>
+                    <strong>${escapeHTML(t('account.deleteKeep'))}</strong>
+                    <small>${escapeHTML(t('account.deleteKeepHint'))}</small>
+                  </span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="mode" value="purge">
+                  <span>
+                    <strong>${escapeHTML(t('account.deletePurge'))}</strong>
+                    <small>${escapeHTML(t('account.deletePurgeHint'))}</small>
+                  </span>
+                </label>
+              </fieldset>
+
+              ${
+                user.hasPassword
+                  ? `<label class="field">
+                       <span>${escapeHTML(t('account.deleteConfirmPassword'))}</span>
+                       <input name="password" type="password" autocomplete="current-password" required>
+                     </label>`
+                  : `<label class="field">
+                       <span>${escapeHTML(t('account.deleteConfirmUsername'))}</span>
+                       <input name="confirmUsername" type="text" autocomplete="off" required
+                              placeholder="${escapeHTML(user.username)}">
+                     </label>`
+              }
+
+              <button type="submit" class="button button--danger">
+                ${escapeHTML(t('account.deleteButton'))}
+              </button>
+            </form>
+          </div>
+        </details>
+      </section>
+
       <section class="account-section">
         <h2>${escapeHTML(t('profile.myComments'))} <span class="count-pill">${mine.total}</span></h2>
         ${
@@ -472,6 +521,44 @@ export function mount() {
         err instanceof ApiError ? map[err.code] || err.message : t('common.error')
       );
     } finally {
+      submit.disabled = false;
+    }
+    return undefined;
+  });
+
+  // --- deleting the account ------------------------------------------------
+  const deleteForm = document.getElementById('delete-form');
+  const deleteError = document.getElementById('delete-error');
+
+  bind(deleteForm, 'submit', async (event) => {
+    event.preventDefault();
+    deleteError.hidden = true;
+
+    const data = Object.fromEntries(new FormData(deleteForm));
+    const mode = data.mode === 'purge' ? 'purge' : 'anonymise';
+
+    // One last plain question. Everything past this point is irreversible, and
+    // the two choices mean different things, so the question names which one.
+    const warning = mode === 'purge' ? t('account.deletePurgeHint') : t('account.deleteKeepHint');
+    if (!window.confirm(`${t('account.deleteWarn')}\n\n${warning}`)) return;
+
+    const submit = deleteForm.querySelector('button[type="submit"]');
+    submit.disabled = true;
+    try {
+      await api.deleteAccount({
+        mode,
+        password: data.password ? String(data.password) : undefined,
+        confirmUsername: data.confirmUsername ? String(data.confirmUsername).trim() : undefined,
+      });
+      await session.refresh();
+      toastSuccess(t('account.deleteDone'));
+      navigate('home', {}, { replace: true });
+    } catch (err) {
+      const map = {
+        invalid_credentials: t('auth.invalidCredentials'),
+        auth_rate_limited: t('auth.rateLimited'),
+      };
+      fail(deleteError, err instanceof ApiError ? map[err.code] || err.message : t('common.error'));
       submit.disabled = false;
     }
     return undefined;

@@ -88,10 +88,36 @@ export function translateDOM(scope = document) {
   });
 }
 
+/**
+ * Parses a stored value into a Date.
+ *
+ * A bare `YYYY-MM-DD` is parsed by the platform as UTC midnight, so anybody
+ * west of Greenwich saw the day before -- an update dated 1 July showed as
+ * 30 June in California. A date with no time in it means a day, not an
+ * instant, so it is built from its own parts in the reader's own zone.
+ * Anything carrying a time is a real instant and is left alone.
+ */
+function toDate(value) {
+  const raw = String(value ?? '').trim();
+  if (!raw) return null;
+
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
+  if (dateOnly) {
+    return new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]));
+  }
+
+  // SQLite writes `2026-09-13 20:13:44` with no zone, and it is always UTC --
+  // datetime('now') is. Left as-is the platform reads it as local time, so
+  // every comment timestamp was out by the reader's offset.
+  const sqlite = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(raw);
+  const date = new Date(sqlite ? `${raw.replace(' ', 'T')}Z` : raw);
+
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
 export function formatDate(value) {
-  if (!value) return '';
-  const date = new Date(String(value).trim());
-  if (Number.isNaN(date.getTime())) return String(value);
+  const date = toDate(value);
+  if (!date) return String(value ?? '');
 
   try {
     return new Intl.DateTimeFormat(strings.meta?.locale || active, {
@@ -101,6 +127,30 @@ export function formatDate(value) {
     }).format(date);
   } catch {
     return date.toISOString().slice(0, 10);
+  }
+}
+
+/**
+ * The day and the time of day, in whatever zone the reader is in.
+ *
+ * Used wherever the hour matters -- a chapter that drops at 18:00 in Amman is
+ * a different hour everywhere else, and telling a reader in Tokyo the Amman
+ * time would be telling them the wrong thing.
+ */
+export function formatDateTime(value) {
+  const date = toDate(value);
+  if (!date) return String(value ?? '');
+
+  try {
+    return new Intl.DateTimeFormat(strings.meta?.locale || active, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    }).format(date);
+  } catch {
+    return date.toISOString().replace('T', ' ').slice(0, 16);
   }
 }
 

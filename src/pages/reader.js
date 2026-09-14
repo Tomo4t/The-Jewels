@@ -1,5 +1,5 @@
 import { escapeHTML, announce, prefersReducedMotion } from '../lib/dom.js';
-import { t, currentLanguage, formatDate } from '../lib/i18n.js';
+import { t, currentLanguage, formatDateTime } from '../lib/i18n.js';
 import { read, write, writeJSON, KEYS } from '../lib/store.js';
 import { play } from '../lib/sound.js';
 import { syncHash, buildHash } from '../router.js';
@@ -40,7 +40,7 @@ export async function render(params) {
     // it does exist -- saying "not found" to someone who followed a countdown
     // would read as the page being broken.
     const notOut = err instanceof ApiError && err.code === 'not_released_yet';
-    const when = notOut && err.details?.releaseAt ? formatDate(err.details.releaseAt) : null;
+    const when = notOut && err.details?.releaseAt ? formatDateTime(err.details.releaseAt) : null;
 
     return `
       <div class="reader-missing">

@@ -195,6 +195,7 @@ export const api = {
   changePassword: (currentPassword, newPassword) =>
     request('/api/auth/password', { method: 'POST', body: { currentPassword, newPassword } }),
   updateProfile: (payload) => request('/api/auth/profile', { method: 'PUT', body: payload }),
+  deleteAccount: (payload) => request('/api/auth/account', { method: 'DELETE', body: payload }),
 
   // reading progress kept on the account
   progress: (lang) =>
@@ -214,6 +215,11 @@ export const api = {
   moderationQueue: () => request('/api/comments/moderation/queue'),
   myComments: ({ limit = 50, offset = 0 } = {}) =>
     request(`/api/comments/mine?limit=${limit}&offset=${offset}`),
+  adminUpdateChapterPages: (lang, number, formData) =>
+    request(`/api/admin/chapters/${encodeURIComponent(lang)}/${Number(number)}/pages`, {
+      method: 'PUT',
+      body: formData,
+    }),
   adminScheduleChapter: (lang, number, payload) =>
     request(`/api/admin/chapters/${encodeURIComponent(lang)}/${Number(number)}/release`, {
       method: 'PATCH',
@@ -231,6 +237,11 @@ export const api = {
   moderate: (id, action) =>
     request(`/api/comments/${Number(id)}/moderate`, { method: 'POST', body: { action } }),
   adminChapters: () => request('/api/admin/chapters'),
+  adminUpdateChapter: (lang, number, payload) =>
+    request(`/api/admin/chapters/${encodeURIComponent(lang)}/${Number(number)}`, {
+      method: 'PATCH',
+      body: payload,
+    }),
   adminUploadChapter: (formData) =>
     request('/api/admin/chapters', { method: 'POST', body: formData }),
   adminDeleteChapter: (lang, number) =>

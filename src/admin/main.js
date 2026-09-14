@@ -9,6 +9,7 @@ import {
   LANGUAGES,
   LANGUAGE_NAMES,
   formatRelative,
+  formatDateTime,
 } from '../lib/i18n.js';
 import { initTheme, toggleTheme } from '../lib/theme.js';
 import session from '../lib/session.js';
@@ -136,10 +137,17 @@ async function renderChapters(panel) {
         <div class="admin-form-row">
           ${languageSelect('chapter-lang')}
           <label class="field">
-            <span>${escapeHTML(t('admin.chapterNumber'))}</span>
-            <input type="number" name="number" min="1" max="9999" required value="1">
+            <span>${escapeHTML(t('admin.release.releaseAt'))}</span>
+            <input type="datetime-local" name="releaseAt">
           </label>
         </div>
+        <p class="field-hint" id="next-number"></p>
+        <p class="field-hint">${escapeHTML(t('admin.release.uploadDateHint'))}</p>
+        <label class="switch-label">
+          <input type="checkbox" name="archived">
+          <span>${escapeHTML(t('admin.release.uploadArchived'))}</span>
+        </label>
+        <p class="field-hint">${escapeHTML(t('admin.release.uploadArchivedHint'))}</p>
         <label class="field">
           <span>${escapeHTML(t('admin.chapterTitle'))}</span>
           <input type="text" name="title" maxlength="120" required>
@@ -195,11 +203,9 @@ async function renderChapters(panel) {
                             </span>
                           </span>
                           <span class="admin-list-controls">
-                            <label class="field field--inline">
-                              <span>${escapeHTML(t('admin.release.releaseAt'))}</span>
-                              <input type="datetime-local" data-release="${lang}:${c.number}"
-                                     value="${escapeHTML(toLocalInput(c.releaseAt))}">
-                            </label>
+                            <button type="button" class="link-button" data-edit="${lang}:${c.number}">
+                              ${escapeHTML(t('admin.release.edit'))}
+                            </button>
                             <button type="button" class="link-button" data-archive="${lang}:${c.number}:${c.archived ? '1' : '0'}">
                               ${escapeHTML(c.archived ? t('admin.release.unarchive') : t('admin.release.archive'))}
                             </button>
@@ -221,25 +227,12 @@ async function renderChapters(panel) {
     </section>
   `;
 
-  wireChapterForm(panel);
+  wireChapterForm(panel, chapters);
 
-  // --- scheduling ---------------------------------------------------------
-  // The date is applied on change rather than behind a save button: there is
-  // one field, and a save button next to one field is a step for its own sake.
-  panel.querySelectorAll('[data-release]').forEach((input) => {
-    input.addEventListener('change', async () => {
-      const [lang, number] = input.dataset.release.split(':');
-      try {
-        await api.adminScheduleChapter(lang, number, {
-          releaseAt: input.value ? new Date(input.value).toISOString() : null,
-        });
-        toastSuccess(
-          input.value ? t('admin.release.scheduledToast') : t('admin.release.liveToast')
-        );
-        renderShell();
-      } catch (err) {
-        fail(err);
-      }
+  panel.querySelectorAll('[data-edit]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const [lang, number] = button.dataset.edit.split(':');
+      openChapterEditor(button.closest('li'), lang, Number(number), chapters);
     });
   });
 
@@ -270,8 +263,263 @@ async function renderChapters(panel) {
   });
 }
 
-function wireChapterForm(panel) {
+// --- chapter editor ---------------------------------------------------------
+
+/**
+ * Opens inline under the chapter it edits.
+ *
+ * Title, description, release date and archived save together; the pages save
+ * separately, because sending thirty images every time a title changes would
+ * be absurd. The page list is edited as the list you want to end up with --
+ * reorder, replace, drop and add are all just that list coming out different,
+ * which is also exactly what the server is told.
+ */
+async function openChapterEditor(host, lang, number, chapters) {
+  const existing = host.querySelector('.chapter-editor');
+  if (existing) {
+    existing.remove();
+    return;
+  }
+
+  const meta = (chapters[lang] || []).find((c) => c.number === number);
+  if (!meta) return;
+
+  let detail;
+  try {
+    detail = await api.chapter(lang, number);
+  } catch (err) {
+    fail(err);
+    return;
+  }
+
+  // Each entry is either a page already on the server or a file about to be.
+  let layout = detail.pages.map((src, index) => ({ kind: 'keep', at: index, src }));
+
+  const box = el('div', { class: 'chapter-editor' });
+  box.innerHTML = `
+    <form class="admin-form chapter-editor-form">
+      <label class="field">
+        <span>${escapeHTML(t('admin.chapterTitle'))}</span>
+        <input type="text" name="title" maxlength="120" required value="${escapeHTML(meta.title)}">
+      </label>
+      <label class="field">
+        <span>${escapeHTML(t('admin.chapterDescription'))}</span>
+        <textarea name="description" rows="2" maxlength="600">${escapeHTML(meta.description || '')}</textarea>
+      </label>
+      <div class="admin-form-row">
+        <label class="field">
+          <span>${escapeHTML(t('admin.release.releaseAt'))}</span>
+          <input type="datetime-local" name="releaseAt" value="${escapeHTML(toLocalInput(meta.releaseAt))}">
+        </label>
+        <label class="switch-label">
+          <input type="checkbox" name="archived" ${meta.archived ? 'checked' : ''}>
+          <span>${escapeHTML(t('admin.release.archived'))}</span>
+        </label>
+      </div>
+      <button type="submit" class="button button--primary">${escapeHTML(t('admin.release.saveDetails'))}</button>
+    </form>
+
+    <div class="page-editor">
+      <h4>${escapeHTML(t('admin.release.pages'))} <span class="count" data-page-count>${layout.length}</span></h4>
+      <ol class="page-grid" data-page-grid></ol>
+      <div class="page-editor-actions">
+        <label class="link-button">
+          ${escapeHTML(t('admin.release.addPages'))}
+          <input type="file" accept="image/jpeg,image/png,image/webp" multiple hidden data-add-pages>
+        </label>
+        <button type="button" class="button button--primary" data-save-pages disabled>
+          ${escapeHTML(t('admin.release.savePages'))}
+        </button>
+        <progress data-page-progress max="100" value="0" hidden></progress>
+      </div>
+    </div>
+  `;
+  host.append(box);
+
+  const grid = box.querySelector('[data-page-grid]');
+  const savePages = box.querySelector('[data-save-pages]');
+  const count = box.querySelector('[data-page-count]');
+  let dirty = false;
+
+  const markDirty = () => {
+    dirty = true;
+    savePages.disabled = false;
+  };
+
+  const draw = () => {
+    grid.replaceChildren();
+    layout.forEach((entry, index) => {
+      const src = entry.kind === 'keep' ? entry.src : URL.createObjectURL(entry.file);
+
+      const item = el(
+        'li',
+        { class: `page-cell ${entry.kind === 'new' ? 'is-new' : ''}` },
+        el('img', {
+          src,
+          alt: '',
+          loading: 'lazy',
+          onLoad: () => entry.kind === 'new' && URL.revokeObjectURL(src),
+        }),
+        el('span', { class: 'page-cell-index', text: String(index + 1) }),
+        el(
+          'span',
+          { class: 'page-cell-tools' },
+          el('button', {
+            type: 'button',
+            class: 'page-tool',
+            title: t('admin.release.moveUp'),
+            'aria-label': t('admin.release.moveUp'),
+            text: '←',
+            disabled: index === 0,
+            onClick: () => {
+              [layout[index - 1], layout[index]] = [layout[index], layout[index - 1]];
+              markDirty();
+              draw();
+            },
+          }),
+          el('button', {
+            type: 'button',
+            class: 'page-tool',
+            title: t('admin.release.moveDown'),
+            'aria-label': t('admin.release.moveDown'),
+            text: '→',
+            disabled: index === layout.length - 1,
+            onClick: () => {
+              [layout[index + 1], layout[index]] = [layout[index], layout[index + 1]];
+              markDirty();
+              draw();
+            },
+          }),
+          el(
+            'label',
+            { class: 'page-tool', title: t('admin.release.replace') },
+            '⤒',
+            el('input', {
+              type: 'file',
+              accept: 'image/jpeg,image/png,image/webp',
+              hidden: true,
+              onChange: (event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                layout[index] = { kind: 'new', file };
+                markDirty();
+                draw();
+              },
+            })
+          ),
+          el('button', {
+            type: 'button',
+            class: 'page-tool is-danger',
+            title: t('common.delete'),
+            'aria-label': t('common.delete'),
+            text: '×',
+            onClick: () => {
+              // A chapter with no pages is not a chapter, so the last one
+              // cannot be removed -- delete the chapter instead.
+              if (layout.length === 1) {
+                toastError(t('admin.release.lastPage'));
+                return;
+              }
+              layout.splice(index, 1);
+              markDirty();
+              draw();
+            },
+          })
+        )
+      );
+      grid.append(item);
+    });
+    count.textContent = String(layout.length);
+  };
+
+  draw();
+
+  box.querySelector('[data-add-pages]').addEventListener('change', (event) => {
+    const files = Array.from(event.target.files || []).filter((f) => f.type.startsWith('image/'));
+    if (!files.length) return;
+    files.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+    layout = [...layout, ...files.map((file) => ({ kind: 'new', file }))];
+    markDirty();
+    draw();
+    event.target.value = '';
+  });
+
+  // --- the details, which do not need the images -------------------------
+  box.querySelector('.chapter-editor-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const submit = form.querySelector('button[type="submit"]');
+    submit.disabled = true;
+
+    try {
+      await api.adminUpdateChapter(lang, number, {
+        title: form.querySelector('[name="title"]').value,
+        description: form.querySelector('[name="description"]').value,
+      });
+      const releaseAt = form.querySelector('[name="releaseAt"]').value;
+      await api.adminScheduleChapter(lang, number, {
+        releaseAt: releaseAt ? new Date(releaseAt).toISOString() : null,
+        archived: form.querySelector('[name="archived"]').checked,
+      });
+      toastSuccess(t('admin.release.savedDetails'));
+      renderShell();
+    } catch (err) {
+      fail(err);
+      submit.disabled = false;
+    }
+  });
+
+  // --- the pages ----------------------------------------------------------
+  savePages.addEventListener('click', async () => {
+    if (!dirty) return;
+    const progress = box.querySelector('[data-page-progress]');
+    savePages.disabled = true;
+    progress.hidden = false;
+    progress.removeAttribute('value');
+
+    const data = new FormData();
+    const spec = [];
+    let newIndex = 0;
+
+    for (const entry of layout) {
+      if (entry.kind === 'keep') {
+        spec.push(`keep:${entry.at}`);
+      } else {
+        data.append('pages', entry.file, entry.file.name);
+        spec.push(`new:${newIndex}`);
+        newIndex += 1;
+      }
+    }
+    data.set('layout', JSON.stringify(spec));
+
+    try {
+      await api.adminUpdateChapterPages(lang, number, data);
+      toastSuccess(t('admin.release.savedPages'));
+      renderShell();
+    } catch (err) {
+      fail(err);
+      savePages.disabled = false;
+    } finally {
+      progress.hidden = true;
+    }
+  });
+}
+
+function wireChapterForm(panel, chapters) {
   const form = panel.querySelector('#chapter-form');
+  const nextNote = panel.querySelector('#next-number');
+  const langSelect = panel.querySelector('#chapter-lang');
+
+  // The number is not a field any more, so it has to be said out loud --
+  // otherwise the author has no idea what they are about to publish.
+  const showNextNumber = () => {
+    const list = chapters[langSelect.value] || [];
+    const next = list.reduce((max, c) => Math.max(max, c.number), 0) + 1;
+    nextNote.textContent = t('admin.release.willBeChapter', { n: next });
+  };
+  langSelect.addEventListener('change', showNextNumber);
+  showNextNumber();
+
   const dropzone = panel.querySelector('#dropzone');
   const input = panel.querySelector('#page-input');
   const preview = panel.querySelector('#page-preview');
@@ -358,10 +606,14 @@ function wireChapterForm(panel) {
     if (!files.length) return;
 
     const data = new FormData();
+    // No number: the server takes the next one, so a gap can never open up
+    // and hide everything after it.
     data.set('lang', form.querySelector('#chapter-lang').value);
-    data.set('number', form.querySelector('[name="number"]').value);
     data.set('title', form.querySelector('[name="title"]').value);
     data.set('description', form.querySelector('[name="description"]').value);
+    const releaseAt = form.querySelector('[name="releaseAt"]').value;
+    if (releaseAt) data.set('releaseAt', new Date(releaseAt).toISOString());
+    if (form.querySelector('[name="archived"]').checked) data.set('archived', 'true');
     data.set('order', JSON.stringify(files.map((f) => f.name)));
     for (const file of files) data.append('pages', file, file.name);
 
@@ -387,7 +639,6 @@ function wireChapterForm(panel) {
 
 async function renderUpdates(panel) {
   const { updates } = await api.adminUpdates();
-  const today = new Date().toISOString().slice(0, 10);
 
   panel.innerHTML = `
     <section class="admin-section">
@@ -395,11 +646,8 @@ async function renderUpdates(panel) {
       <form id="update-form" class="admin-form">
         <div class="admin-form-row">
           ${languageSelect('update-lang')}
-          <label class="field">
-            <span>${escapeHTML(t('admin.updateDate'))}</span>
-            <input type="date" name="date" required value="${today}">
-          </label>
         </div>
+        <p class="field-hint">${escapeHTML(t('admin.updateStamped'))}</p>
         <label class="field">
           <span>${escapeHTML(t('admin.updateBody'))}</span>
           <textarea name="body" rows="4" maxlength="2000" required></textarea>
@@ -421,7 +669,7 @@ async function renderUpdates(panel) {
                       (u) => `
                         <li>
                           <span class="admin-list-main">
-                            <strong>${escapeHTML(u.date)}</strong>
+                            <strong>${escapeHTML(formatDateTime(u.date))}</strong>
                             ${escapeHTML(u.body.slice(0, 140))}${u.body.length > 140 ? '…' : ''}
                           </span>
                           <button type="button" class="link-button link-button--danger"
@@ -444,7 +692,6 @@ async function renderUpdates(panel) {
     try {
       await api.adminSaveUpdate({
         lang: form.querySelector('#update-lang').value,
-        date: form.querySelector('[name="date"]').value,
         body: form.querySelector('[name="body"]').value,
       });
       toastSuccess(t('common.save'));

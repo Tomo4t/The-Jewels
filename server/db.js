@@ -103,6 +103,11 @@ addColumn('users', 'google_sub', 'TEXT');
 // Everyone already on the site registered by hand and typed their own
 // username, so the backfill closes the window for them the one time the
 // column appears. Only accounts created after this, by Google, start NULL.
+// Set when somebody deletes their account but asks to keep what they wrote.
+// The row has to survive -- comments reference it, and ON DELETE CASCADE would
+// take every reply thread with it -- so it is scrubbed and marked instead.
+addColumn('users', 'deleted_at', 'TEXT');
+
 if (addColumn('users', 'profile_setup_at', 'TEXT')) {
   db.exec("UPDATE users SET profile_setup_at = COALESCE(created_at, datetime('now'))");
 }
