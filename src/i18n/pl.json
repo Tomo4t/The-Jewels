@@ -66,6 +66,16 @@
   "contact": {
     "title": "Wszystkie oficjalne profile twórcy"
   },
+  "legal": {
+    "privacy": {
+      "title": "Prywatność"
+    },
+    "terms": {
+      "title": "Regulamin"
+    },
+    "updated": "Ostatnia aktualizacja: {date}",
+    "englishOnly": "Ta strona jest napisana po angielsku."
+  },
   "auth": {
     "signIn": "Zaloguj się",
     "signUp": "Załóż konto",

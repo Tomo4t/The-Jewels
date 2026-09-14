@@ -14,13 +14,27 @@ registerRoute('chapters', () => import('./pages/chapters.js'));
 registerRoute('reader', () => import('./pages/reader.js'));
 registerRoute('contact', () => import('./pages/contact.js'));
 registerRoute('fanart', () => import('./pages/fanart.js'));
+registerRoute('privacy', () => import('./pages/privacy.js'));
+registerRoute('terms', () => import('./pages/terms.js'));
 registerRoute('signin', () => import('./pages/auth.js').then((m) => m.signIn));
 registerRoute('signup', () => import('./pages/auth.js').then((m) => m.signUp));
 registerRoute('profile', () => import('./pages/profile.js'));
 registerRoute('reset', () => import('./pages/reset.js'));
 registerRoute('notFound', () => import('./pages/notFound.js'));
 
+// Entry points that live outside the site — a privacy policy URL given to
+// Google, a link pasted into a forum — arrive as a path rather than a hash.
+// The server serves index.html for these, and the router takes it from here.
+const PATH_ROUTES = { '/privacy': 'privacy', '/terms': 'terms' };
+
+function adoptPathRoute() {
+  if (window.location.hash) return;
+  const route = PATH_ROUTES[window.location.pathname.replace(/\/+$/, '') || '/'];
+  if (route) window.history.replaceState({}, '', `/#${route}`);
+}
+
 async function bootstrap() {
+  adoptPathRoute();
   initTheme();
   await loadLanguage(preferredLanguage());
   translateDOM(document);

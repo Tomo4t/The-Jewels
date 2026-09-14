@@ -1,0 +1,142 @@
+/* ==========================================================================
+   Legal pages (privacy, terms) and the site footer
+   ========================================================================== */
+
+/* The site paints a photograph behind every page at 0.6 opacity. Short,
+   centred pages carry that fine; a wall of small text does not, and the
+   measured contrast of body text is meaningless when a picture is what sits
+   behind it. So these two pages get an opaque sheet of their own. */
+.legal-page {
+  max-width: 46rem;
+  margin: var(--space-5) auto var(--space-6);
+  padding: var(--space-6) clamp(var(--space-4), 4vw, var(--space-6));
+  color: var(--color-text);
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+@media (max-width: 640px) {
+  .legal-page {
+    margin-inline: var(--space-3);
+    border-radius: var(--radius-md);
+  }
+}
+
+.legal-head {
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.legal-head h1 {
+  margin: 0 0 var(--space-2);
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+}
+
+.legal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.legal-lang-note {
+  font-style: italic;
+}
+
+.legal-section {
+  margin-bottom: var(--space-6);
+}
+
+.legal-section h2 {
+  margin: 0 0 var(--space-3);
+  font-size: 1.15rem;
+  color: var(--color-accent-contrast);
+}
+
+html.dark .legal-section h2 {
+  color: var(--color-text);
+}
+
+.legal-section p,
+.legal-section li {
+  /* Long prose wants a little more air than the site default. */
+  line-height: 1.7;
+}
+
+.legal-section p {
+  margin: 0 0 var(--space-3);
+}
+
+.legal-section ul {
+  margin: 0 0 var(--space-3);
+  padding-left: 1.3rem;
+}
+
+.legal-section li {
+  margin-bottom: var(--space-2);
+}
+
+.legal-page a {
+  color: var(--color-footer-link);
+  text-underline-offset: 2px;
+}
+
+.legal-page a:hover,
+.legal-page a:focus-visible {
+  color: var(--color-footer-link-hover);
+}
+
+.legal-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+  font-size: 0.95rem;
+}
+
+/* --- site footer ---------------------------------------------------------- */
+
+.site-footer {
+  position: relative;
+  z-index: 1;
+  padding: var(--space-4);
+  background-color: var(--color-footer-bg);
+  color: var(--color-footer-text);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.site-footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2) var(--space-4);
+  max-width: 60rem;
+  margin: 0 auto;
+}
+
+.site-footer a {
+  color: var(--color-footer-link);
+  /* Underlined rather than colour-only: the link and the text beside it sit at
+     nearly the same brightness, so colour alone would not distinguish them. */
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.site-footer a:hover,
+.site-footer a:focus-visible {
+  color: var(--color-footer-link-hover);
+  text-decoration-thickness: 2px;
+}
+
+.site-footer small {
+  color: var(--color-footer-text);
+}

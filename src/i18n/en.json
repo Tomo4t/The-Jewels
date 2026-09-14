@@ -66,6 +66,16 @@
   "contact": {
     "title": "All official socials for the creator"
   },
+  "legal": {
+    "privacy": {
+      "title": "Privacy"
+    },
+    "terms": {
+      "title": "Terms"
+    },
+    "updated": "Last updated {date}",
+    "englishOnly": "This page is written in English."
+  },
   "auth": {
     "signIn": "Sign in",
     "signUp": "Create account",

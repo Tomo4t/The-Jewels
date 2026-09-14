@@ -66,6 +66,16 @@
   "contact": {
     "title": "Tous les réseaux officiels du créateur"
   },
+  "legal": {
+    "privacy": {
+      "title": "Confidentialité"
+    },
+    "terms": {
+      "title": "Conditions"
+    },
+    "updated": "Dernière mise à jour : {date}",
+    "englishOnly": "Cette page est rédigée en anglais."
+  },
   "auth": {
     "signIn": "Se connecter",
     "signUp": "Créer un compte",

@@ -66,6 +66,16 @@
   "contact": {
     "title": "作者の公式SNS一覧"
   },
+  "legal": {
+    "privacy": {
+      "title": "プライバシー"
+    },
+    "terms": {
+      "title": "利用規約"
+    },
+    "updated": "最終更新: {date}",
+    "englishOnly": "このページは英語で書かれています。"
+  },
   "auth": {
     "signIn": "ログイン",
     "signUp": "アカウント作成",
