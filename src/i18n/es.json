@@ -65,7 +65,11 @@
     "backToChapters": "Volver a los capítulos",
     "notFound": "No se ha encontrado ese capítulo.",
     "notOutYet": "Este capítulo aún no ha salido",
-    "outOn": "Llega el {date}."
+    "outOn": "Llega el {date}.",
+    "focusMode": "Modo enfoque",
+    "exitFocus": "Salir del modo enfoque",
+    "focusEntered": "Modo enfoque activado. Pulsa Esc para salir.",
+    "focusLeft": "Modo enfoque desactivado."
   },
   "contact": {
     "title": "Todas las redes oficiales del creador"

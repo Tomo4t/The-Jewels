@@ -65,7 +65,11 @@
     "backToChapters": "Wróć do rozdziałów",
     "notFound": "Nie znaleziono takiego rozdziału.",
     "notOutYet": "Ten rozdział jeszcze nie wyszedł",
-    "outOn": "Ukaże się {date}."
+    "outOn": "Ukaże się {date}.",
+    "focusMode": "Tryb skupienia",
+    "exitFocus": "Wyjdź z trybu skupienia",
+    "focusEntered": "Tryb skupienia włączony. Naciśnij Esc, aby wyjść.",
+    "focusLeft": "Tryb skupienia wyłączony."
   },
   "contact": {
     "title": "Wszystkie oficjalne profile twórcy"

@@ -62,9 +62,19 @@
   align-items: center;
 }
 
-.reader-toggle {
+/* The mode group and the focus toggle share a row; the group keeps its own
+   role="group" rather than swallowing an unrelated control. */
+.reader-controls {
   grid-column: 1;
   justify-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.reader-toggle {
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -482,5 +492,118 @@ html.dark .mode-btn.active img {
 
     max-width: min(100%, calc(var(--scroll-h) * 2 / 3));
     height: var(--scroll-h);
+  }
+}
+
+/* --- focus mode ----------------------------------------------------------
+   Nothing on the screen but the pages. The class on <html> is what does the
+   work; fullscreen is asked for on top of it and is allowed to fail. */
+
+.focus-btn svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  color: var(--color-text);
+}
+
+/* Brackets point outwards to go in, inwards to come back. */
+.focus-btn .focus-in,
+html.reading-focus .focus-btn .focus-out {
+  display: none;
+}
+
+html.reading-focus .focus-btn .focus-in {
+  display: inline;
+}
+
+html.reading-focus {
+  overflow: hidden;
+}
+
+html.reading-focus .navbar,
+html.reading-focus .site-footer,
+html.reading-focus .comments-section,
+html.reading-focus .reader-title {
+  display: none;
+}
+
+html.reading-focus .reader-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--color-focus-backdrop);
+  padding: 0;
+}
+
+/* The chrome left in focus mode is the button row, the counter and the two
+   arrows -- roughly 190px, against the 320px the normal layout has to reserve.
+   The page takes the difference. */
+html.reading-focus .book {
+  --page-h: clamp(300px, calc(100svh - 190px), 1200px);
+
+  padding-top: 0;
+}
+
+html.reading-focus .reader-toolbar {
+  padding: var(--space-3) var(--space-3) var(--space-2);
+}
+
+/* The arrows are spaced by `max-width: 20%` against auto margins, which works
+   on a block but not here: an auto margin in a flex column shrinks the item to
+   its content, and the two arrows ended up touching in the middle. An explicit
+   width puts the gap back without depending on the parent's display. */
+html.reading-focus .navbtns {
+  width: min(22rem, 45vw);
+  max-width: none;
+}
+
+/* The backdrop is near-black in BOTH themes, so whatever is left on it has to
+   be light in both. The paging arrows carry no colour filter at all -- they are
+   raw black SVG, which is right on the site's own pale backdrop and measures
+   1.13:1 here -- and the counter's muted token manages 3.11:1 in the light
+   theme. Both land near 12:1 this way. */
+html.reading-focus .page-indicator {
+  color: var(--color-focus-ink);
+}
+
+html.reading-focus .navbtns img {
+  filter: brightness(0) invert(0.82);
+}
+
+/* Faded rather than removed, so the page does not resize every time the
+   controls come and go. */
+html.reading-focus .reader-toolbar,
+html.reading-focus .page-indicator,
+html.reading-focus .navbtns {
+  transition: opacity 400ms ease;
+}
+
+html.reading-focus .reader-wrapper.is-idle .reader-toolbar,
+html.reading-focus .reader-wrapper.is-idle .page-indicator,
+html.reading-focus .reader-wrapper.is-idle .navbtns {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.reading-focus .reader-toolbar,
+  html.reading-focus .page-indicator,
+  html.reading-focus .navbtns {
+    transition: none;
+  }
+}
+
+/* The phone rule below reserves 200px for a bar and a footer that focus mode
+   has already taken away. */
+@media (max-width: 640px) {
+  html.reading-focus .Wepcomic-inner {
+    --scroll-h: min(calc(100vw * 3 / 2), calc(100svh - 150px));
   }
 }

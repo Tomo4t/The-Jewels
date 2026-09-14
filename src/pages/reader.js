@@ -71,10 +71,21 @@ export async function render(params) {
       <div class="reader-toolbar">
         <h1 class="reader-title">${escapeHTML(chapter.title)}</h1>
 
-        <div class="reader-toggle" role="group" aria-label="${escapeHTML(t('reader.comicMode'))}">
-          ${modeButton('comic', 'flip', t('reader.comicMode'), 'open-page.svg')}
-          ${modeButton('scroll', 'scroll', t('reader.scrollMode'), 'scroll.svg')}
-          ${modeButton('card', 'card', t('reader.cardMode'), 'card.svg')}
+        <div class="reader-controls">
+          <div class="reader-toggle" role="group" aria-label="${escapeHTML(t('reader.comicMode'))}">
+            ${modeButton('comic', 'flip', t('reader.comicMode'), 'open-page.svg')}
+            ${modeButton('scroll', 'scroll', t('reader.scrollMode'), 'scroll.svg')}
+            ${modeButton('card', 'card', t('reader.cardMode'), 'card.svg')}
+          </div>
+
+          <button type="button" id="focus-btn" class="mode-btn focus-btn" data-sound="ui"
+                  title="${escapeHTML(t('reader.focusMode'))}"
+                  aria-label="${escapeHTML(t('reader.focusMode'))}" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path class="focus-out" d="M4 9V5h5M20 9V5h-5M4 15v4h5M20 15v4h-5" />
+              <path class="focus-in" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" />
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -502,13 +513,100 @@ function renderCard(book) {
 
 // --- input ----------------------------------------------------------------
 
+// --- focus mode -----------------------------------------------------------
+
+/**
+ * Reading with nothing else on the screen.
+ *
+ * Two layers, because they fail independently. The `reading-focus` class does
+ * the actual work -- it lays the reader over the viewport and takes the bar,
+ * the footer and the comments out of the way -- and fullscreen is requested on
+ * top of that, to get the browser's own chrome out too. Safari on iOS grants
+ * fullscreen to nothing but a <video>, so on a phone the class carries the
+ * whole feature on its own and the reader still fills the screen.
+ */
+
+const IDLE_AFTER = 2500;
+let idleTimer = null;
+let unwatchIdle = null;
+
+const inFocus = () => document.documentElement.classList.contains('reading-focus');
+
+/**
+ * Hides the controls once the reader has been still for a moment, and brings
+ * them back on the first sign of life. Pointer devices only: a phone has no
+ * pointer to move, and a tap on the page already turns it, so there would be
+ * no gesture left to summon a hidden control back.
+ */
+function watchIdle() {
+  stopWatchingIdle();
+  if (!window.matchMedia('(hover: hover)').matches) return;
+
+  const wrapper = document.querySelector('.reader-wrapper');
+  if (!wrapper) return;
+
+  const sleep = () => wrapper.classList.add('is-idle');
+  const wake = () => {
+    wrapper.classList.remove('is-idle');
+    window.clearTimeout(idleTimer);
+    idleTimer = window.setTimeout(sleep, IDLE_AFTER);
+  };
+
+  // focusin is in the list so a keyboard reader tabbing to a control brings
+  // the set back rather than tabbing into something invisible.
+  const events = ['pointermove', 'pointerdown', 'keydown', 'wheel', 'focusin'];
+  for (const name of events) document.addEventListener(name, wake, { passive: true });
+
+  unwatchIdle = () => {
+    for (const name of events) document.removeEventListener(name, wake);
+    window.clearTimeout(idleTimer);
+    wrapper.classList.remove('is-idle');
+  };
+
+  wake();
+}
+
+function stopWatchingIdle() {
+  unwatchIdle?.();
+  unwatchIdle = null;
+}
+
+function setFocus(on) {
+  if (inFocus() === on) return;
+
+  document.documentElement.classList.toggle('reading-focus', on);
+
+  const btn = document.getElementById('focus-btn');
+  if (btn) {
+    const label = t(on ? 'reader.exitFocus' : 'reader.focusMode');
+    btn.setAttribute('aria-pressed', String(on));
+    btn.setAttribute('aria-label', label);
+    btn.title = label;
+  }
+
+  if (on) {
+    // Rejected on iOS, and whenever the click that got here was not counted as
+    // a user gesture. Neither is a failure: the class has already done the
+    // part that matters.
+    document.documentElement.requestFullscreen?.({ navigationUI: 'hide' }).catch(() => {});
+    watchIdle();
+  } else {
+    if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+    stopWatchingIdle();
+  }
+
+  announce(t(on ? 'reader.focusEntered' : 'reader.focusLeft'));
+}
+
 function bindToolbar() {
-  document.querySelectorAll('.mode-btn').forEach((btn) => {
+  document.querySelectorAll('.mode-btn[data-mode]').forEach((btn) => {
     btn.addEventListener('click', () => {
       if (btn.dataset.mode === state.mode) return;
       renderMode(btn.dataset.mode);
     });
   });
+
+  document.getElementById('focus-btn')?.addEventListener('click', () => setFocus(!inFocus()));
 }
 
 function bindInput() {
@@ -528,7 +626,25 @@ function bindInput() {
     } else if (event.key === 'Home') {
       event.preventDefault();
       renderMode(state.mode);
+    } else if (event.key === 'f' || event.key === 'F') {
+      event.preventDefault();
+      setFocus(!inFocus());
+    } else if (event.key === 'Escape' && inFocus()) {
+      // Real fullscreen answers Escape itself and reports back through
+      // fullscreenchange, which lands in the same place -- but when fullscreen
+      // was never granted, nothing else would let go of the screen. Handling it
+      // here either way costs nothing, because setFocus does nothing when it is
+      // asked for the state it is already in.
+      event.preventDefault();
+      setFocus(false);
     }
+  };
+
+  // Leaving fullscreen by Escape, F11 or the browser's own control should leave
+  // focus mode with it -- otherwise the reader stays laid over the page with no
+  // visible way out.
+  const onFullscreenChange = () => {
+    if (!document.fullscreenElement && inFocus()) setFocus(false);
   };
 
   // --- swipe ---
@@ -558,13 +674,18 @@ function bindInput() {
   };
 
   document.addEventListener('keydown', onKeydown);
+  document.addEventListener('fullscreenchange', onFullscreenChange);
   book?.addEventListener('touchstart', onTouchStart, { passive: true });
   book?.addEventListener('touchend', onTouchEnd, { passive: true });
 
   return () => {
     document.removeEventListener('keydown', onKeydown);
+    document.removeEventListener('fullscreenchange', onFullscreenChange);
     book?.removeEventListener('touchstart', onTouchStart);
     book?.removeEventListener('touchend', onTouchEnd);
+    // Navigating away while focused would otherwise leave the class on <html>
+    // and every other page laid out for a reader that is no longer there.
+    setFocus(false);
   };
 }
 

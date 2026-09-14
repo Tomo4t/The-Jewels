@@ -65,7 +65,11 @@
     "backToChapters": "章一覧に戻る",
     "notFound": "その章は見つかりませんでした。",
     "notOutYet": "この章はまだ公開されていません",
-    "outOn": "{date} に公開されます。"
+    "outOn": "{date} に公開されます。",
+    "focusMode": "集中モード",
+    "exitFocus": "集中モードを終了",
+    "focusEntered": "集中モードをオンにしました。Esc キーで終了します。",
+    "focusLeft": "集中モードをオフにしました。"
   },
   "contact": {
     "title": "作者の公式SNS一覧"

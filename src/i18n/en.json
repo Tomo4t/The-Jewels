@@ -65,7 +65,11 @@
     "backToChapters": "Back to chapters",
     "notFound": "That chapter could not be found.",
     "notOutYet": "This chapter is not out yet",
-    "outOn": "It arrives on {date}."
+    "outOn": "It arrives on {date}.",
+    "focusMode": "Focus mode",
+    "exitFocus": "Leave focus mode",
+    "focusEntered": "Focus mode on. Press Escape to leave.",
+    "focusLeft": "Focus mode off."
   },
   "contact": {
     "title": "All official socials for the creator"

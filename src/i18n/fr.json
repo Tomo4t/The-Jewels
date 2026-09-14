@@ -65,7 +65,11 @@
     "backToChapters": "Retour aux chapitres",
     "notFound": "Ce chapitre est introuvable.",
     "notOutYet": "Ce chapitre n'est pas encore paru",
-    "outOn": "Il arrive le {date}."
+    "outOn": "Il arrive le {date}.",
+    "focusMode": "Mode lecture",
+    "exitFocus": "Quitter le mode lecture",
+    "focusEntered": "Mode lecture activé. Appuyez sur Échap pour quitter.",
+    "focusLeft": "Mode lecture désactivé."
   },
   "contact": {
     "title": "Tous les réseaux officiels du créateur"

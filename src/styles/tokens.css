@@ -20,6 +20,12 @@
   --color-text: #2c1e00;
   --color-text-muted: #7a5f30;
 
+  /* Focus mode dims to near-black so the artwork is the only lit thing on the
+     screen. Tinted to each theme's own hue rather than a flat #000, so leaving
+     focus mode is not a jump between two unrelated palettes. */
+  --color-focus-backdrop: #17120a;
+  --color-focus-ink: #d6cec2;
+
   --color-updates-heading: #1a1200;
   --color-updates-text: #2c1e00;
 
@@ -102,6 +108,8 @@ html.dark {
      the 4.5:1 WCAG AA minimum. These pass at 14:1 and 7:1. */
   --color-text: #ece7f5;
   --color-text-muted: #b9a9d4;
+  --color-focus-backdrop: #120e18;
+  --color-focus-ink: #d3cce0;
 
   --color-updates-heading: #ffffff;
   --color-updates-text: #ece7f5;
