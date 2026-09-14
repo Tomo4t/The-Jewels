@@ -185,8 +185,12 @@ html.dark .mode-btn.active img {
      arrows 21px below the fold on a 800px-tall laptop and 35px below on a 760.
      The floor keeps the page usable on a very short window, where the document
      scrolls instead. */
-  --page-h: clamp(300px, calc(100vh - 320px), 700px);
-  --page-h: clamp(300px, calc(100svh - 320px), 700px);
+  /* The cap was 700px, so a page stopped growing well before a large monitor
+     ran out of room and the comic sat small in the middle of it. The chrome
+     above and below is what the 320px subtracts; the cap is now high enough
+     that the viewport, not the constant, is what decides. */
+  --page-h: clamp(300px, calc(100vh - 320px), 1000px);
+  --page-h: clamp(300px, calc(100svh - 320px), 1000px);
   --page-w: calc(var(--page-h) * 27 / 40);
 
   display: flex;
@@ -222,7 +226,7 @@ html.dark .mode-btn.active img {
   height: var(--page-h);
   width: auto;
   aspect-ratio: var(--page-ratio, 27 / 40);
-  max-width: min(90vw, 450px);
+  max-width: min(90vw, var(--page-w));
   perspective: 1500px;
   transition: transform 0.3s ease;
 }
@@ -315,7 +319,7 @@ html.dark .mode-btn.active img {
      `object-fit: contain` filled the other 810px with empty box -- the wide
      frame around the comic in card mode. */
   width: auto;
-  max-width: min(90vw, 450px);
+  max-width: min(90vw, var(--page-w));
   top: 0;
   left: 50%;
   position: absolute;
@@ -332,7 +336,7 @@ html.dark .mode-btn.active img {
      does not resize the page. */
   width: auto;
   height: auto;
-  max-width: min(90vw, 450px);
+  max-width: min(90vw, var(--page-w));
   max-height: var(--page-h);
   display: block;
   margin: 0 auto;

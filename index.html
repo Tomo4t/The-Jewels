@@ -136,10 +136,28 @@
             aria-pressed="false"
             data-i18n-attr="title:nav.theme aria-label:nav.theme"
           >
-            <span class="theme-icons" aria-hidden="true">
-              <img class="theme-sun" src="/images/sun.svg" alt="" />
-              <img class="theme-moon" src="/images/moon.svg" alt="" />
-            </span>
+            <!-- One shape, not two images cross-fading. The orb is a single
+                 circle; a second circle punched out of it by the mask slides
+                 across to carve the crescent, and the rays retract into it.
+                 Two stacked PNGs could only dissolve through each other, which
+                 is what read as a smudge halfway through. -->
+            <svg class="theme-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <mask id="theme-mark-mask">
+                <rect x="0" y="0" width="24" height="24" fill="#fff" />
+                <circle class="theme-bite" cx="26" cy="8" r="7" fill="#000" />
+              </mask>
+              <circle class="theme-orb" cx="12" cy="12" r="5.5" mask="url(#theme-mark-mask)" />
+              <g class="theme-rays" stroke-linecap="round">
+                <line x1="12" y1="1.6" x2="12" y2="4" />
+                <line x1="12" y1="20" x2="12" y2="22.4" />
+                <line x1="1.6" y1="12" x2="4" y2="12" />
+                <line x1="20" y1="12" x2="22.4" y2="12" />
+                <line x1="4.6" y1="4.6" x2="6.3" y2="6.3" />
+                <line x1="17.7" y1="17.7" x2="19.4" y2="19.4" />
+                <line x1="4.6" y1="19.4" x2="6.3" y2="17.7" />
+                <line x1="17.7" y1="6.3" x2="19.4" y2="4.6" />
+              </g>
+            </svg>
           </button>
 
           <button

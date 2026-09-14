@@ -10,6 +10,19 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+
+  /* Almost everything on the site is sized in rem, so the root size is the one
+     lever that scales type, spacing, buttons and icons together.
+
+     This is the ONLY place the root size is set. There used to be a second
+     ladder at the bottom of navbar.css which, being imported later, silently
+     won -- a desktop stayed pinned at 16px no matter how large the screen.
+
+     One continuous curve: a small phone comes down a little, a desktop grows
+     with the viewport rather than leaving the site as a small island in the
+     middle of a large monitor. Written in px + vw because a rem inside this
+     rule would resolve against the value being defined. */
+  font-size: clamp(14px, 12.6px + 0.34vw, 20px);
 }
 
 body {
