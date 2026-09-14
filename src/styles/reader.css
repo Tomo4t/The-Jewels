@@ -193,6 +193,20 @@ html.dark .mode-btn.active img {
   --page-h: clamp(300px, calc(100svh - 320px), 1000px);
   --page-w: calc(var(--page-h) * 27 / 40);
 
+  /* A sheet turns about its own left edge, so it swings out to the LEFT of the
+     box: once the book is open the spread on screen is two pages wide even
+     though .book-inner is only ever one. The room for a single page is
+     therefore half the pane, not all of it. Sizing every sheet at 90vw is what
+     ran an open spread 156px past each edge of a 390px phone, where the
+     overflow: hidden below cut the outer half of both pages off.
+
+     Half the pane in every state, not just the open one, so a page does not
+     change size as the cover is turned. That is already how this behaves on a
+     desktop, where --page-w is the binding term and the cover and the spread
+     use the same sheet. */
+  --pane-w: 96vw;
+  --sheet-w: min(var(--page-w), calc(var(--pane-w) / 2));
+
   display: flex;
   justify-content: center;
   transition: transform 0.3s ease;
@@ -223,10 +237,13 @@ html.dark .mode-btn.active img {
      are 1080x1600, and the 0.8% it was out left a five-pixel strip of nothing
      under every page. Each sheet publishes its exact ratio once loaded, so a
      chapter drawn to another shape fills its sheet too. */
-  height: var(--page-h);
+  /* Height leads on a roomy screen, width on a narrow one -- and the height has
+     to come down with the width, or a sheet clamped by --sheet-w keeps its full
+     height and letterboxes the artwork inside it. */
+  height: min(var(--page-h), calc(var(--sheet-w) * 40 / 27));
   width: auto;
   aspect-ratio: var(--page-ratio, 27 / 40);
-  max-width: min(90vw, var(--page-w));
+  max-width: var(--sheet-w);
   perspective: 1500px;
   transition: transform 0.3s ease;
 }
