@@ -46,6 +46,17 @@ export const config = {
   contentBaselineDir: abs(process.env.CONTENT_BASELINE_DIR, './content-baseline'),
   distDir: abs(process.env.DIST_DIR, './dist'),
 
+  // Weekly copy of the database and every uploaded page, sent to Google Drive.
+  // The client id and secret identify the application and belong in the
+  // environment; the refresh token is earned through the admin panel and kept
+  // in the database, so no credential has to be copied between two consoles.
+  googleDrive: {
+    clientId: (process.env.GOOGLE_DRIVE_CLIENT_ID || '').trim(),
+    clientSecret: (process.env.GOOGLE_DRIVE_CLIENT_SECRET || '').trim(),
+  },
+  backupIntervalDays: int(process.env.BACKUP_INTERVAL_DAYS, 7),
+  backupKeep: int(process.env.BACKUP_KEEP, 8),
+
   sessionSecret: process.env.SESSION_SECRET || '',
   sessionCookieName: 'jewels_session',
   sessionTtlDays: int(process.env.SESSION_TTL_DAYS, 30),

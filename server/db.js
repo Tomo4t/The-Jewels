@@ -27,6 +27,24 @@ CREATE TABLE IF NOT EXISTS users (
   last_seen_at   TEXT
 );
 
+CREATE TABLE IF NOT EXISTS app_secrets (
+  key        TEXT PRIMARY KEY,
+  value      TEXT NOT NULL,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS backups (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  started_at  TEXT    NOT NULL,
+  finished_at TEXT,
+  status      TEXT    NOT NULL CHECK (status IN ('running', 'ok', 'failed')),
+  bytes       INTEGER,
+  file_name   TEXT,
+  remote_id   TEXT,
+  error       TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_backups_status ON backups(status, id DESC);
+
 CREATE TABLE IF NOT EXISTS sessions (
   token_hash   TEXT    PRIMARY KEY,
   user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

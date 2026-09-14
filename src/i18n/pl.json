@@ -233,7 +233,28 @@
       "uploadArchived": "Na razie zarchiwizuj",
       "uploadArchivedHint": "Nikt go nie zobaczy, dopóki go nie przywrócisz — możesz dokończyć później."
     },
-    "updateStamped": "Data i godzina zapisują się w chwili publikacji."
+    "updateStamped": "Data i godzina zapisują się w chwili publikacji.",
+    "backups": {
+      "title": "Kopie zapasowe",
+      "intro": "Kopia bazy danych i każdej wgranej strony, wysyłana na Dysk Google.",
+      "notConfigured": "Jeszcze nieskonfigurowane. Dodaj dane logowania Google do środowiska serwera i wdróż ponownie.",
+      "notConnected": "Brak połączenia z Dyskiem Google.",
+      "connect": "Połącz Dysk Google",
+      "disconnect": "Rozłącz",
+      "connectedAs": "Połączono jako {email}",
+      "runNow": "Wykonaj kopię teraz",
+      "running": "Tworzenie kopii…",
+      "lastSuccess": "Ostatnia kopia {when}",
+      "never": "Nie wykonano jeszcze żadnej kopii.",
+      "every": "Co {days} dni, zachowując {keep} najnowszych.",
+      "ok": "Udana",
+      "failed": "Nieudana",
+      "history": "Ostatnie kopie",
+      "connected": "Dysk Google połączony.",
+      "connectFailed": "Nie udało się połączyć Dysku Google: {message}",
+      "done": "Kopia wysłana.",
+      "confirmDisconnect": "Zatrzymać kopie na Dysku Google? Istniejące kopie pozostaną na Twoim Dysku."
+    }
   },
   "errors": {
     "notFound": "Nie znaleziono strony",

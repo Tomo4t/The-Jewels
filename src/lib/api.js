@@ -226,6 +226,10 @@ export const api = {
       body: payload,
     }),
   adminSettings: () => request('/api/admin/settings'),
+  adminBackups: () => request('/api/admin/backups'),
+  adminRunBackup: () => request('/api/admin/backups', { method: 'POST' }),
+  adminDriveConnect: () => request('/api/admin/drive/connect'),
+  adminDriveDisconnect: () => request('/api/admin/drive', { method: 'DELETE' }),
   updateAdminSettings: (changes) =>
     request('/api/admin/settings', { method: 'PATCH', body: changes }),
   forgotPassword: (email) =>

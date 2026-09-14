@@ -26,6 +26,16 @@ import {
   syncConfigFromDisk,
 } from '../services/content.js';
 import { listUsers, setRole, setStatus, findById } from '../services/users.js';
+import { randomBytes, timingSafeEqual } from 'node:crypto';
+import { getSecret, setSecret } from '../services/secrets.js';
+import {
+  backupFolder,
+  consentUrl,
+  disconnect as driveDisconnect,
+  driveConfigured,
+  exchangeCode,
+} from '../services/drive.js';
+import { backupState, runBackup } from '../services/backup.js';
 
 const router = Router();
 
@@ -233,7 +243,8 @@ router.put(
 
         if (kind === 'new') {
           const file = incoming[at];
-          if (!file) throw ApiError.badRequest('bad_layout', 'A new page is missing from the upload.');
+          if (!file)
+            throw ApiError.badRequest('bad_layout', 'A new page is missing from the upload.');
           const output = await sharp(file.buffer, { failOn: 'error' })
             .rotate()
             .resize({ width: 1800, withoutEnlargement: true })
@@ -517,6 +528,112 @@ router.patch(
     }
 
     res.json({ settings: allSettings() });
+  })
+);
+
+// --- backups ---------------------------------------------------------------
+
+/**
+ * Connecting Google Drive happens here rather than through pasted credentials.
+ *
+ * The consent round trip leaves and re-enters the site, so the callback cannot
+ * be protected by the same-origin check the rest of the admin API uses -- it
+ * arrives as a top-level navigation from Google. A signed, single-use,
+ * short-lived state value does that job instead: it proves the callback belongs
+ * to a connect that this administrator started minutes ago, which is what stops
+ * someone from handing Tomo a link that quietly attaches the site's backups to
+ * a Drive they own.
+ */
+const CONNECT_STATE = 'drive.connect_state';
+const STATE_TTL = 10 * 60_000;
+
+router.get(
+  '/drive/connect',
+  requireRole('admin'),
+  asyncRoute(async (req, res) => {
+    if (!driveConfigured()) {
+      throw ApiError.badRequest(
+        'drive_not_configured',
+        'Set GOOGLE_DRIVE_CLIENT_ID and GOOGLE_DRIVE_CLIENT_SECRET first.'
+      );
+    }
+    const state = `${req.user.id}.${Date.now()}.${randomBytes(24).toString('hex')}`;
+    setSecret(CONNECT_STATE, state, req.user.id);
+    audit(req.user.id, 'drive.connect_started', 'drive', null);
+    res.json({ url: consentUrl(state) });
+  })
+);
+
+router.get(
+  '/drive/callback',
+  asyncRoute(async (req, res) => {
+    const expected = getSecret(CONNECT_STATE);
+    const given = String(req.query.state || '');
+    // Cleared whatever happens, so a state value is good for exactly one
+    // callback and a replayed link is simply dead.
+    setSecret(CONNECT_STATE, '');
+
+    const done = (ok, message) =>
+      res.redirect(
+        302,
+        `/admin/#settings?drive=${ok ? 'connected' : 'failed'}` +
+          (message ? `&message=${encodeURIComponent(message)}` : '')
+      );
+
+    if (!expected || !given)
+      return done(false, 'That link did not come from a connect you started.');
+
+    const a = Buffer.from(expected);
+    const b = Buffer.from(given);
+    if (a.length !== b.length || !timingSafeEqual(a, b)) {
+      return done(false, 'That link did not come from a connect you started.');
+    }
+
+    const [userId, startedAt] = expected.split('.');
+    if (Date.now() - Number(startedAt) > STATE_TTL) {
+      return done(false, 'That took too long — start again.');
+    }
+    if (req.query.error) return done(false, String(req.query.error).slice(0, 120));
+    if (!req.query.code) return done(false, 'Google sent no authorisation back.');
+
+    try {
+      await exchangeCode(String(req.query.code));
+      await backupFolder();
+      audit(Number(userId), 'drive.connected', 'drive', null);
+      return done(true);
+    } catch (err) {
+      return done(false, String(err.message || err).slice(0, 200));
+    }
+  })
+);
+
+router.delete(
+  '/drive',
+  requireRole('admin'),
+  asyncRoute(async (req, res) => {
+    driveDisconnect();
+    audit(req.user.id, 'drive.disconnected', 'drive', null);
+    res.json({ ok: true });
+  })
+);
+
+router.get(
+  '/backups',
+  requireRole('admin'),
+  asyncRoute(async (_req, res) => {
+    res.json(await backupState());
+  })
+);
+
+router.post(
+  '/backups',
+  requireRole('admin'),
+  asyncRoute(async (req, res) => {
+    const result = await runBackup({ reason: `manual by ${req.user.username}` });
+    audit(req.user.id, 'backup.manual', 'backup', null, { ok: !!result.ok });
+    if (result.skipped) throw ApiError.badRequest('not_ready', result.skipped);
+    if (!result.ok) throw new ApiError(502, 'backup_failed', result.error);
+    res.json(result);
   })
 );
 

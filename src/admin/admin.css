@@ -570,3 +570,59 @@
   align-items: center;
   gap: var(--space-3);
 }
+
+/* --- backups --------------------------------------------------------------
+   A failed backup has to look different from a successful one at a glance;
+   that is the whole reason this history is on the page. */
+
+.backups-group .backup-state {
+  margin: var(--space-2) 0;
+  font-weight: 600;
+}
+
+.backups-group .backup-state.is-warn {
+  color: var(--color-warning, #a4611c);
+}
+
+.backup-history {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.backup-run {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: var(--space-3);
+  align-items: baseline;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  font-size: 0.9rem;
+}
+
+.backup-run .backup-status {
+  font-weight: 600;
+}
+
+.backup-run.is-ok .backup-status {
+  color: var(--color-success, #2f7d4f);
+}
+
+.backup-run.is-failed .backup-status,
+.backup-run.is-failed .backup-error {
+  color: var(--color-danger, #b3261e);
+}
+
+.backup-run .backup-error {
+  grid-column: 1 / -1;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 640px) {
+  .backup-run {
+    grid-template-columns: 1fr auto;
+  }
+}

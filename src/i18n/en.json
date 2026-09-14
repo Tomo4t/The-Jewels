@@ -233,7 +233,28 @@
       "uploadArchived": "Archive it for now",
       "uploadArchivedHint": "Nobody sees it until you bring it back, so you can finish setting it up later."
     },
-    "updateStamped": "The date and time are recorded when you post it."
+    "updateStamped": "The date and time are recorded when you post it.",
+    "backups": {
+      "title": "Backups",
+      "intro": "A copy of the database and every uploaded page, sent to Google Drive.",
+      "notConfigured": "Not set up yet. Add the Google credentials to the server environment, then redeploy.",
+      "notConnected": "Not connected to Google Drive yet.",
+      "connect": "Connect Google Drive",
+      "disconnect": "Disconnect",
+      "connectedAs": "Connected as {email}",
+      "runNow": "Back up now",
+      "running": "Backing up…",
+      "lastSuccess": "Last backup {when}",
+      "never": "No backup has run yet.",
+      "every": "Every {days} days, keeping the newest {keep}.",
+      "ok": "Worked",
+      "failed": "Failed",
+      "history": "Recent backups",
+      "connected": "Google Drive connected.",
+      "connectFailed": "Could not connect Google Drive: {message}",
+      "done": "Backup uploaded.",
+      "confirmDisconnect": "Stop backing up to Google Drive? Existing backups stay in your Drive."
+    }
   },
   "errors": {
     "notFound": "Page not found",

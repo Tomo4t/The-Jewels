@@ -57,6 +57,9 @@ async function boot() {
 
   // Moderators get the moderation tab only; admins get everything.
   activeTab = session.isAdmin ? 'chapters' : 'moderation';
+  // Coming back from Google's consent screen should land on the panel that
+  // sent you there, with the outcome said out loud.
+  if (session.isAdmin && reportDriveReturn()) activeTab = 'settings';
   renderShell();
 }
 
@@ -958,7 +961,10 @@ async function renderSettings(panel) {
         <span class="setting-saved" id="settings-saved" hidden>${escapeHTML(t('admin.settings.saved'))}</span>
       </div>
     </section>
+    <section class="admin-section" id="backups-section"></section>
   `;
+
+  renderBackups(panel.querySelector('#backups-section'));
 
   // Saved in one go rather than on every keystroke: a banned-words list is
   // edited in bursts, and a save per character would be a save per typo.
@@ -986,6 +992,159 @@ async function renderSettings(panel) {
       button.disabled = false;
     }
   });
+}
+
+/**
+ * The backups panel.
+ *
+ * Its whole job is to make a failure impossible to miss. A backup that quietly
+ * stopped working eight weeks ago is worse than no backup at all, because you
+ * only discover it on the day you needed it -- so the state, the date of the
+ * last success and the recent history are all on the page, and a run that
+ * failed says why.
+ */
+const bytes = (n) => {
+  if (!n && n !== 0) return '';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  let value = n;
+  let unit = 0;
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024;
+    unit += 1;
+  }
+  return `${value < 10 && unit > 0 ? value.toFixed(1) : Math.round(value)} ${units[unit]}`;
+};
+
+async function renderBackups(host) {
+  const draw = (state) => {
+    const rows = (state.history || [])
+      .map(
+        (run) => `
+        <li class="backup-run is-${run.status}">
+          <span class="backup-when">${escapeHTML(formatDateTime(run.startedAt))}</span>
+          <span class="backup-status">${escapeHTML(
+            run.status === 'ok' ? t('admin.backups.ok') : t('admin.backups.failed')
+          )}</span>
+          <span class="backup-size">${escapeHTML(bytes(run.bytes))}</span>
+          ${run.error ? `<span class="backup-error">${escapeHTML(run.error)}</span>` : ''}
+        </li>`
+      )
+      .join('');
+
+    host.innerHTML = `
+      <div class="setting-group backups-group">
+        <h3>${escapeHTML(t('admin.backups.title'))}</h3>
+        <p class="field-hint">${escapeHTML(t('admin.backups.intro'))}</p>
+
+        ${
+          !state.configured
+            ? `<p class="backup-state is-warn">${escapeHTML(t('admin.backups.notConfigured'))}</p>`
+            : !state.connected
+              ? `<p class="backup-state is-warn">${escapeHTML(t('admin.backups.notConnected'))}</p>
+                 <button type="button" class="button button--primary" data-connect>
+                   ${escapeHTML(t('admin.backups.connect'))}
+                 </button>`
+              : `<p class="backup-state">
+                   ${escapeHTML(
+                     state.account?.emailAddress
+                       ? t('admin.backups.connectedAs', { email: state.account.emailAddress })
+                       : t('admin.backups.title')
+                   )}
+                 </p>
+                 <p class="field-hint">
+                   ${escapeHTML(
+                     t('admin.backups.every', { days: state.intervalDays, keep: state.keep })
+                   )}
+                   ${escapeHTML(
+                     state.lastSuccess
+                       ? t('admin.backups.lastSuccess', {
+                           when: formatDateTime(state.lastSuccess),
+                         })
+                       : t('admin.backups.never')
+                   )}
+                 </p>
+                 <div class="setting-actions">
+                   <button type="button" class="button button--primary" data-run
+                           ${state.running ? 'disabled' : ''}>
+                     ${escapeHTML(
+                       state.running ? t('admin.backups.running') : t('admin.backups.runNow')
+                     )}
+                   </button>
+                   <button type="button" class="button" data-disconnect>
+                     ${escapeHTML(t('admin.backups.disconnect'))}
+                   </button>
+                 </div>`
+        }
+
+        ${
+          rows
+            ? `<h4>${escapeHTML(t('admin.backups.history'))}</h4>
+               <ul class="backup-history">${rows}</ul>`
+            : ''
+        }
+      </div>
+    `;
+
+    host.querySelector('[data-connect]')?.addEventListener('click', async (event) => {
+      event.currentTarget.disabled = true;
+      try {
+        const { url } = await api.adminDriveConnect();
+        window.location.href = url;
+      } catch (err) {
+        fail(err);
+        event.currentTarget.disabled = false;
+      }
+    });
+
+    host.querySelector('[data-disconnect]')?.addEventListener('click', async () => {
+      if (!window.confirm(t('admin.backups.confirmDisconnect'))) return;
+      try {
+        await api.adminDriveDisconnect();
+        await renderBackups(host);
+      } catch (err) {
+        fail(err);
+      }
+    });
+
+    host.querySelector('[data-run]')?.addEventListener('click', async (event) => {
+      const button = event.currentTarget;
+      button.disabled = true;
+      button.textContent = t('admin.backups.running');
+      try {
+        await api.adminRunBackup();
+        toastSuccess(t('admin.backups.done'));
+      } catch (err) {
+        fail(err);
+      } finally {
+        await renderBackups(host);
+      }
+    });
+  };
+
+  try {
+    draw(await api.adminBackups());
+  } catch (err) {
+    fail(err);
+  }
+}
+
+/**
+ * Google sends the administrator back here after the consent screen, so the
+ * result of that round trip has to be reported on arrival -- otherwise a failed
+ * connect looks exactly like a successful one.
+ */
+function reportDriveReturn() {
+  const hash = window.location.hash;
+  const at = hash.indexOf('?');
+  if (at < 0) return false;
+  const params = new URLSearchParams(hash.slice(at + 1));
+  const outcome = params.get('drive');
+  if (!outcome) return false;
+
+  window.history.replaceState({}, '', `${window.location.pathname}#settings`);
+  if (outcome === 'connected') toastSuccess(t('admin.backups.connected'));
+  else toastError(t('admin.backups.connectFailed', { message: params.get('message') || outcome }));
+  return true;
 }
 
 boot().catch((err) => {

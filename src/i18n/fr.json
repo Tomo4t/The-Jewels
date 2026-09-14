@@ -233,7 +233,28 @@
       "uploadArchived": "L'archiver pour l'instant",
       "uploadArchivedHint": "Personne ne le voit tant que vous ne le restaurez pas — vous pourrez finir plus tard."
     },
-    "updateStamped": "La date et l'heure sont enregistrées au moment de la publication."
+    "updateStamped": "La date et l'heure sont enregistrées au moment de la publication.",
+    "backups": {
+      "title": "Sauvegardes",
+      "intro": "Une copie de la base de données et de chaque page envoyée, déposée sur Google Drive.",
+      "notConfigured": "Pas encore configuré. Ajoutez les identifiants Google à l'environnement du serveur, puis redéployez.",
+      "notConnected": "Pas encore connecté à Google Drive.",
+      "connect": "Connecter Google Drive",
+      "disconnect": "Déconnecter",
+      "connectedAs": "Connecté en tant que {email}",
+      "runNow": "Sauvegarder maintenant",
+      "running": "Sauvegarde en cours…",
+      "lastSuccess": "Dernière sauvegarde {when}",
+      "never": "Aucune sauvegarde effectuée.",
+      "every": "Tous les {days} jours, en gardant les {keep} plus récentes.",
+      "ok": "Réussie",
+      "failed": "Échec",
+      "history": "Sauvegardes récentes",
+      "connected": "Google Drive connecté.",
+      "connectFailed": "Connexion à Google Drive impossible : {message}",
+      "done": "Sauvegarde envoyée.",
+      "confirmDisconnect": "Arrêter les sauvegardes vers Google Drive ? Les sauvegardes existantes restent dans votre Drive."
+    }
   },
   "errors": {
     "notFound": "Page introuvable",

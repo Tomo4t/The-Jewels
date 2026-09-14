@@ -233,7 +233,28 @@
       "uploadArchived": "いったんアーカイブする",
       "uploadArchivedHint": "戻すまで誰にも見えないので、あとで仕上げられます。"
     },
-    "updateStamped": "投稿した日時が自動で記録されます。"
+    "updateStamped": "投稿した日時が自動で記録されます。",
+    "backups": {
+      "title": "バックアップ",
+      "intro": "データベースとアップロード済みのページすべてを Google ドライブに保存します。",
+      "notConfigured": "まだ設定されていません。サーバーの環境変数に Google の認証情報を追加して再デプロイしてください。",
+      "notConnected": "Google ドライブにまだ接続していません。",
+      "connect": "Google ドライブに接続",
+      "disconnect": "接続を解除",
+      "connectedAs": "{email} として接続中",
+      "runNow": "今すぐバックアップ",
+      "running": "バックアップ中…",
+      "lastSuccess": "最後のバックアップ {when}",
+      "never": "まだバックアップを実行していません。",
+      "every": "{days} 日ごと、最新 {keep} 件を保持します。",
+      "ok": "成功",
+      "failed": "失敗",
+      "history": "最近のバックアップ",
+      "connected": "Google ドライブに接続しました。",
+      "connectFailed": "Google ドライブに接続できませんでした: {message}",
+      "done": "バックアップをアップロードしました。",
+      "confirmDisconnect": "Google ドライブへのバックアップを停止しますか？既存のバックアップはドライブに残ります。"
+    }
   },
   "errors": {
     "notFound": "ページが見つかりません",

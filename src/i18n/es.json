@@ -233,7 +233,28 @@
       "uploadArchived": "Archivarlo por ahora",
       "uploadArchivedHint": "Nadie lo ve hasta que lo recuperes, así puedes terminarlo más tarde."
     },
-    "updateStamped": "La fecha y la hora se registran al publicarlo."
+    "updateStamped": "La fecha y la hora se registran al publicarlo.",
+    "backups": {
+      "title": "Copias de seguridad",
+      "intro": "Una copia de la base de datos y de cada página subida, enviada a Google Drive.",
+      "notConfigured": "Aún sin configurar. Añade las credenciales de Google al entorno del servidor y vuelve a desplegar.",
+      "notConnected": "Todavía no está conectado a Google Drive.",
+      "connect": "Conectar Google Drive",
+      "disconnect": "Desconectar",
+      "connectedAs": "Conectado como {email}",
+      "runNow": "Copiar ahora",
+      "running": "Copiando…",
+      "lastSuccess": "Última copia {when}",
+      "never": "Aún no se ha hecho ninguna copia.",
+      "every": "Cada {days} días, conservando las {keep} más recientes.",
+      "ok": "Correcta",
+      "failed": "Fallida",
+      "history": "Copias recientes",
+      "connected": "Google Drive conectado.",
+      "connectFailed": "No se pudo conectar Google Drive: {message}",
+      "done": "Copia subida.",
+      "confirmDisconnect": "¿Dejar de hacer copias en Google Drive? Las copias existentes seguirán en tu Drive."
+    }
   },
   "errors": {
     "notFound": "Página no encontrada",
