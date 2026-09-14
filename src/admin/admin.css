@@ -314,3 +314,143 @@
     order: -1;
   }
 }
+
+/* --- settings ---------------------------------------------------------------
+   Grouped rather than a flat list of switches: the two that decide whether a
+   comment appears at all belong together, and the numbers behind the spam
+   rules belong under the list that uses them. */
+
+.setting-group {
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.setting-group:last-of-type {
+  border-bottom: none;
+}
+
+.setting-group h3 {
+  margin: 0 0 var(--space-4);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.setting-row {
+  margin-bottom: var(--space-4);
+}
+
+.setting-row:last-child {
+  margin-bottom: 0;
+}
+
+.switch-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.switch-label input {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+/* The explanation sits under the control and lines up with its label rather
+   than with the checkbox, so the two read as one thing. */
+.setting-describe {
+  margin: var(--space-1) 0 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.setting-row textarea {
+  width: 100%;
+  min-height: 8rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.setting-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+
+.setting-saved {
+  color: var(--color-success);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* --- release controls on the chapter list ---------------------------------- */
+
+.admin-list-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.field--inline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin: 0;
+}
+
+.field--inline > span {
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.field--inline input {
+  padding: 0.3rem 0.5rem;
+  font-size: 0.85rem;
+}
+
+.chapter-state {
+  display: block;
+  margin-top: 0.2rem;
+}
+
+.state-pill {
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.state-pill.is-live {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.state-pill.is-scheduled {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+
+.state-pill.is-archived {
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+}
+
+.admin-list li.is-archived img {
+  filter: grayscale(1);
+  opacity: 0.55;
+}

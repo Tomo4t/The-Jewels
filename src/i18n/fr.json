@@ -50,7 +50,10 @@
     "empty": "Aucun chapitre dans cette langue pour l’instant.",
     "emptyHint": "Essayez une autre langue ou revenez bientôt.",
     "chapter": "Chapitre {n}",
-    "openChapter": "Ouvrir {title}"
+    "openChapter": "Ouvrir {title}",
+    "comingSoon": "Bientôt",
+    "comingLabel": "{title} — pas encore paru",
+    "archived": "Archivé"
   },
   "reader": {
     "comicMode": "Mode livre",
@@ -60,7 +63,9 @@
     "nextPage": "Page suivante",
     "pageOf": "Page {current} sur {total}",
     "backToChapters": "Retour aux chapitres",
-    "notFound": "Ce chapitre est introuvable."
+    "notFound": "Ce chapitre est introuvable.",
+    "notOutYet": "Ce chapitre n'est pas encore paru",
+    "outOn": "Il arrive le {date}."
   },
   "contact": {
     "title": "Tous les réseaux officiels du créateur"
@@ -154,7 +159,8 @@
       "chapters": "Chapitres",
       "updates": "Actualités",
       "moderation": "Modération",
-      "users": "Utilisateurs"
+      "users": "Utilisateurs",
+      "settings": "Réglages"
     },
     "uploadChapter": "Téléverser un chapitre",
     "chapterTitle": "Titre du chapitre",
@@ -180,7 +186,35 @@
     },
     "banUser": "Bannir",
     "unbanUser": "Réintégrer",
-    "confirmDeleteChapter": "Supprimer ce chapitre et toutes ses pages ? Cette action est irréversible."
+    "confirmDeleteChapter": "Supprimer ce chapitre et toutes ses pages ? Cette action est irréversible.",
+    "settings": {
+      "group_comments": "Commentaires et comptes",
+      "group_words": "Mots interdits",
+      "group_limits": "Limites anti-spam",
+      "moderationQueue": "Retenir les nouveaux commentaires pour approbation",
+      "requireVerifiedEmail": "Exiger une adresse confirmée avant de commenter",
+      "allowRegistration": "Autoriser les nouveaux comptes",
+      "bannedWords": "Mots interdits",
+      "bannedWordsAction": "Quand l'un est trouvé",
+      "bannedWordsPlaceholder": "Un mot ou une expression par ligne",
+      "actionHold": "Le retenir pour approbation",
+      "actionReject": "Le rejeter directement",
+      "commentCooldownMinutes": "Fenêtre « publie trop vite » (minutes)",
+      "commentDuplicateHours": "Fenêtre de doublon (heures)",
+      "save": "Enregistrer",
+      "saved": "Enregistré"
+    },
+    "release": {
+      "releaseAt": "Parution",
+      "archive": "Archiver",
+      "unarchive": "Restaurer",
+      "preview": "Aperçu",
+      "archived": "Archivé",
+      "scheduled": "Programmé",
+      "live": "En ligne",
+      "scheduledToast": "Date de parution définie.",
+      "liveToast": "Publié."
+    }
   },
   "errors": {
     "notFound": "Page introuvable",

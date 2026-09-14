@@ -60,7 +60,9 @@ async function boot() {
 }
 
 function renderShell() {
-  const tabs = session.isAdmin ? ['chapters', 'updates', 'moderation', 'users'] : ['moderation'];
+  const tabs = session.isAdmin
+    ? ['chapters', 'updates', 'moderation', 'users', 'settings']
+    : ['moderation'];
 
   main.replaceChildren(
     el(
@@ -91,6 +93,7 @@ function renderShell() {
     updates: renderUpdates,
     moderation: renderModeration,
     users: renderUsers,
+    settings: renderSettings,
   }[activeTab];
 
   render(panel).catch(fail);
@@ -108,6 +111,20 @@ const languageSelect = (id, value = LANGUAGES[0]) => `
   </label>`;
 
 // --- chapters -------------------------------------------------------------
+
+/**
+ * <input type="datetime-local"> speaks local wall-clock time with no zone, so
+ * an ISO string with a Z on it has to be shifted into the viewer's offset
+ * before it will display, and shifted back on the way out. Handing it the ISO
+ * string directly shows the wrong hour to everyone not on UTC.
+ */
+function toLocalInput(iso) {
+  if (!iso) return '';
+  const at = new Date(iso);
+  if (Number.isNaN(at.getTime())) return '';
+  const local = new Date(at.getTime() - at.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 16);
+}
 
 async function renderChapters(panel) {
   const { chapters } = await api.adminChapters();
@@ -161,17 +178,39 @@ async function renderChapters(panel) {
                 ? `<ul class="admin-list">${list
                     .map(
                       (c) => `
-                        <li>
+                        <li class="${c.archived ? 'is-archived' : ''}">
                           <img src="${escapeHTML(c.cover)}" alt="" loading="lazy" width="40" height="56">
                           <span class="admin-list-main">
                             <strong>${escapeHTML(t('chapters.chapter', { n: c.number }))}</strong>
                             ${escapeHTML(c.title)}
                             <small>${c.pages} pages</small>
+                            <span class="chapter-state">
+                              ${
+                                c.archived
+                                  ? `<span class="state-pill is-archived">${escapeHTML(t('admin.release.archived'))}</span>`
+                                  : c.released === false
+                                    ? `<span class="state-pill is-scheduled">${escapeHTML(t('admin.release.scheduled'))}</span>`
+                                    : `<span class="state-pill is-live">${escapeHTML(t('admin.release.live'))}</span>`
+                              }
+                            </span>
                           </span>
-                          <button type="button" class="link-button link-button--danger"
-                                  data-delete-chapter="${lang}:${c.number}">
-                            ${escapeHTML(t('common.delete'))}
-                          </button>
+                          <span class="admin-list-controls">
+                            <label class="field field--inline">
+                              <span>${escapeHTML(t('admin.release.releaseAt'))}</span>
+                              <input type="datetime-local" data-release="${lang}:${c.number}"
+                                     value="${escapeHTML(toLocalInput(c.releaseAt))}">
+                            </label>
+                            <button type="button" class="link-button" data-archive="${lang}:${c.number}:${c.archived ? '1' : '0'}">
+                              ${escapeHTML(c.archived ? t('admin.release.unarchive') : t('admin.release.archive'))}
+                            </button>
+                            <a class="link-button" href="/#reader?lang=${lang}&chapter=${c.number}&page=0" target="_blank" rel="noopener">
+                              ${escapeHTML(t('admin.release.preview'))}
+                            </a>
+                            <button type="button" class="link-button link-button--danger"
+                                    data-delete-chapter="${lang}:${c.number}">
+                              ${escapeHTML(t('common.delete'))}
+                            </button>
+                          </span>
                         </li>`
                     )
                     .join('')}</ul>`
@@ -183,6 +222,38 @@ async function renderChapters(panel) {
   `;
 
   wireChapterForm(panel);
+
+  // --- scheduling ---------------------------------------------------------
+  // The date is applied on change rather than behind a save button: there is
+  // one field, and a save button next to one field is a step for its own sake.
+  panel.querySelectorAll('[data-release]').forEach((input) => {
+    input.addEventListener('change', async () => {
+      const [lang, number] = input.dataset.release.split(':');
+      try {
+        await api.adminScheduleChapter(lang, number, {
+          releaseAt: input.value ? new Date(input.value).toISOString() : null,
+        });
+        toastSuccess(
+          input.value ? t('admin.release.scheduledToast') : t('admin.release.liveToast')
+        );
+        renderShell();
+      } catch (err) {
+        fail(err);
+      }
+    });
+  });
+
+  panel.querySelectorAll('[data-archive]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const [lang, number, archived] = button.dataset.archive.split(':');
+      try {
+        await api.adminScheduleChapter(lang, number, { archived: archived !== '1' });
+        renderShell();
+      } catch (err) {
+        fail(err);
+      }
+    });
+  });
 
   panel.querySelectorAll('[data-delete-chapter]').forEach((button) => {
     button.addEventListener('click', async () => {
@@ -546,6 +617,127 @@ async function renderUsers(panel) {
         fail(err);
       }
     });
+  });
+}
+
+// --- settings ---------------------------------------------------------------
+
+/**
+ * Everything an administrator can change while the site is running.
+ *
+ * Grouped rather than listed flat: the two switches that decide whether a
+ * comment appears at all belong together, and the numbers behind the spam
+ * rules belong under the list that uses them.
+ */
+
+const GROUPS = [
+  { id: 'comments', keys: ['moderationQueue', 'requireVerifiedEmail', 'allowRegistration'] },
+  { id: 'words', keys: ['bannedWords', 'bannedWordsAction'] },
+  { id: 'limits', keys: ['commentCooldownMinutes', 'commentDuplicateHours'] },
+];
+
+const settingField = (key, setting) => {
+  const label = t(`admin.settings.${key}`);
+  const describe = escapeHTML(setting.describe || '');
+  const id = `set-${key}`;
+
+  if (setting.type === 'boolean') {
+    return `
+      <div class="setting-row">
+        <label class="switch-label" for="${id}">
+          <input type="checkbox" id="${id}" data-setting="${key}" ${setting.value ? 'checked' : ''}>
+          <span>${escapeHTML(label)}</span>
+        </label>
+        <p class="setting-describe">${describe}</p>
+      </div>`;
+  }
+
+  if (key === 'bannedWordsAction') {
+    return `
+      <div class="setting-row">
+        <label class="field">
+          <span>${escapeHTML(label)}</span>
+          <select id="${id}" data-setting="${key}">
+            <option value="hold" ${setting.value === 'hold' ? 'selected' : ''}>${escapeHTML(t('admin.settings.actionHold'))}</option>
+            <option value="reject" ${setting.value === 'reject' ? 'selected' : ''}>${escapeHTML(t('admin.settings.actionReject'))}</option>
+          </select>
+        </label>
+        <p class="setting-describe">${describe}</p>
+      </div>`;
+  }
+
+  if (setting.type === 'number') {
+    return `
+      <div class="setting-row">
+        <label class="field">
+          <span>${escapeHTML(label)}</span>
+          <input type="number" min="0" step="1" id="${id}" data-setting="${key}" value="${escapeHTML(String(setting.value))}">
+        </label>
+        <p class="setting-describe">${describe}</p>
+      </div>`;
+  }
+
+  return `
+    <div class="setting-row">
+      <label class="field">
+        <span>${escapeHTML(label)}</span>
+        <textarea id="${id}" data-setting="${key}" rows="6"
+                  placeholder="${escapeHTML(t('admin.settings.bannedWordsPlaceholder'))}">${escapeHTML(String(setting.value ?? ''))}</textarea>
+      </label>
+      <p class="setting-describe">${describe}</p>
+    </div>`;
+};
+
+async function renderSettings(panel) {
+  const { settings } = await api.adminSettings();
+
+  panel.innerHTML = `
+    <section class="admin-section">
+      <h2>${escapeHTML(t('admin.tabs.settings'))}</h2>
+      ${GROUPS.map(
+        (group) => `
+          <div class="setting-group">
+            <h3>${escapeHTML(t(`admin.settings.group_${group.id}`))}</h3>
+            ${group.keys
+              .filter((key) => settings[key])
+              .map((key) => settingField(key, settings[key]))
+              .join('')}
+          </div>`
+      ).join('')}
+      <div class="setting-actions">
+        <button type="button" class="button button--primary" id="save-settings">
+          ${escapeHTML(t('admin.settings.save'))}
+        </button>
+        <span class="setting-saved" id="settings-saved" hidden>${escapeHTML(t('admin.settings.saved'))}</span>
+      </div>
+    </section>
+  `;
+
+  // Saved in one go rather than on every keystroke: a banned-words list is
+  // edited in bursts, and a save per character would be a save per typo.
+  panel.querySelector('#save-settings').addEventListener('click', async (event) => {
+    const button = event.currentTarget;
+    button.disabled = true;
+
+    const changes = {};
+    panel.querySelectorAll('[data-setting]').forEach((node) => {
+      const key = node.dataset.setting;
+      changes[key] = node.type === 'checkbox' ? node.checked : node.value;
+    });
+
+    try {
+      await api.updateAdminSettings(changes);
+      toastSuccess(t('admin.settings.saved'));
+      const flag = panel.querySelector('#settings-saved');
+      flag.hidden = false;
+      setTimeout(() => {
+        flag.hidden = true;
+      }, 2500);
+    } catch (err) {
+      fail(err);
+    } finally {
+      button.disabled = false;
+    }
   });
 }
 

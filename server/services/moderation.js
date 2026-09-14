@@ -44,6 +44,26 @@ const SPAM_TERMS = [
 
 const clamp01 = (n) => Math.max(0, Math.min(1, n));
 
+/**
+ * The list an administrator keeps, one entry per line.
+ *
+ * Matched on a space-padded lowercase copy of the comment, so a one-word entry
+ * catches the word and not every longer word that contains it -- banning "ass"
+ * should not take out "passage". An entry with a space in it is matched as the
+ * phrase it is.
+ */
+function bannedWordHits(trimmed) {
+  const raw = String(getSetting('bannedWords') || '').trim();
+  if (!raw) return [];
+
+  const padded = ` ${trimmed.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ')} `;
+  return raw
+    .split(/\r?\n/)
+    .map((line) => line.trim().toLowerCase())
+    .filter(Boolean)
+    .filter((term) => padded.includes(term.includes(' ') ? term : ` ${term} `));
+}
+
 /** Stage 1: cheap, deterministic signals. Returns { score, reasons[] }. */
 export function heuristicScore(body, { user, lang, chapter } = {}) {
   const text = String(body || '');
@@ -96,6 +116,15 @@ export function heuristicScore(body, { user, lang, chapter } = {}) {
     }
   }
 
+  // --- the administrator's own list ---
+  // Scored high enough to hold on its own. Whether it holds or rejects is
+  // decided in screenComment, which is where the status is settled.
+  const banned = bannedWordHits(trimmed);
+  if (banned.length) {
+    score += 0.8;
+    reasons.push(`banned word: ${banned[0]}`);
+  }
+
   // --- known commercial spam vocabulary ---
   const lowered = ` ${trimmed.toLowerCase()} `;
   const hits = SPAM_TERMS.filter((term) => lowered.includes(term));
@@ -106,12 +135,15 @@ export function heuristicScore(body, { user, lang, chapter } = {}) {
 
   // --- posting velocity for this account ---
   if (user?.id) {
+    // The windows were hardcoded at 5 minutes and a day. They are settings now,
+    // bound through a parameter rather than spliced into the SQL.
+    const cooldown = Number(getSetting('commentCooldownMinutes')) || 5;
     const recent = db
       .prepare(
         `SELECT COUNT(*) AS n FROM comments
-         WHERE user_id = ? AND created_at > datetime('now', '-5 minutes')`
+         WHERE user_id = ? AND created_at > datetime('now', ?)`
       )
-      .get(user.id).n;
+      .get(user.id, `-${cooldown} minutes`).n;
     if (recent >= 5) {
       score += 0.4;
       reasons.push('posting very quickly');
@@ -120,12 +152,13 @@ export function heuristicScore(body, { user, lang, chapter } = {}) {
     }
 
     // --- duplicate of something they already posted ---
+    const duplicateWindow = Number(getSetting('commentDuplicateHours')) || 24;
     const duplicate = db
       .prepare(
         `SELECT COUNT(*) AS n FROM comments
-         WHERE user_id = ? AND body = ? AND created_at > datetime('now', '-1 day')`
+         WHERE user_id = ? AND body = ? AND created_at > datetime('now', ?)`
       )
-      .get(user.id, trimmed).n;
+      .get(user.id, trimmed, `-${duplicateWindow} hours`).n;
     if (duplicate > 0) {
       score += 0.45;
       reasons.push('duplicate of a recent comment');
@@ -255,10 +288,18 @@ export async function screenComment(body, context) {
   }
 
   const flagged = score >= 0.4;
+
+  // The banned list is the one rule an administrator wrote by hand, so it is
+  // the one that may reject rather than only hold -- and only when they have
+  // said so. Everything else still holds at worst.
+  const banned = bannedWordHits(String(body || '').trim());
+  const rejectOutright = banned.length && getSetting('bannedWordsAction') === 'reject';
+
   // Read at screening time rather than boot, so an administrator turning the
   // queue off takes effect on the next comment instead of the next deploy. A
   // flagged comment is always held regardless of the setting.
-  const status = flagged || getSetting('moderationQueue') ? 'pending' : 'visible';
+  let status = flagged || getSetting('moderationQueue') ? 'pending' : 'visible';
+  if (rejectOutright) status = 'rejected';
 
   return {
     status,

@@ -1,9 +1,9 @@
 import { escapeHTML, announce, prefersReducedMotion } from '../lib/dom.js';
-import { t, currentLanguage } from '../lib/i18n.js';
+import { t, currentLanguage, formatDate } from '../lib/i18n.js';
 import { read, write, writeJSON, KEYS } from '../lib/store.js';
 import { play } from '../lib/sound.js';
 import { syncHash, buildHash } from '../router.js';
-import api from '../lib/api.js';
+import api, { ApiError } from '../lib/api.js';
 import session from '../lib/session.js';
 import { mountComments } from '../components/comments.js';
 
@@ -35,10 +35,17 @@ export async function render(params) {
   let chapter;
   try {
     chapter = await api.chapter(lang, number);
-  } catch {
+  } catch (err) {
+    // A chapter with a date still to come answers 403 rather than 404, because
+    // it does exist -- saying "not found" to someone who followed a countdown
+    // would read as the page being broken.
+    const notOut = err instanceof ApiError && err.code === 'not_released_yet';
+    const when = notOut && err.details?.releaseAt ? formatDate(err.details.releaseAt) : null;
+
     return `
       <div class="reader-missing">
-        <h2>${escapeHTML(t('reader.notFound'))}</h2>
+        <h2>${escapeHTML(notOut ? t('reader.notOutYet') : t('reader.notFound'))}</h2>
+        ${when ? `<p>${escapeHTML(t('reader.outOn', { date: when }))}</p>` : ''}
         <a class="button" href="${buildHash('chapters')}">${escapeHTML(t('reader.backToChapters'))}</a>
       </div>
     `;

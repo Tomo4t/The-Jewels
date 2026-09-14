@@ -117,6 +117,18 @@ export async function syncConfigFromDisk() {
 
 // --- chapters -------------------------------------------------------------
 
+/**
+ * A chapter is released when it has no release time, or when that time has
+ * passed. Nothing runs on a schedule: the comparison happens on every read, so
+ * a chapter goes live on the stroke of its date whether or not anybody is
+ * awake to press a button.
+ */
+export const isReleased = (meta, now = Date.now()) => {
+  if (!meta?.releaseAt) return true;
+  const at = Date.parse(meta.releaseAt);
+  return Number.isNaN(at) ? true : at <= now;
+};
+
 export async function readChapterMeta(lang, n) {
   try {
     const raw = await fs.readFile(join(chapterDir(lang, n), 'meta.json'), 'utf8');
@@ -126,38 +138,83 @@ export async function readChapterMeta(lang, n) {
       description: String(meta.description || ''),
       pages: Number(meta.pages) || 0,
       publishedAt: meta.publishedAt || null,
+      // A moment in the future, or null for something already out.
+      releaseAt: meta.releaseAt || null,
+      // Off the shelf but not deleted: hidden from readers, still there for
+      // the author and still openable by them.
+      archived: Boolean(meta.archived),
     };
   } catch {
     return null;
   }
 }
 
-export async function listChapters(lang) {
+export async function writeChapterMeta(lang, n, patch) {
+  const existing = await readChapterMeta(lang, n);
+  if (!existing) throw ApiError.notFound('chapter_not_found', 'That chapter does not exist.');
+
+  const next = { ...existing, ...patch };
+  const file = assertInsideContent(join(chapterDir(lang, n), 'meta.json'));
+  await fs.writeFile(file, `${JSON.stringify(next, null, 2)}\n`, 'utf8');
+  return next;
+}
+
+/**
+ * @param {object} [options]
+ * @param {boolean} [options.includeHidden] Include archived chapters and the
+ *   ones still counting down. Only ever true for the author.
+ */
+export async function listChapters(lang, { includeHidden = false } = {}) {
   assertLanguage(lang);
   const cfg = await readConfig();
   const count = cfg.languages[lang]?.chapters || 0;
+  const now = Date.now();
 
   const chapters = [];
   for (let n = 1; n <= count; n += 1) {
     const meta = await readChapterMeta(lang, n);
     if (!meta) continue;
+
+    const released = isReleased(meta, now);
+    // An archived chapter is gone from the reader's view entirely. An
+    // unreleased one is listed, with its date, so the countdown has something
+    // to count -- but without its page count, which would give away length.
+    if (meta.archived && !includeHidden) continue;
+
     chapters.push({
       number: n,
       title: meta.title,
-      description: meta.description,
-      pages: meta.pages,
+      description: released || includeHidden ? meta.description : '',
+      pages: released || includeHidden ? meta.pages : 0,
       publishedAt: meta.publishedAt,
+      releaseAt: meta.releaseAt,
+      released,
+      archived: meta.archived,
       cover: `/content/chapters/${lang}/chapter${n}/page0.jpg`,
     });
   }
   return chapters;
 }
 
-export async function getChapter(lang, n) {
+export async function getChapter(lang, n, { includeHidden = false } = {}) {
   assertLanguage(lang);
   assertChapterNumber(n);
   const meta = await readChapterMeta(lang, n);
   if (!meta) throw ApiError.notFound('chapter_not_found', 'That chapter does not exist.');
+
+  // The pages are the thing being held back, so the refusal happens here
+  // rather than only in the listing -- otherwise guessing the URL would walk
+  // straight past the countdown.
+  if (!includeHidden) {
+    if (meta.archived) {
+      throw ApiError.notFound('chapter_not_found', 'That chapter does not exist.');
+    }
+    if (!isReleased(meta)) {
+      throw new ApiError(403, 'not_released_yet', 'This chapter is not out yet.', {
+        releaseAt: meta.releaseAt,
+      });
+    }
+  }
 
   const dir = chapterDir(lang, n);
   const files = existsSync(dir) ? await fs.readdir(dir) : [];
@@ -171,6 +228,9 @@ export async function getChapter(lang, n) {
     title: meta.title,
     description: meta.description,
     publishedAt: meta.publishedAt,
+    releaseAt: meta.releaseAt,
+    released: isReleased(meta),
+    archived: meta.archived,
     pages: pageFiles.map((f) => `/content/chapters/${lang}/chapter${n}/${f}`),
   };
 }

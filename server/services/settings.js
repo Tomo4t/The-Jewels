@@ -28,11 +28,35 @@ export const DEFINITIONS = {
     fallback: () => config.allowRegistration,
     describe: 'Allow new accounts to be created.',
   },
+  bannedWords: {
+    type: 'text',
+    fallback: () => '',
+    describe: 'Words and phrases to catch, one per line. Matching is case-insensitive.',
+  },
+  bannedWordsAction: {
+    type: 'text',
+    fallback: () => 'hold',
+    describe: 'What to do with a comment containing one: hold it for approval, or reject it.',
+  },
+  commentCooldownMinutes: {
+    type: 'number',
+    fallback: () => 5,
+    describe: 'How recently five posts from one reader counts as posting too fast.',
+  },
+  commentDuplicateHours: {
+    type: 'number',
+    fallback: () => 24,
+    describe: 'How long the same comment posted twice by one reader counts as a duplicate.',
+  },
 };
 
 const cache = new Map();
 
-const coerce = (type, raw) => (type === 'boolean' ? raw === 'true' : raw);
+const coerce = (type, raw) => {
+  if (type === 'boolean') return raw === 'true';
+  if (type === 'number') return Number(raw);
+  return raw;
+};
 
 export function getSetting(key) {
   const definition = DEFINITIONS[key];
@@ -50,7 +74,14 @@ export function setSetting(key, value, actorId) {
   const definition = DEFINITIONS[key];
   if (!definition) throw new Error(`Unknown setting: ${key}`);
 
-  const stored = definition.type === 'boolean' ? String(Boolean(value)) : String(value);
+  let stored;
+  if (definition.type === 'boolean') stored = String(Boolean(value));
+  else if (definition.type === 'number') {
+    const n = Number(value);
+    // A setting that reads back as NaN would silently disable the rule it
+    // governs, so a nonsense value falls back rather than being stored.
+    stored = String(Number.isFinite(n) && n >= 0 ? n : definition.fallback());
+  } else stored = String(value);
   db.prepare(
     `INSERT INTO settings (key, value, updated_by) VALUES (?, ?, ?)
      ON CONFLICT(key) DO UPDATE SET value = excluded.value,
@@ -76,6 +107,7 @@ export function allSettings() {
       key,
       {
         value: getSetting(key),
+        type: definition.type,
         source: stored.has(key) ? 'admin' : 'environment',
         describe: definition.describe,
       },

@@ -50,7 +50,10 @@
     "empty": "W tym języku nie ma jeszcze rozdziałów.",
     "emptyHint": "Wybierz inny język albo zajrzyj tu wkrótce.",
     "chapter": "Rozdział {n}",
-    "openChapter": "Otwórz {title}"
+    "openChapter": "Otwórz {title}",
+    "comingSoon": "Wkrótce",
+    "comingLabel": "{title} — jeszcze nie wyszedł",
+    "archived": "Zarchiwizowany"
   },
   "reader": {
     "comicMode": "Tryb książki",
@@ -60,7 +63,9 @@
     "nextPage": "Następna strona",
     "pageOf": "Strona {current} z {total}",
     "backToChapters": "Wróć do rozdziałów",
-    "notFound": "Nie znaleziono takiego rozdziału."
+    "notFound": "Nie znaleziono takiego rozdziału.",
+    "notOutYet": "Ten rozdział jeszcze nie wyszedł",
+    "outOn": "Ukaże się {date}."
   },
   "contact": {
     "title": "Wszystkie oficjalne profile twórcy"
@@ -154,7 +159,8 @@
       "chapters": "Rozdziały",
       "updates": "Aktualności",
       "moderation": "Moderacja",
-      "users": "Użytkownicy"
+      "users": "Użytkownicy",
+      "settings": "Ustawienia"
     },
     "uploadChapter": "Wyślij rozdział",
     "chapterTitle": "Tytuł rozdziału",
@@ -180,7 +186,35 @@
     },
     "banUser": "Zablokuj",
     "unbanUser": "Odblokuj",
-    "confirmDeleteChapter": "Usunąć ten rozdział i wszystkie jego strony? Tej operacji nie można cofnąć."
+    "confirmDeleteChapter": "Usunąć ten rozdział i wszystkie jego strony? Tej operacji nie można cofnąć.",
+    "settings": {
+      "group_comments": "Komentarze i konta",
+      "group_words": "Słowa, których nie chcesz",
+      "group_limits": "Limity antyspamowe",
+      "moderationQueue": "Wstrzymuj nowe komentarze do zatwierdzenia",
+      "requireVerifiedEmail": "Wymagaj potwierdzonego adresu przed komentowaniem",
+      "allowRegistration": "Zezwalaj na nowe konta",
+      "bannedWords": "Zakazane słowa",
+      "bannedWordsAction": "Gdy któreś wystąpi",
+      "bannedWordsPlaceholder": "Jedno słowo lub wyrażenie w wierszu",
+      "actionHold": "Wstrzymaj do zatwierdzenia",
+      "actionReject": "Odrzuć od razu",
+      "commentCooldownMinutes": "Okno „za szybkie publikowanie” (minuty)",
+      "commentDuplicateHours": "Okno duplikatów (godziny)",
+      "save": "Zapisz ustawienia",
+      "saved": "Zapisano"
+    },
+    "release": {
+      "releaseAt": "Premiera",
+      "archive": "Archiwizuj",
+      "unarchive": "Przywróć",
+      "preview": "Podgląd",
+      "archived": "Zarchiwizowany",
+      "scheduled": "Zaplanowany",
+      "live": "Opublikowany",
+      "scheduledToast": "Ustawiono datę premiery.",
+      "liveToast": "Opublikowano."
+    }
   },
   "errors": {
     "notFound": "Nie znaleziono strony",

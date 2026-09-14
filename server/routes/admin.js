@@ -18,6 +18,7 @@ import {
   listChapters,
   listUpdates,
   readChapterMeta,
+  writeChapterMeta,
   saveUpdate,
   syncConfigFromDisk,
 } from '../services/content.js';
@@ -51,7 +52,7 @@ router.get(
   requireRole('admin'),
   asyncRoute(async (_req, res) => {
     const byLanguage = {};
-    for (const lang of config.languages) byLanguage[lang] = await listChapters(lang);
+    for (const lang of config.languages) byLanguage[lang] = await listChapters(lang, { includeHidden: true });
     res.json({ chapters: byLanguage });
   })
 );
@@ -161,6 +162,48 @@ router.delete(
     await deleteChapter(lang, number);
     audit(req.user.id, 'chapter.deleted', 'chapter', `${lang}/${number}`);
     res.json({ ok: true });
+  })
+);
+
+/**
+ * Schedule, archive or bring back a chapter.
+ *
+ * releaseAt is a moment in the future; null means it is out now. archived
+ * takes it off the shelf without deleting anything, so it can come back.
+ */
+router.patch(
+  '/chapters/:lang/:number/release',
+  requireRole('admin'),
+  asyncRoute(async (req, res) => {
+    const lang = assertLanguage(req.params.lang);
+    const number = assertChapterNumber(req.params.number);
+
+    const patch = {};
+
+    if ('releaseAt' in (req.body || {})) {
+      const raw = req.body.releaseAt;
+      if (raw === null || raw === '') {
+        patch.releaseAt = null;
+      } else {
+        const at = new Date(String(raw));
+        if (Number.isNaN(at.getTime())) {
+          throw ApiError.badRequest('invalid_date', 'That is not a date and time.', {
+            field: 'releaseAt',
+          });
+        }
+        patch.releaseAt = at.toISOString();
+      }
+    }
+
+    if ('archived' in (req.body || {})) patch.archived = Boolean(req.body.archived);
+
+    if (!Object.keys(patch).length) {
+      throw ApiError.badRequest('no_changes', 'Nothing to change.');
+    }
+
+    const meta = await writeChapterMeta(lang, number, patch);
+    audit(req.user.id, 'chapter.scheduled', 'chapter', `${lang}/${number}`, patch);
+    res.json({ chapter: { lang, number, ...meta } });
   })
 );
 

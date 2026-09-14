@@ -170,3 +170,79 @@
     flex-wrap: wrap;
   }
 }
+
+/* --- a chapter that is not out yet ------------------------------------------
+   The same slot on the shelf, but a panel rather than a link: there is nothing
+   behind it to open, and a link that refuses to open is worse than no link.
+   The cover stays visible under a veil so the shelf still reads as a shelf. */
+
+.chapter-box.is-upcoming {
+  position: relative;
+  cursor: default;
+}
+
+.chapter-veil {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-bg) 55%, transparent),
+    color-mix(in srgb, var(--color-bg) 88%, transparent)
+  );
+  backdrop-filter: blur(3px);
+}
+
+.chapter-coming {
+  position: absolute;
+  inset-inline: 0;
+  top: 38%;
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+  padding-inline: var(--space-2);
+  text-align: center;
+  pointer-events: none;
+}
+
+.chapter-coming-flag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* Tabular numerals so the digits do not jitter sideways as it counts down. */
+.chapter-countdown {
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+
+.chapter-when {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+}
+
+/* Archived: still on the author's shelf, greyed rather than hidden, so it is
+   obvious at a glance which ones readers cannot see. */
+.chapter-box.is-archived img {
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+
+.chapter-archived-flag {
+  position: absolute;
+  top: var(--space-2);
+  inset-inline-start: var(--space-2);
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: var(--color-surface-raised);
+  color: var(--color-text-muted);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}

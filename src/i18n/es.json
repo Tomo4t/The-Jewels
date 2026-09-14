@@ -50,7 +50,10 @@
     "empty": "Todavía no hay capítulos en este idioma.",
     "emptyHint": "Prueba con otro idioma o vuelve pronto.",
     "chapter": "Capítulo {n}",
-    "openChapter": "Abrir {title}"
+    "openChapter": "Abrir {title}",
+    "comingSoon": "Muy pronto",
+    "comingLabel": "{title} — aún no ha salido",
+    "archived": "Archivado"
   },
   "reader": {
     "comicMode": "Modo libro",
@@ -60,7 +63,9 @@
     "nextPage": "Página siguiente",
     "pageOf": "Página {current} de {total}",
     "backToChapters": "Volver a los capítulos",
-    "notFound": "No se ha encontrado ese capítulo."
+    "notFound": "No se ha encontrado ese capítulo.",
+    "notOutYet": "Este capítulo aún no ha salido",
+    "outOn": "Llega el {date}."
   },
   "contact": {
     "title": "Todas las redes oficiales del creador"
@@ -154,7 +159,8 @@
       "chapters": "Capítulos",
       "updates": "Novedades",
       "moderation": "Moderación",
-      "users": "Usuarios"
+      "users": "Usuarios",
+      "settings": "Ajustes"
     },
     "uploadChapter": "Subir capítulo",
     "chapterTitle": "Título del capítulo",
@@ -180,7 +186,35 @@
     },
     "banUser": "Bloquear",
     "unbanUser": "Desbloquear",
-    "confirmDeleteChapter": "¿Eliminar este capítulo y todas sus páginas? No se puede deshacer."
+    "confirmDeleteChapter": "¿Eliminar este capítulo y todas sus páginas? No se puede deshacer.",
+    "settings": {
+      "group_comments": "Comentarios y cuentas",
+      "group_words": "Palabras que no admites",
+      "group_limits": "Límites antispam",
+      "moderationQueue": "Retener los comentarios nuevos para aprobación",
+      "requireVerifiedEmail": "Exigir un correo confirmado antes de comentar",
+      "allowRegistration": "Permitir cuentas nuevas",
+      "bannedWords": "Palabras prohibidas",
+      "bannedWordsAction": "Cuando aparece una",
+      "bannedWordsPlaceholder": "Una palabra o frase por línea",
+      "actionHold": "Retenerlo para aprobación",
+      "actionReject": "Rechazarlo sin más",
+      "commentCooldownMinutes": "Ventana de «publica demasiado rápido» (minutos)",
+      "commentDuplicateHours": "Ventana de duplicados (horas)",
+      "save": "Guardar ajustes",
+      "saved": "Guardado"
+    },
+    "release": {
+      "releaseAt": "Publicación",
+      "archive": "Archivar",
+      "unarchive": "Recuperar",
+      "preview": "Vista previa",
+      "archived": "Archivado",
+      "scheduled": "Programado",
+      "live": "Publicado",
+      "scheduledToast": "Fecha de publicación fijada.",
+      "liveToast": "Publicado ya."
+    }
   },
   "errors": {
     "notFound": "Página no encontrada",

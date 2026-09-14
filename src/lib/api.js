@@ -214,6 +214,11 @@ export const api = {
   moderationQueue: () => request('/api/comments/moderation/queue'),
   myComments: ({ limit = 50, offset = 0 } = {}) =>
     request(`/api/comments/mine?limit=${limit}&offset=${offset}`),
+  adminScheduleChapter: (lang, number, payload) =>
+    request(`/api/admin/chapters/${encodeURIComponent(lang)}/${Number(number)}/release`, {
+      method: 'PATCH',
+      body: payload,
+    }),
   adminSettings: () => request('/api/admin/settings'),
   updateAdminSettings: (changes) =>
     request('/api/admin/settings', { method: 'PATCH', body: changes }),

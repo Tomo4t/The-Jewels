@@ -50,7 +50,10 @@
     "empty": "No chapters in this language yet.",
     "emptyHint": "Try another language, or check back soon.",
     "chapter": "Chapter {n}",
-    "openChapter": "Open {title}"
+    "openChapter": "Open {title}",
+    "comingSoon": "Coming soon",
+    "comingLabel": "{title} — not out yet",
+    "archived": "Archived"
   },
   "reader": {
     "comicMode": "Book mode",
@@ -60,7 +63,9 @@
     "nextPage": "Next page",
     "pageOf": "Page {current} of {total}",
     "backToChapters": "Back to chapters",
-    "notFound": "That chapter could not be found."
+    "notFound": "That chapter could not be found.",
+    "notOutYet": "This chapter is not out yet",
+    "outOn": "It arrives on {date}."
   },
   "contact": {
     "title": "All official socials for the creator"
@@ -154,7 +159,8 @@
       "chapters": "Chapters",
       "updates": "Updates",
       "moderation": "Moderation",
-      "users": "Users"
+      "users": "Users",
+      "settings": "Settings"
     },
     "uploadChapter": "Upload chapter",
     "chapterTitle": "Chapter title",
@@ -180,7 +186,35 @@
     },
     "banUser": "Ban",
     "unbanUser": "Unban",
-    "confirmDeleteChapter": "Delete this chapter and all of its pages? This cannot be undone."
+    "confirmDeleteChapter": "Delete this chapter and all of its pages? This cannot be undone.",
+    "settings": {
+      "group_comments": "Comments and accounts",
+      "group_words": "Words you will not have",
+      "group_limits": "Spam limits",
+      "moderationQueue": "Hold new comments for approval",
+      "requireVerifiedEmail": "Require a confirmed email before commenting",
+      "allowRegistration": "Allow new accounts",
+      "bannedWords": "Banned words",
+      "bannedWordsAction": "When one is found",
+      "bannedWordsPlaceholder": "One word or phrase per line",
+      "actionHold": "Hold it for approval",
+      "actionReject": "Reject it outright",
+      "commentCooldownMinutes": "Posting-too-fast window (minutes)",
+      "commentDuplicateHours": "Duplicate window (hours)",
+      "save": "Save settings",
+      "saved": "Saved"
+    },
+    "release": {
+      "releaseAt": "Release",
+      "archive": "Archive",
+      "unarchive": "Bring back",
+      "preview": "Preview",
+      "archived": "Archived",
+      "scheduled": "Scheduled",
+      "live": "Live",
+      "scheduledToast": "Release date set.",
+      "liveToast": "Published now."
+    }
   },
   "errors": {
     "notFound": "Page not found",

@@ -50,7 +50,10 @@
     "empty": "この言語の章はまだありません。",
     "emptyHint": "他の言語をお試しいただくか、また後日ご確認ください。",
     "chapter": "第{n}話",
-    "openChapter": "{title} を開く"
+    "openChapter": "{title} を開く",
+    "comingSoon": "近日公開",
+    "comingLabel": "{title} — まだ公開前",
+    "archived": "アーカイブ済み"
   },
   "reader": {
     "comicMode": "見開きモード",
@@ -60,7 +63,9 @@
     "nextPage": "次のページ",
     "pageOf": "{total} ページ中 {current} ページ",
     "backToChapters": "章一覧に戻る",
-    "notFound": "その章は見つかりませんでした。"
+    "notFound": "その章は見つかりませんでした。",
+    "notOutYet": "この章はまだ公開されていません",
+    "outOn": "{date} に公開されます。"
   },
   "contact": {
     "title": "作者の公式SNS一覧"
@@ -154,7 +159,8 @@
       "chapters": "章",
       "updates": "お知らせ",
       "moderation": "モデレーション",
-      "users": "ユーザー"
+      "users": "ユーザー",
+      "settings": "設定"
     },
     "uploadChapter": "章をアップロード",
     "chapterTitle": "章タイトル",
@@ -180,7 +186,35 @@
     },
     "banUser": "アクセス禁止",
     "unbanUser": "禁止解除",
-    "confirmDeleteChapter": "この章とすべてのページを削除しますか？元に戻せません。"
+    "confirmDeleteChapter": "この章とすべてのページを削除しますか？元に戻せません。",
+    "settings": {
+      "group_comments": "コメントとアカウント",
+      "group_words": "禁止する言葉",
+      "group_limits": "スパム制限",
+      "moderationQueue": "新しいコメントを承認待ちにする",
+      "requireVerifiedEmail": "コメントの前にメール確認を必須にする",
+      "allowRegistration": "新規アカウントを許可する",
+      "bannedWords": "禁止ワード",
+      "bannedWordsAction": "見つかったとき",
+      "bannedWordsPlaceholder": "1 行に 1 語または 1 フレーズ",
+      "actionHold": "承認待ちにする",
+      "actionReject": "そのまま却下する",
+      "commentCooldownMinutes": "連続投稿とみなす時間（分）",
+      "commentDuplicateHours": "重複とみなす時間（時間）",
+      "save": "設定を保存",
+      "saved": "保存しました"
+    },
+    "release": {
+      "releaseAt": "公開日時",
+      "archive": "アーカイブ",
+      "unarchive": "戻す",
+      "preview": "プレビュー",
+      "archived": "アーカイブ済み",
+      "scheduled": "予約済み",
+      "live": "公開中",
+      "scheduledToast": "公開日時を設定しました。",
+      "liveToast": "公開しました。"
+    }
   },
   "errors": {
     "notFound": "ページが見つかりません",

@@ -1042,3 +1042,244 @@ describe('the names an account appears under, and where it left off', () => {
     assert.equal(body.progress, null);
   });
 });
+
+describe('the controls an administrator actually has', () => {
+  test('a banned word holds a comment that would otherwise pass', async () => {
+    const { setSetting, clearSettingsCache } = await import('../services/settings.js');
+    setSetting('bannedWords', 'pineapple\nsome long phrase', null);
+    setSetting('moderationQueue', false, null);
+    clearSettingsCache();
+
+    const client = makeClient();
+    await client('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'wordy', password: 'a-long-enough-password' }),
+    });
+
+    const clean = await client('/api/comments', {
+      method: 'POST',
+      body: json({ lang: 'en', chapter: 1, body: 'What a lovely page.' }),
+    });
+    assert.equal(clean.body.comment.status, 'visible');
+
+    const caught = await client('/api/comments', {
+      method: 'POST',
+      body: json({ lang: 'en', chapter: 1, body: 'I would put pineapple on it.' }),
+    });
+    assert.equal(caught.body.comment.status, 'pending');
+
+    // The reason is a moderator's business, not the author's, so it is read
+    // from the queue rather than from what the poster gets back.
+    const admin = makeClient();
+    await admin('/api/auth/login', {
+      method: 'POST',
+      body: json({ username: 'tomo', password: 'a-very-long-password' }),
+    });
+    const queue = await admin('/api/comments/moderation/queue');
+    const held = queue.body.items.find((c) => c.id === caught.body.comment.id);
+    assert.ok(held, 'the held comment is not in the moderation queue');
+    assert.match(held.flagReason, /banned word/);
+
+    // A word is matched as a word, not as a run of letters inside a longer
+    // one -- banning "ass" must not take out "passage".
+    setSetting('bannedWords', 'ass', null);
+    clearSettingsCache();
+    const innocent = await client('/api/comments', {
+      method: 'POST',
+      body: json({ lang: 'en', chapter: 1, body: 'A lovely passage in this chapter.' }),
+    });
+    assert.equal(innocent.body.comment.status, 'visible');
+
+    setSetting('bannedWords', '', null);
+    setSetting('moderationQueue', true, null);
+    clearSettingsCache();
+  });
+
+  test('set to reject, a banned word rejects instead of holding', async () => {
+    const { setSetting, clearSettingsCache } = await import('../services/settings.js');
+    setSetting('bannedWords', 'gorgonzola', null);
+    setSetting('bannedWordsAction', 'reject', null);
+    clearSettingsCache();
+
+    const client = makeClient();
+    await client('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'rejector', password: 'a-long-enough-password' }),
+    });
+
+    const { body } = await client('/api/comments', {
+      method: 'POST',
+      body: json({ lang: 'en', chapter: 1, body: 'gorgonzola forever' }),
+    });
+    assert.equal(body.comment.status, 'rejected');
+
+    setSetting('bannedWords', '', null);
+    setSetting('bannedWordsAction', 'hold', null);
+    clearSettingsCache();
+  });
+
+  test('the new settings are readable and writable by an admin', async () => {
+    const admin = makeClient();
+    await admin('/api/auth/login', {
+      method: 'POST',
+      body: json({ username: 'tomo', password: 'a-very-long-password' }),
+    });
+
+    const { body } = await admin('/api/admin/settings');
+    for (const key of [
+      'bannedWords',
+      'bannedWordsAction',
+      'commentCooldownMinutes',
+      'commentDuplicateHours',
+    ]) {
+      assert.ok(body.settings[key], `${key} is missing from the settings`);
+      assert.ok(body.settings[key].type, `${key} has no type`);
+    }
+
+    const saved = await admin('/api/admin/settings', {
+      method: 'PATCH',
+      body: json({ commentCooldownMinutes: 9 }),
+    });
+    assert.equal(saved.status, 200);
+
+    const after = await admin('/api/admin/settings');
+    assert.equal(after.body.settings.commentCooldownMinutes.value, 9);
+
+    // A nonsense number falls back rather than being stored as NaN, which
+    // would quietly switch the rule it governs off.
+    await admin('/api/admin/settings', {
+      method: 'PATCH',
+      body: json({ commentCooldownMinutes: 'soon' }),
+    });
+    const recovered = await admin('/api/admin/settings');
+    assert.equal(recovered.body.settings.commentCooldownMinutes.value, 5);
+  });
+
+  test('a reader cannot read or change the settings', async () => {
+    const reader = makeClient();
+    await reader('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'nosy', password: 'a-long-enough-password' }),
+    });
+    const read = await reader('/api/admin/settings');
+    assert.equal(read.status, 403);
+
+    const write = await reader('/api/admin/settings', {
+      method: 'PATCH',
+      body: json({ allowRegistration: false }),
+    });
+    assert.equal(write.status, 403);
+  });
+});
+
+describe('a chapter with a date still to come', () => {
+  test('it is listed with its date, cannot be opened, and lets itself out on time', async () => {
+    const { writeChapterMeta } = await import('../services/content.js');
+
+    const admin = makeClient();
+    await admin('/api/auth/login', {
+      method: 'POST',
+      body: json({ username: 'tomo', password: 'a-very-long-password' }),
+    });
+
+    const future = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    await writeChapterMeta('en', 1, { releaseAt: future });
+
+    // A reader sees it on the shelf, with its date, and no page count — the
+    // countdown needs something to count, but the length is not given away.
+    const reader = makeClient();
+    const shelf = await reader('/api/content/chapters?lang=en');
+    const listed = shelf.body.chapters.find((c) => c.number === 1);
+    assert.ok(listed, 'the chapter vanished from the shelf instead of counting down');
+    assert.equal(listed.released, false);
+    assert.equal(listed.releaseAt, future);
+    assert.equal(listed.pages, 0);
+
+    // Guessing the URL must not walk past the countdown.
+    const blocked = await reader('/api/content/chapters/en/1');
+    assert.equal(blocked.status, 403);
+    assert.equal(blocked.body.error.code, 'not_released_yet');
+
+    // The author can still read it, which is what "preview" means here.
+    const preview = await admin('/api/content/chapters/en/1');
+    assert.equal(preview.status, 200);
+    assert.ok(preview.body.pages.length >= 0);
+
+    // A date in the past is simply out: nothing runs on a schedule, the
+    // comparison happens on every read.
+    await writeChapterMeta('en', 1, { releaseAt: new Date(Date.now() - 1000).toISOString() });
+    const now = await reader('/api/content/chapters/en/1');
+    assert.equal(now.status, 200);
+
+    await writeChapterMeta('en', 1, { releaseAt: null });
+  });
+
+  test('an archived chapter is gone for readers and still there for the author', async () => {
+    const { writeChapterMeta } = await import('../services/content.js');
+
+    const admin = makeClient();
+    await admin('/api/auth/login', {
+      method: 'POST',
+      body: json({ username: 'tomo', password: 'a-very-long-password' }),
+    });
+
+    await writeChapterMeta('en', 1, { archived: true });
+
+    const reader = makeClient();
+    const shelf = await reader('/api/content/chapters?lang=en');
+    assert.equal(
+      shelf.body.chapters.find((c) => c.number === 1),
+      undefined
+    );
+    const gone = await reader('/api/content/chapters/en/1');
+    assert.equal(gone.status, 404);
+
+    const authorShelf = await admin('/api/content/chapters?lang=en');
+    const mine = authorShelf.body.chapters.find((c) => c.number === 1);
+    assert.ok(mine, 'the author cannot see their own archived chapter');
+    assert.equal(mine.archived, true);
+    assert.equal((await admin('/api/content/chapters/en/1')).status, 200);
+
+    await writeChapterMeta('en', 1, { archived: false });
+  });
+
+  test('only an admin can schedule, and the date has to be a date', async () => {
+    const reader = makeClient();
+    await reader('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'schemer', password: 'a-long-enough-password' }),
+    });
+    const refused = await reader('/api/admin/chapters/en/1/release', {
+      method: 'PATCH',
+      body: json({ releaseAt: new Date().toISOString() }),
+    });
+    assert.equal(refused.status, 403);
+
+    const admin = makeClient();
+    await admin('/api/auth/login', {
+      method: 'POST',
+      body: json({ username: 'tomo', password: 'a-very-long-password' }),
+    });
+    const nonsense = await admin('/api/admin/chapters/en/1/release', {
+      method: 'PATCH',
+      body: json({ releaseAt: 'next tuesday-ish' }),
+    });
+    assert.equal(nonsense.status, 400);
+    assert.equal(nonsense.body.error.code, 'invalid_date');
+
+    // Scheduling must not quietly drop the title alongside it.
+    const before = await admin('/api/content/chapters/en/1');
+    const ok = await admin('/api/admin/chapters/en/1/release', {
+      method: 'PATCH',
+      body: json({ releaseAt: new Date(Date.now() + 3600_000).toISOString() }),
+    });
+    assert.equal(ok.status, 200);
+    const after = await admin('/api/content/chapters/en/1');
+    assert.equal(after.body.title, before.body.title);
+
+    await admin('/api/admin/chapters/en/1/release', {
+      method: 'PATCH',
+      body: json({ releaseAt: null }),
+    });
+  });
+});
