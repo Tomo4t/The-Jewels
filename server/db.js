@@ -87,12 +87,25 @@ function addColumn(table, column, definition) {
     .prepare(`PRAGMA table_info(${table})`)
     .all()
     .some((c) => c.name === column);
-  if (!present) db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  if (present) return false;
+  db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  return true;
 }
 
 addColumn('users', 'email', 'TEXT');
 addColumn('users', 'email_verified_at', 'TEXT');
 addColumn('users', 'google_sub', 'TEXT');
+// NULL until the owner has been shown, and had a chance to change, the name
+// they will appear under. A Google sign-up never chose either name -- the
+// server picked both from the Google profile -- so this marks the one moment
+// the username is still theirs to set.
+//
+// Everyone already on the site registered by hand and typed their own
+// username, so the backfill closes the window for them the one time the
+// column appears. Only accounts created after this, by Google, start NULL.
+if (addColumn('users', 'profile_setup_at', 'TEXT')) {
+  db.exec("UPDATE users SET profile_setup_at = COALESCE(created_at, datetime('now'))");
+}
 
 db.exec(`
 CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email
@@ -120,6 +133,18 @@ CREATE TABLE IF NOT EXISTS settings (
   value      TEXT NOT NULL,
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_by INTEGER REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- Where each reader is in each language. Kept on the account as well as in
+-- the browser so "continue reading" survives a browser that clears its
+-- storage, and follows the reader from a phone to a desktop.
+CREATE TABLE IF NOT EXISTS reading_progress (
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  lang       TEXT    NOT NULL,
+  chapter    INTEGER NOT NULL,
+  page       INTEGER NOT NULL DEFAULT 0,
+  updated_at TEXT    NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (user_id, lang)
 );
 
 -- Short-lived CSRF state for the OAuth round trip.

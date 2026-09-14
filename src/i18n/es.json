@@ -205,7 +205,12 @@
     "googleLinked": "Cuenta de Google vinculada",
     "noPassword": "Esta cuenta inicia sesión con Google y no tiene contraseña.",
     "usernameLabel": "Nombre de usuario",
-    "memberSince": "Miembro desde"
+    "memberSince": "Miembro desde",
+    "settings": "Ajustes",
+    "displayNameLabel": "Nombre visible",
+    "displayNameHint": "Es el nombre que ven los demás lectores. Puedes cambiarlo cuando quieras.",
+    "displayNameSaved": "Nombre visible actualizado.",
+    "displayNameRequired": "Elige un nombre visible."
   },
   "fanart": {
     "title": "Fan art",
@@ -230,7 +235,12 @@
     "commentRejected": "Comentario rechazado.",
     "finishSetupTitle": "Termina de configurar tu cuenta",
     "finishSetupSent": "Enviamos un enlace de confirmación a {email}. Ábrelo para terminar de configurar tu cuenta; hasta entonces no puedes publicar comentarios.",
-    "finishSetupNoEmail": "Añade un correo electrónico abajo y confírmalo para terminar de configurar tu cuenta."
+    "finishSetupNoEmail": "Añade un correo electrónico abajo y confírmalo para terminar de configurar tu cuenta.",
+    "welcomeTitle": "Elige cómo apareces",
+    "welcomeBody": "Tu cuenta se creó a partir de tu perfil de Google, así que esto se rellenó por ti. Cámbialo ahora si quieres: después tu nombre de usuario será definitivo.",
+    "welcomeSave": "Ese soy yo",
+    "welcomeSaved": "Todo listo.",
+    "usernameOnce": "El nombre de usuario solo se elige una vez. Después no se puede cambiar."
   },
   "settings": {
     "title": "Ajustes del sitio",

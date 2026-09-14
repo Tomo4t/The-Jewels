@@ -205,7 +205,12 @@
     "googleLinked": "Konto Google połączone",
     "noPassword": "To konto loguje się przez Google i nie ma hasła.",
     "usernameLabel": "Nazwa użytkownika",
-    "memberSince": "Konto od"
+    "memberSince": "Konto od",
+    "settings": "Ustawienia",
+    "displayNameLabel": "Nazwa wyświetlana",
+    "displayNameHint": "To nazwa, którą widzą inni czytelnicy. Możesz ją zmienić w każdej chwili.",
+    "displayNameSaved": "Nazwa wyświetlana zaktualizowana.",
+    "displayNameRequired": "Wybierz nazwę wyświetlaną."
   },
   "fanart": {
     "title": "Fan art",
@@ -230,7 +235,12 @@
     "commentRejected": "Komentarz odrzucony.",
     "finishSetupTitle": "Dokończ zakładanie konta",
     "finishSetupSent": "Wysłaliśmy link potwierdzający na adres {email}. Otwórz go, aby dokończyć zakładanie konta — do tego czasu nie możesz dodawać komentarzy.",
-    "finishSetupNoEmail": "Dodaj poniżej adres e-mail i potwierdź go, aby dokończyć zakładanie konta."
+    "finishSetupNoEmail": "Dodaj poniżej adres e-mail i potwierdź go, aby dokończyć zakładanie konta.",
+    "welcomeTitle": "Wybierz, jak chcesz wyglądać",
+    "welcomeBody": "Konto powstało z Twojego profilu Google, więc te pola wypełniono za Ciebie. Zmień je teraz, jeśli chcesz — nazwy użytkownika nie da się później zmienić.",
+    "welcomeSave": "To ja",
+    "welcomeSaved": "Gotowe.",
+    "usernameOnce": "Nazwę użytkownika ustawia się tylko raz. Później nie można jej zmienić."
   },
   "settings": {
     "title": "Ustawienia strony",

@@ -205,7 +205,12 @@
     "googleLinked": "Google アカウント連携済み",
     "noPassword": "このアカウントは Google でログインするため、パスワードはありません。",
     "usernameLabel": "ユーザー名",
-    "memberSince": "登録日"
+    "memberSince": "登録日",
+    "settings": "設定",
+    "displayNameLabel": "表示名",
+    "displayNameHint": "他の読者に表示される名前です。いつでも変更できます。",
+    "displayNameSaved": "表示名を更新しました。",
+    "displayNameRequired": "表示名を入力してください。"
   },
   "fanart": {
     "title": "ファンアート",
@@ -230,7 +235,12 @@
     "commentRejected": "コメントを却下しました。",
     "finishSetupTitle": "アカウントの設定を完了してください",
     "finishSetupSent": "{email} に確認リンクを送信しました。リンクを開いてアカウントの設定を完了してください。それまではコメントを投稿できません。",
-    "finishSetupNoEmail": "下でメールアドレスを追加し、確認するとアカウントの設定が完了します。"
+    "finishSetupNoEmail": "下でメールアドレスを追加し、確認するとアカウントの設定が完了します。",
+    "welcomeTitle": "表示のしかたを選ぶ",
+    "welcomeBody": "このアカウントは Google プロフィールから作成されたため、ここはあらかじめ入力されています。必要なら今変更してください。ユーザー名はこのあと変更できません。",
+    "welcomeSave": "これでいい",
+    "welcomeSaved": "完了しました。",
+    "usernameOnce": "ユーザー名を決められるのは一度だけです。あとから変更はできません。"
   },
   "settings": {
     "title": "サイト設定",

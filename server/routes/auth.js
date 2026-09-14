@@ -33,6 +33,11 @@ import {
   destroyAllSessionsForUser,
   verifiedHolderOf,
   setEmail,
+  setDisplayName,
+  setUsernameDuringSetup,
+  markProfileSetupDone,
+  readProgress,
+  writeProgress,
   suggestUsername,
   toPrivateUser,
   verifyPassword,
@@ -95,6 +100,104 @@ router.get(
   })
 );
 
+/**
+ * The display name, and — only while setup is still pending — the username.
+ *
+ * A Google sign-up never chose either name: suggestUsername picked one and the
+ * Google profile supplied the other. This is the one moment the username is
+ * still the owner's to set; after `done` it is fixed, because other people
+ * link to it.
+ */
+router.put(
+  '/profile',
+  requireAuth,
+  asyncRoute(async (req, res) => {
+    const current = findById(req.user.id);
+    if (!current) throw ApiError.notFound('not_found', 'That account no longer exists.');
+
+    const parsed = z
+      .object({
+        displayName: z.string().trim().min(1).max(40).optional(),
+        username: z.string().trim().optional(),
+        done: z.boolean().optional(),
+      })
+      .safeParse(req.body ?? {});
+    if (!parsed.success) {
+      throw ApiError.badRequest('invalid', 'That name will not do.', { field: 'displayName' });
+    }
+    const { displayName, username, done } = parsed.data;
+
+    if (username !== undefined) {
+      if (current.profile_setup_at) {
+        throw ApiError.badRequest(
+          'username_fixed',
+          'Your username cannot be changed once it is set.',
+          { field: 'username' }
+        );
+      }
+      if (!USERNAME_RE.test(username)) {
+        throw ApiError.badRequest(
+          'invalid_username',
+          'Usernames are 3 to 24 letters, numbers, hyphens or underscores.',
+          { field: 'username' }
+        );
+      }
+      const taken = findByUsername(username);
+      if (taken && taken.id !== current.id) {
+        throw ApiError.conflict('username_taken', 'That username is already taken.', {
+          field: 'username',
+        });
+      }
+      if (username !== current.username) {
+        setUsernameDuringSetup(current.id, username);
+        audit(current.id, 'user.username_set', 'user', current.id);
+      }
+    }
+
+    if (displayName !== undefined) {
+      setDisplayName(current.id, displayName);
+      audit(current.id, 'user.display_name', 'user', current.id);
+    }
+
+    if (done) markProfileSetupDone(current.id);
+
+    res.json({ user: toPrivateUser(findById(current.id)) });
+  })
+);
+
+/**
+ * Reading progress on the account.
+ *
+ * The browser keeps its own copy for signed-out readers; this one survives a
+ * browser that clears its storage and follows the reader between devices.
+ */
+router.get(
+  '/progress',
+  requireAuth,
+  asyncRoute(async (req, res) => {
+    const lang = req.query.lang ? String(req.query.lang) : null;
+    res.json({ progress: readProgress(req.user.id, lang) });
+  })
+);
+
+router.put(
+  '/progress',
+  requireAuth,
+  asyncRoute(async (req, res) => {
+    const parsed = z
+      .object({
+        lang: z.string().trim().min(2).max(8),
+        chapter: z.coerce.number().int().min(1),
+        page: z.coerce.number().int().min(0),
+      })
+      .safeParse(req.body ?? {});
+    if (!parsed.success) throw ApiError.badRequest('invalid', 'That is not a place in the comic.');
+
+    const { lang, chapter, page } = parsed.data;
+    res.json({ progress: writeProgress(req.user.id, lang, chapter, page) });
+  })
+);
+
 router.post(
   '/register',
   authLimiter,
@@ -139,6 +242,9 @@ router.post(
     const token = createSession(user.id, req.get('user-agent'));
     res.cookie(config.sessionCookieName, token, sessionCookieOptions());
 
+    // This account typed its own username and display name on the form, so
+    // there is nothing to come back and choose.
+    markProfileSetupDone(user.id);
     audit(user.id, 'user.register', 'user', user.id, { role, email: Boolean(address) });
 
     const verification = await startVerification(user, address);
@@ -537,6 +643,15 @@ router.get(
 
     const token = createSession(user.id, req.get('user-agent'));
     res.cookie(config.sessionCookieName, token, sessionCookieOptions());
+
+    // A brand new Google account has a username the server guessed and a
+    // display name lifted off the Google profile. Send it to the account page
+    // to be shown both, and to change them, before anything else.
+    const fresh = findById(user.id);
+    if (fresh && !fresh.profile_setup_at) {
+      return res.redirect(302, absoluteUrl('/#profile?welcome=1'));
+    }
+
     res.redirect(302, absoluteUrl(stateRow.redirect_to || '/#home'));
   })
 );

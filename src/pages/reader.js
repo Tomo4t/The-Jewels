@@ -4,6 +4,7 @@ import { read, write, writeJSON, KEYS } from '../lib/store.js';
 import { play } from '../lib/sound.js';
 import { syncHash, buildHash } from '../router.js';
 import api from '../lib/api.js';
+import session from '../lib/session.js';
 import { mountComments } from '../components/comments.js';
 
 /**
@@ -129,9 +130,33 @@ function setPage(page, { announcePage = false } = {}) {
   if (indicator) indicator.textContent = label;
   if (announcePage) announce(label);
 
-  writeJSON(KEYS.progress(state.lang), { chapter: state.number, page: state.page });
+  rememberProgress(state.lang, state.number, state.page);
   syncHash('reader', { lang: state.lang, chapter: state.number, page: state.page });
   updateLazyImages();
+}
+
+/**
+ * Where the reader is, in the browser and — when signed in — on the account.
+ *
+ * The browser copy is the only one a signed-out reader has. The account copy
+ * survives a browser that clears its storage and follows the reader from a
+ * phone to a desktop, which is what makes "continue reading" dependable
+ * rather than a thing that quietly stops appearing.
+ *
+ * Turning a page fires this constantly, so the network half is held back
+ * until the reader settles.
+ */
+let progressTimer = null;
+
+function rememberProgress(lang, chapter, page) {
+  writeJSON(KEYS.progress(lang), { chapter, page });
+  if (!session.isSignedIn) return;
+
+  window.clearTimeout(progressTimer);
+  progressTimer = window.setTimeout(() => {
+    // Losing a bookmark is not worth interrupting anybody over.
+    api.saveProgress(lang, chapter, page).catch(() => {});
+  }, 1500);
 }
 
 /** Gives a `src` only to images near the current page, and drops far ones. */

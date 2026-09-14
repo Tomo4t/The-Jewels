@@ -947,3 +947,98 @@ describe('the verification gate stands down without a mail provider', () => {
     clearSettingsCache();
   });
 });
+
+describe('the names an account appears under, and where it left off', () => {
+  test('a display name can be changed, and the username cannot', async () => {
+    const client = makeClient();
+    await client('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'namer', password: 'a-long-enough-password' }),
+    });
+
+    const renamed = await client('/api/auth/profile', {
+      method: 'PUT',
+      body: json({ displayName: 'Someone Else' }),
+    });
+    assert.equal(renamed.status, 200);
+    assert.equal(renamed.body.user.displayName, 'Someone Else');
+    assert.equal(renamed.body.user.username, 'namer');
+
+    // Registering by hand means the username was typed on the form, so the
+    // one chance to set it is already spent.
+    const retried = await client('/api/auth/profile', {
+      method: 'PUT',
+      body: json({ username: 'somebody-new' }),
+    });
+    assert.equal(retried.status, 400);
+    assert.equal(retried.body.error.code, 'username_fixed');
+
+    const { body } = await client('/api/auth/me');
+    assert.equal(body.user.username, 'namer');
+    assert.equal(body.user.profileSetupPending, false);
+  });
+
+  test('an empty display name is refused rather than stored', async () => {
+    const client = makeClient();
+    await client('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'blanker', password: 'a-long-enough-password' }),
+    });
+
+    const { status } = await client('/api/auth/profile', {
+      method: 'PUT',
+      body: json({ displayName: '   ' }),
+    });
+    assert.equal(status, 400);
+
+    const { body } = await client('/api/auth/me');
+    assert.equal(body.user.displayName, 'blanker');
+  });
+
+  test('reading progress is kept per language and overwritten in place', async () => {
+    const client = makeClient();
+    await client('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'bookmark', password: 'a-long-enough-password' }),
+    });
+
+    const empty = await client('/api/auth/progress?lang=en');
+    assert.equal(empty.status, 200);
+    assert.equal(empty.body.progress, null);
+
+    await client('/api/auth/progress', {
+      method: 'PUT',
+      body: json({ lang: 'en', chapter: 1, page: 3 }),
+    });
+    await client('/api/auth/progress', {
+      method: 'PUT',
+      body: json({ lang: 'ja', chapter: 1, page: 1 }),
+    });
+    // Reading on does not add a second row for the same language.
+    await client('/api/auth/progress', {
+      method: 'PUT',
+      body: json({ lang: 'en', chapter: 1, page: 7 }),
+    });
+
+    const one = await client('/api/auth/progress?lang=en');
+    assert.equal(one.body.progress.page, 7);
+
+    const all = await client('/api/auth/progress');
+    assert.equal(all.body.progress.length, 2);
+    assert.deepEqual(all.body.progress.map((p) => p.lang).sort(), ['en', 'ja']);
+  });
+
+  test('progress belongs to the account, not to whoever asks', async () => {
+    const stranger = makeClient();
+    const { status } = await stranger('/api/auth/progress?lang=en');
+    assert.equal(status, 401);
+
+    const other = makeClient();
+    await other('/api/auth/register', {
+      method: 'POST',
+      body: json({ username: 'elsewhere', password: 'a-long-enough-password' }),
+    });
+    const { body } = await other('/api/auth/progress?lang=en');
+    assert.equal(body.progress, null);
+  });
+});

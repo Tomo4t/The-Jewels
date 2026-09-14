@@ -3,6 +3,7 @@ import { t, currentLanguage, formatDate } from '../lib/i18n.js';
 import { readJSON, KEYS } from '../lib/store.js';
 import { buildHash } from '../router.js';
 import api from '../lib/api.js';
+import session from '../lib/session.js';
 
 export function title() {
   return t('nav.home');
@@ -103,6 +104,28 @@ async function mountUpdates(lang, signal) {
 
 // --- latest chapter and continue reading ----------------------------------
 
+/**
+ * The account's copy first, the browser's as the fallback.
+ *
+ * A signed-out reader only ever has the browser copy. A signed-in one has
+ * both, and the account is the one that survives cleared storage and carries
+ * between devices — so it wins, and the local copy catches the case where the
+ * request fails.
+ */
+async function savedProgress(lang) {
+  const local = readJSON(KEYS.progress(lang), null);
+  if (!session.loaded) await session.refresh();
+  if (!session.isSignedIn) return local;
+
+  try {
+    const { progress } = await api.progress(lang);
+    if (progress && progress.chapter) return { chapter: progress.chapter, page: progress.page };
+  } catch (err) {
+    console.warn('[home] could not read progress from the account', err);
+  }
+  return local;
+}
+
 function coverCard({ href, image, label, title: caption, alt }) {
   return `
     <a class="cover-card" href="${href}">
@@ -142,7 +165,7 @@ async function mountChapterCards(lang) {
   }
 
   // Continue reading, only if there is saved progress that still exists
-  const progress = readJSON(KEYS.progress(lang), null);
+  const progress = await savedProgress(lang);
   if (!progress || !continueHost) return;
 
   const chapter = chapters.find((c) => c.number === Number(progress.chapter));

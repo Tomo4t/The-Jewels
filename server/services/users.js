@@ -39,6 +39,10 @@ export const toPrivateUser = (row) =>
         email: row.email || null,
         hasPassword: row.password_hash !== UNUSABLE_PASSWORD,
         linkedGoogle: Boolean(row.google_sub),
+        // True for an account that has never been shown the names it is going
+        // to appear under -- in practice a fresh Google sign-up, where the
+        // server chose both from the Google profile without asking.
+        profileSetupPending: !row.profile_setup_at,
       }
     : null;
 
@@ -117,6 +121,60 @@ export function listUsers({ limit = 100, offset = 0 } = {}) {
       linkedGoogle: Boolean(row.google_sub),
       commentCount: row.comment_count,
     }));
+}
+
+/**
+ * The display name is the one the reader picked for themselves and may change
+ * whenever they like. The username is an identity other people link to, so it
+ * is settable exactly once -- see setUsernameDuringSetup.
+ */
+export function setDisplayName(userId, displayName) {
+  db.prepare('UPDATE users SET display_name = ? WHERE id = ?').run(displayName, userId);
+  return findById(userId);
+}
+
+/**
+ * Only while profile_setup_at is still NULL. A Google sign-up never chose its
+ * username -- suggestUsername did -- so this is the one chance to correct it,
+ * and it closes the moment setup is marked done.
+ */
+export function setUsernameDuringSetup(userId, username) {
+  const row = findById(userId);
+  if (!row || row.profile_setup_at) return null;
+  db.prepare('UPDATE users SET username = ? WHERE id = ?').run(username, userId);
+  return findById(userId);
+}
+
+export function markProfileSetupDone(userId) {
+  db.prepare("UPDATE users SET profile_setup_at = datetime('now') WHERE id = ?").run(userId);
+  return findById(userId);
+}
+
+// --- reading progress ------------------------------------------------------
+
+export function readProgress(userId, lang = null) {
+  if (lang) {
+    return (
+      db
+        .prepare('SELECT lang, chapter, page, updated_at FROM reading_progress WHERE user_id = ? AND lang = ?')
+        .get(userId, lang) || null
+    );
+  }
+  return db
+    .prepare('SELECT lang, chapter, page, updated_at FROM reading_progress WHERE user_id = ?')
+    .all(userId);
+}
+
+export function writeProgress(userId, lang, chapter, page) {
+  db.prepare(
+    `INSERT INTO reading_progress (user_id, lang, chapter, page, updated_at)
+     VALUES (?, ?, ?, ?, datetime('now'))
+     ON CONFLICT(user_id, lang) DO UPDATE
+       SET chapter = excluded.chapter,
+           page = excluded.page,
+           updated_at = excluded.updated_at`
+  ).run(userId, lang, chapter, page);
+  return readProgress(userId, lang);
 }
 
 export function setRole(userId, role) {

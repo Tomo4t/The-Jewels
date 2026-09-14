@@ -23,8 +23,8 @@ export class ApiError extends Error {
   static notFound(code = 'not_found', message = 'Not found.') {
     return new ApiError(404, code, message);
   }
-  static conflict(code, message) {
-    return new ApiError(409, code, message);
+  static conflict(code, message, details) {
+    return new ApiError(409, code, message, details);
   }
   static tooMany(code = 'rate_limited', message = 'Too many requests. Please slow down.') {
     return new ApiError(429, code, message);

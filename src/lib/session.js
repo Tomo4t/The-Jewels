@@ -57,6 +57,12 @@ export const session = {
   },
 
   /** Signed in, but the account still has a step left before it is usable. */
+  /** A fresh Google sign-up that has not yet been shown the names it will
+      appear under. Password sign-ups typed their own, so this is false. */
+  get profileSetupPending() {
+    return Boolean(state.user?.profileSetupPending);
+  },
+
   get setupPending() {
     return Boolean(state.user) && state.emailRequired && !state.user.emailVerified;
   },

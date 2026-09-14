@@ -194,6 +194,13 @@ export const api = {
   resendVerification: () => request('/api/auth/verify/resend', { method: 'POST' }),
   changePassword: (currentPassword, newPassword) =>
     request('/api/auth/password', { method: 'POST', body: { currentPassword, newPassword } }),
+  updateProfile: (payload) => request('/api/auth/profile', { method: 'PUT', body: payload }),
+
+  // reading progress kept on the account
+  progress: (lang) =>
+    request(`/api/auth/progress${lang ? `?lang=${encodeURIComponent(lang)}` : ''}`),
+  saveProgress: (lang, chapter, page) =>
+    request('/api/auth/progress', { method: 'PUT', body: { lang, chapter, page } }),
 
   // comments
   comments: (lang, chapter) =>

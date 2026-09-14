@@ -205,7 +205,12 @@
     "googleLinked": "Google account linked",
     "noPassword": "This account signs in with Google and has no password.",
     "usernameLabel": "Username",
-    "memberSince": "Member since"
+    "memberSince": "Member since",
+    "settings": "Settings",
+    "displayNameLabel": "Display name",
+    "displayNameHint": "This is the name other readers see. You can change it whenever you like.",
+    "displayNameSaved": "Display name updated.",
+    "displayNameRequired": "Pick a display name."
   },
   "fanart": {
     "title": "Fan art",
@@ -230,7 +235,12 @@
     "commentRejected": "Comment rejected.",
     "finishSetupTitle": "Finish setting up your account",
     "finishSetupSent": "We sent a confirmation link to {email}. Open it to finish setting up your account — until then you cannot post comments.",
-    "finishSetupNoEmail": "Add an email address below and confirm it to finish setting up your account."
+    "finishSetupNoEmail": "Add an email address below and confirm it to finish setting up your account.",
+    "welcomeTitle": "Choose how you will appear",
+    "welcomeBody": "Your account was made from your Google profile, so these were filled in for you. Change them now if you want — your username is fixed after this.",
+    "welcomeSave": "That is me",
+    "welcomeSaved": "All set.",
+    "usernameOnce": "Your username can only be set once. It cannot be changed later."
   },
   "settings": {
     "title": "Site settings",

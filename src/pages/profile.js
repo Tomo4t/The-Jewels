@@ -6,13 +6,17 @@ import api, { ApiError } from '../lib/api.js';
 import { toastSuccess, toastError } from '../components/toast.js';
 
 /**
- * The signed-in user's own page: who they are, the address on the account, the
- * password, and everything they have written -- including the comments still
- * waiting on a moderator, since not being able to see those is exactly the
- * confusion this answers.
+ * The signed-in reader's own page.
  *
- * Moderators additionally get the approval queue here, so the everyday job does
- * not require opening the admin panel.
+ * It used to be a stack of sections with two forms permanently unfolded, so
+ * the first thing you saw on your own account page was an empty "change your
+ * password" box. The settings are disclosures now: each row states what the
+ * setting currently is, and opens only when you mean to change it. What you
+ * actually come here to look at -- who you are, and what you have written --
+ * is what is on screen when the page loads.
+ *
+ * Moderators keep the approval queue here, so the everyday job does not
+ * require opening the admin panel.
  */
 
 export function title() {
@@ -28,10 +32,7 @@ const STATUS_LABEL = {
   rejected: 'profile.statusRejected',
 };
 
-const badge = (verified) =>
-  `<span class="verify-badge${verified ? ' is-verified' : ''}">
-     ${escapeHTML(verified ? t('auth.verified') : t('auth.unverified'))}
-   </span>`;
+const ROLE_LABEL = { admin: 'comments.admin', moderator: 'comments.moderator' };
 
 const commentCard = (comment, { moderation = false } = {}) => {
   const status = comment.status || 'visible';
@@ -67,6 +68,16 @@ const commentCard = (comment, { moderation = false } = {}) => {
       }
     </li>`;
 };
+
+/** One settings row: what it is now in the summary, the form behind it. */
+const setting = (id, label, value, body, { tone = '' } = {}) => `
+  <details class="setting" id="setting-${id}">
+    <summary class="setting-summary">
+      <span class="setting-label">${escapeHTML(label)}</span>
+      <span class="setting-value${tone ? ` is-${tone}` : ''}">${value}</span>
+    </summary>
+    <div class="setting-body">${body}</div>
+  </details>`;
 
 export async function render(params = {}) {
   if (!session.loaded) await session.refresh();
@@ -112,10 +123,107 @@ export async function render(params = {}) {
     }
   }
 
+  const roleKey = ROLE_LABEL[user.role];
+
+  // Shown once, to an account that never chose the names it appears under --
+  // in practice a Google sign-up, where the server picked the username and
+  // Google supplied the display name.
+  const welcome = session.profileSetupPending
+    ? `
+      <section class="account-section welcome-panel" id="welcome-panel">
+        <h2>${escapeHTML(t('profile.welcomeTitle'))}</h2>
+        <p>${escapeHTML(t('profile.welcomeBody'))}</p>
+        <form id="welcome-form" class="account-form" novalidate>
+          <p class="form-error" id="welcome-error" role="alert" hidden></p>
+          <label class="field">
+            <span>${escapeHTML(t('account.usernameLabel'))}</span>
+            <input name="username" type="text" value="${escapeHTML(user.username)}"
+                   minlength="3" maxlength="24" autocomplete="username" required>
+          </label>
+          <p class="field-hint">${escapeHTML(t('profile.usernameOnce'))}</p>
+          <label class="field">
+            <span>${escapeHTML(t('account.displayNameLabel'))}</span>
+            <input name="displayName" type="text" value="${escapeHTML(user.displayName || user.username)}"
+                   maxlength="40" required>
+          </label>
+          <p class="field-hint">${escapeHTML(t('account.displayNameHint'))}</p>
+          <button type="submit" class="button button--primary">
+            ${escapeHTML(t('profile.welcomeSave'))}
+          </button>
+        </form>
+      </section>`
+    : '';
+
+  const emailBody = `
+    ${
+      user.email && !user.emailVerified && session.emailVerification
+        ? `<button type="button" class="button" id="resend-verify">
+             ${escapeHTML(t('auth.resendVerification'))}
+           </button>`
+        : ''
+    }
+    <form id="email-form" class="account-form" novalidate>
+      <p class="form-error" id="email-error" role="alert" hidden></p>
+      <label class="field">
+        <span>${escapeHTML(user.email ? t('account.changeEmail') : t('account.addEmail'))}</span>
+        <input name="email" type="email" maxlength="254" autocomplete="email" required>
+      </label>
+      <button type="submit" class="button button--primary">
+        ${escapeHTML(t('account.save'))}
+      </button>
+    </form>`;
+
+  const passwordBody = user.hasPassword
+    ? `<form id="password-form" class="account-form" novalidate>
+         <p class="form-error" id="password-error" role="alert" hidden></p>
+         <label class="field">
+           <span>${escapeHTML(t('account.currentPassword'))}</span>
+           <input name="currentPassword" type="password" autocomplete="current-password" required>
+         </label>
+         <label class="field">
+           <span>${escapeHTML(t('account.newPassword'))}</span>
+           <input name="newPassword" type="password" autocomplete="new-password" required minlength="10">
+         </label>
+         <p class="field-hint">${escapeHTML(t('auth.passwordRules'))}</p>
+         <button type="submit" class="button button--primary">
+           ${escapeHTML(t('account.changePassword'))}
+         </button>
+       </form>`
+    : `<p class="account-note">${escapeHTML(t('account.noPassword'))}</p>`;
+
+  const displayNameBody = `
+    <form id="display-name-form" class="account-form" novalidate>
+      <p class="form-error" id="display-name-error" role="alert" hidden></p>
+      <label class="field">
+        <span>${escapeHTML(t('account.displayNameLabel'))}</span>
+        <input name="displayName" type="text" maxlength="40" required
+               value="${escapeHTML(user.displayName || '')}">
+      </label>
+      <p class="field-hint">${escapeHTML(t('account.displayNameHint'))}</p>
+      <button type="submit" class="button button--primary">
+        ${escapeHTML(t('account.save'))}
+      </button>
+    </form>`;
+
+  const emailSummary = user.email
+    ? `${escapeHTML(user.email)}${
+        user.emailVerified
+          ? ''
+          : ` <span class="setting-flag">${escapeHTML(t('auth.unverified'))}</span>`
+      }`
+    : `<span class="setting-empty">${escapeHTML(t('account.noEmail'))}</span>`;
+
   return `
     <div class="account-page">
-      <div class="profile-head">
-        <h1>${escapeHTML(t('account.title'))}</h1>
+      <header class="profile-head">
+        <div class="profile-identity">
+          <h1 class="profile-name">${escapeHTML(user.displayName || user.username)}</h1>
+          <p class="profile-meta">
+            <span class="profile-handle">@${escapeHTML(user.username)}</span>
+            ${roleKey ? `<span class="profile-role is-${escapeHTML(user.role)}">${escapeHTML(t(roleKey))}</span>` : ''}
+            <span class="profile-since">${escapeHTML(t('account.memberSince'))} ${escapeHTML(formatDate(user.createdAt))}</span>
+          </p>
+        </div>
         <div class="profile-head-actions">
           ${
             session.isAdmin
@@ -132,9 +240,10 @@ export async function render(params = {}) {
             <img src="/images/logout.svg" alt="" aria-hidden="true">
           </button>
         </div>
-      </div>
+      </header>
 
       ${verifyNotice}
+      ${welcome}
 
       ${
         session.setupPending
@@ -157,69 +266,21 @@ export async function render(params = {}) {
       }
 
       <section class="account-section">
-        <dl class="account-facts">
-          <div>
-            <dt>${escapeHTML(t('account.usernameLabel'))}</dt>
-            <dd>${escapeHTML(user.username)}</dd>
-          </div>
-          <div>
-            <dt>${escapeHTML(t('account.memberSince'))}</dt>
-            <dd>${escapeHTML(formatDate(user.createdAt))}</dd>
-          </div>
-        </dl>
-      </section>
-
-      <section class="account-section">
-        <h2>${escapeHTML(t('account.emailSection'))}</h2>
-        ${
-          user.email
-            ? `<p class="account-email">
-                 <span class="account-email-address">${escapeHTML(user.email)}</span>
-                 ${badge(user.emailVerified)}
-               </p>
-               ${
-                 !user.emailVerified && session.emailVerification
-                   ? `<button type="button" class="button" id="resend-verify">
-                        ${escapeHTML(t('auth.resendVerification'))}
-                      </button>`
-                   : ''
-               }`
-            : `<p class="empty-note">${escapeHTML(t('account.noEmail'))}</p>`
-        }
-        <form id="email-form" class="account-form" novalidate>
-          <p class="form-error" id="email-error" role="alert" hidden></p>
-          <label class="field">
-            <span>${escapeHTML(user.email ? t('account.changeEmail') : t('account.addEmail'))}</span>
-            <input name="email" type="email" maxlength="254" autocomplete="email" required>
-          </label>
-          <button type="submit" class="button button--primary">
-            ${escapeHTML(t('account.save'))}
-          </button>
-        </form>
-      </section>
-
-      <section class="account-section">
-        <h2>${escapeHTML(t('account.passwordSection'))}</h2>
-        ${
-          user.hasPassword
-            ? `<form id="password-form" class="account-form" novalidate>
-                 <p class="form-error" id="password-error" role="alert" hidden></p>
-                 <label class="field">
-                   <span>${escapeHTML(t('account.currentPassword'))}</span>
-                   <input name="currentPassword" type="password" autocomplete="current-password" required>
-                 </label>
-                 <label class="field">
-                   <span>${escapeHTML(t('account.newPassword'))}</span>
-                   <input name="newPassword" type="password" autocomplete="new-password" required minlength="10">
-                 </label>
-                 <p class="field-hint">${escapeHTML(t('auth.passwordRules'))}</p>
-                 <button type="submit" class="button button--primary">
-                   ${escapeHTML(t('account.changePassword'))}
-                 </button>
-               </form>`
-            : `<p class="account-note">${escapeHTML(t('account.noPassword'))}</p>`
-        }
-        ${user.linkedGoogle ? `<p class="account-note">${escapeHTML(t('account.googleLinked'))}</p>` : ''}
+        <h2>${escapeHTML(t('account.settings'))}</h2>
+        <div class="settings-list">
+          ${setting('display-name', t('account.displayNameLabel'), escapeHTML(user.displayName || user.username), displayNameBody)}
+          ${setting('email', t('account.emailSection'), emailSummary, emailBody, {
+            tone: user.email && !user.emailVerified ? 'warn' : '',
+          })}
+          ${setting(
+            'password',
+            t('account.passwordSection'),
+            user.hasPassword
+              ? '••••••••'
+              : `<span class="setting-empty">${escapeHTML(t('account.googleLinked'))}</span>`,
+            passwordBody
+          )}
+        </div>
       </section>
 
       ${
@@ -265,6 +326,68 @@ export function mount() {
     event.currentTarget.disabled = true;
     await session.signOut();
     navigate('home', {}, { replace: true });
+  });
+
+  // --- the one-time welcome: pick a username and a display name -----------
+  const welcomeForm = document.getElementById('welcome-form');
+  const welcomeError = document.getElementById('welcome-error');
+
+  bind(welcomeForm, 'submit', async (event) => {
+    event.preventDefault();
+    welcomeError.hidden = true;
+    const data = Object.fromEntries(new FormData(welcomeForm));
+    const username = String(data.username || '').trim();
+    const displayName = String(data.displayName || '').trim();
+
+    if (!/^[a-zA-Z0-9_-]{3,24}$/.test(username)) {
+      return fail(welcomeError, t('auth.usernameRules'));
+    }
+    if (!displayName) return fail(welcomeError, t('account.displayNameRequired'));
+
+    const submit = welcomeForm.querySelector('button[type="submit"]');
+    submit.disabled = true;
+    try {
+      await api.updateProfile({ username, displayName, done: true });
+      await session.refresh();
+      toastSuccess(t('profile.welcomeSaved'));
+      navigate('profile', {}, { replace: true });
+    } catch (err) {
+      const map = {
+        username_taken: t('auth.usernameTaken'),
+        invalid_username: t('auth.usernameRules'),
+        username_fixed: t('profile.usernameOnce'),
+      };
+      fail(
+        welcomeError,
+        err instanceof ApiError ? map[err.code] || err.message : t('common.error')
+      );
+      submit.disabled = false;
+    }
+    return undefined;
+  });
+
+  // --- display name --------------------------------------------------------
+  const nameForm = document.getElementById('display-name-form');
+  const nameError = document.getElementById('display-name-error');
+
+  bind(nameForm, 'submit', async (event) => {
+    event.preventDefault();
+    nameError.hidden = true;
+    const value = String(new FormData(nameForm).get('displayName') || '').trim();
+    if (!value) return fail(nameError, t('account.displayNameRequired'));
+
+    const submit = nameForm.querySelector('button[type="submit"]');
+    submit.disabled = true;
+    try {
+      await api.updateProfile({ displayName: value });
+      await session.refresh();
+      toastSuccess(t('account.displayNameSaved'));
+      navigate('profile', {}, { replace: true });
+    } catch (err) {
+      fail(nameError, err instanceof ApiError ? err.message : t('common.error'));
+      submit.disabled = false;
+    }
+    return undefined;
   });
 
   // --- email ---
@@ -338,6 +461,7 @@ export function mount() {
       await api.changePassword(String(data.currentPassword || ''), next);
       toastSuccess(t('account.passwordChanged'));
       passwordForm.reset();
+      document.getElementById('setting-password')?.removeAttribute('open');
     } catch (err) {
       const map = {
         invalid_credentials: t('auth.invalidCredentials'),
@@ -383,3 +507,5 @@ export function mount() {
 
   return () => cleanups.forEach((fn) => fn());
 }
+
+export default { render, mount, title };

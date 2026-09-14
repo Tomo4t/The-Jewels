@@ -205,7 +205,12 @@
     "googleLinked": "Compte Google lié",
     "noPassword": "Ce compte se connecte avec Google et n'a pas de mot de passe.",
     "usernameLabel": "Nom d'utilisateur",
-    "memberSince": "Membre depuis"
+    "memberSince": "Membre depuis",
+    "settings": "Réglages",
+    "displayNameLabel": "Nom affiché",
+    "displayNameHint": "C'est le nom que voient les autres lecteurs. Vous pouvez le changer quand vous voulez.",
+    "displayNameSaved": "Nom affiché mis à jour.",
+    "displayNameRequired": "Choisissez un nom affiché."
   },
   "fanart": {
     "title": "Fan art",
@@ -230,7 +235,12 @@
     "commentRejected": "Commentaire refusé.",
     "finishSetupTitle": "Terminez la création de votre compte",
     "finishSetupSent": "Nous avons envoyé un lien de confirmation à {email}. Ouvrez-le pour terminer la création de votre compte — d'ici là, vous ne pouvez pas publier de commentaires.",
-    "finishSetupNoEmail": "Ajoutez une adresse e-mail ci-dessous et confirmez-la pour terminer la création de votre compte."
+    "finishSetupNoEmail": "Ajoutez une adresse e-mail ci-dessous et confirmez-la pour terminer la création de votre compte.",
+    "welcomeTitle": "Choisissez votre apparence",
+    "welcomeBody": "Votre compte a été créé à partir de votre profil Google, ces champs ont donc été remplis pour vous. Modifiez-les maintenant si vous le souhaitez — votre nom d'utilisateur sera ensuite définitif.",
+    "welcomeSave": "C'est bien moi",
+    "welcomeSaved": "Tout est prêt.",
+    "usernameOnce": "Le nom d'utilisateur ne se choisit qu'une fois. Il ne pourra plus être modifié."
   },
   "settings": {
     "title": "Paramètres du site",
