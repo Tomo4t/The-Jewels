@@ -7,7 +7,7 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  padding: 2rem;
+  padding: clamp(1rem, 4vw, 2rem);
 }
 
 .home-sections {
@@ -17,18 +17,19 @@
   justify-content: space-between;
 }
 
+/* Both cards share the row evenly. `flex-basis: 0` rather than a pixel basis,
+   and `min-width: 0` so the pair can shrink onto a phone instead of one card
+   being pushed onto its own line. The cap is the cover art's own width -- past
+   that the card would just be a small picture floating in a wide box. */
 .home-block {
-  flex: 1 1 300px;
-  max-width: 48%;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 19rem;
 }
 
 @media (max-width: 768px) {
   .home-sections {
     flex-direction: column;
-  }
-
-  .home-block {
-    max-width: 100%;
   }
 }
 
@@ -41,11 +42,15 @@
   margin: 0 auto 2rem auto; /* top: 0, bottom: 2rem, horizontal: auto (centered) */
   width: 100%;
 }
+/* Continue reading and Latest chapter stay side by side at every width, so
+   `nowrap`. The gap has to give way on a narrow screen, or two cards plus a
+   4rem gutter will not fit and the shrinking lands entirely on the artwork. */
 .home-pair {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  align-items: flex-start;
   justify-content: center;
-  gap: clamp(1rem, 5vw, 4rem); /* Responsive gap */
+  gap: clamp(0.75rem, 4vw, 3rem);
   max-width: 62rem;
   margin: 0 auto;
 }
