@@ -60,8 +60,7 @@
     "nextPage": "Página siguiente",
     "pageOf": "Página {current} de {total}",
     "backToChapters": "Volver a los capítulos",
-    "notFound": "No se ha encontrado ese capítulo.",
-    "fullscreenHint": "Toca dos veces una página para verla a pantalla completa"
+    "notFound": "No se ha encontrado ese capítulo."
   },
   "contact": {
     "title": "Todas las redes oficiales del creador"
@@ -147,8 +146,7 @@
     "loadMore": "Cargar más comentarios",
     "author": "Autor",
     "moderator": "Moderador",
-    "admin": "Administrador",
-    "verifiedBadge": "Correo verificado"
+    "admin": "Administrador"
   },
   "admin": {
     "title": "Panel de administración",

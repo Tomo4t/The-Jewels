@@ -60,8 +60,7 @@
     "nextPage": "Page suivante",
     "pageOf": "Page {current} sur {total}",
     "backToChapters": "Retour aux chapitres",
-    "notFound": "Ce chapitre est introuvable.",
-    "fullscreenHint": "Touchez deux fois une page pour le plein écran"
+    "notFound": "Ce chapitre est introuvable."
   },
   "contact": {
     "title": "Tous les réseaux officiels du créateur"
@@ -147,8 +146,7 @@
     "loadMore": "Charger plus de commentaires",
     "author": "Auteur",
     "moderator": "Modérateur",
-    "admin": "Administrateur",
-    "verifiedBadge": "E-mail vérifié"
+    "admin": "Administrateur"
   },
   "admin": {
     "title": "Panneau d’administration",

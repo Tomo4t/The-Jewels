@@ -154,7 +154,10 @@ async function mountChapterCards(lang) {
   let detail;
   try {
     detail = await api.chapter(lang, chapter.number);
-  } catch {
+  } catch (err) {
+    // Swallowing this silently made "continue reading quietly never appears"
+    // indistinguishable from "there is nothing to continue".
+    console.warn('[home] could not load the chapter to continue from', err);
     return;
   }
 

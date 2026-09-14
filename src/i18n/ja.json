@@ -60,8 +60,7 @@
     "nextPage": "次のページ",
     "pageOf": "{total} ページ中 {current} ページ",
     "backToChapters": "章一覧に戻る",
-    "notFound": "その章は見つかりませんでした。",
-    "fullscreenHint": "ページをダブルタップで全画面表示"
+    "notFound": "その章は見つかりませんでした。"
   },
   "contact": {
     "title": "作者の公式SNS一覧"
@@ -147,8 +146,7 @@
     "loadMore": "コメントをもっと見る",
     "author": "作者",
     "moderator": "モデレーター",
-    "admin": "管理者",
-    "verifiedBadge": "メール認証済み"
+    "admin": "管理者"
   },
   "admin": {
     "title": "管理画面",

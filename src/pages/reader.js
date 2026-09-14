@@ -75,7 +75,6 @@ export async function render(params) {
       <p class="page-indicator" id="page-indicator" aria-live="polite">
         ${escapeHTML(t('reader.pageOf', { current: startPage + 1, total }))}
       </p>
-      <p class="reader-hint">${escapeHTML(t('reader.fullscreenHint'))}</p>
     </div>
 
     <section class="comments-section" id="comments-section" aria-labelledby="comments-heading">
@@ -295,6 +294,21 @@ function renderFlip(book) {
   });
 
   navButtons(prev, next);
+
+  // Click the right half of the spread to turn forward, the left half to go
+  // back -- the same gesture card mode has, so the two modes behave alike.
+  // Measured against the spread rather than the click target, so it still
+  // reads correctly on the half-width sheet at either end of the book.
+  const onClick = (event) => {
+    if (!event.target.closest('.front, .back')) return;
+    const box = inner.getBoundingClientRect();
+    if (event.clientX >= box.left + box.width / 2) next();
+    else prev();
+  };
+
+  inner.addEventListener('click', onClick);
+  state.cleanups.push(() => inner.removeEventListener('click', onClick));
+
   apply({ silent: true, keepPage: true });
 }
 
@@ -348,7 +362,8 @@ function renderScroll(book) {
 
   const goTo = (index) => {
     if (index < 0 || index >= state.total) return;
-    play('flip');
+    // No flip sound here. Nothing is being turned in scroll mode -- the column
+    // just moves -- so the sound described something that was not happening.
     scrollToPage(index, { smooth: true });
     setPage(index, { announcePage: true });
   };
@@ -440,9 +455,6 @@ function renderCard(book) {
   // Click the right half of the page to go forward, the left half to go back --
   // the swipe gesture, with a mouse. Swiping is untouched.
   const onClick = (event) => {
-    // The second click of a double-click belongs to the fullscreen gesture, so
-    // a double-click opens fullscreen instead of turning two pages.
-    if (event.detail > 1) return;
     const card = event.target.closest('.card-page.show');
     if (!card || !state?.actions) return;
     const box = card.getBoundingClientRect();
@@ -513,24 +525,14 @@ function bindInput() {
     else state.actions.prev();
   };
 
-  // --- double-tap or double-click for fullscreen ---
-  const onDoubleClick = (event) => {
-    const img = event.target.closest('.page-iner');
-    if (!img) return;
-    if (document.fullscreenElement) document.exitFullscreen?.();
-    else img.requestFullscreen?.().catch(() => {});
-  };
-
   document.addEventListener('keydown', onKeydown);
   book?.addEventListener('touchstart', onTouchStart, { passive: true });
   book?.addEventListener('touchend', onTouchEnd, { passive: true });
-  book?.addEventListener('dblclick', onDoubleClick);
 
   return () => {
     document.removeEventListener('keydown', onKeydown);
     book?.removeEventListener('touchstart', onTouchStart);
     book?.removeEventListener('touchend', onTouchEnd);
-    book?.removeEventListener('dblclick', onDoubleClick);
   };
 }
 

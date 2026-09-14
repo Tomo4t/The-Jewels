@@ -425,14 +425,6 @@ html.dark .mode-btn.active img {
   color: var(--color-text-muted);
 }
 
-.reader-hint {
-  margin: var(--space-1) auto var(--space-5);
-  text-align: center;
-  font-size: 0.75rem;
-  opacity: 0.6;
-  color: var(--color-text-muted);
-}
-
 /* A placeholder tint while the image is still arriving, so a page does not pop
    in from nothing. */
 .page-iner {
@@ -457,10 +449,6 @@ html.dark .mode-btn.active img {
 @media (max-width: 640px) {
   .reader-toolbar {
     padding-inline: var(--space-3);
-  }
-
-  .reader-hint {
-    display: none;
   }
 
   /* A phone gives scroll mode the page edge to edge -- as long as a whole page

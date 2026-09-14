@@ -12,7 +12,12 @@
     <meta name="theme-color" content="#f4eee6" />
     <meta name="color-scheme" content="light dark" />
 
+    <!-- Safari never rendered the 176 KB nine-image .ico: a PNG it will take.
+         The .ico stays for older Windows browsers that only read that. -->
     <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="canonical" href="https://www.tomojw.com/" />
 
     <!-- Open Graph / Twitter -->

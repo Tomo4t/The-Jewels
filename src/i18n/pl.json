@@ -60,8 +60,7 @@
     "nextPage": "Następna strona",
     "pageOf": "Strona {current} z {total}",
     "backToChapters": "Wróć do rozdziałów",
-    "notFound": "Nie znaleziono takiego rozdziału.",
-    "fullscreenHint": "Dotknij strony dwukrotnie, aby otworzyć pełny ekran"
+    "notFound": "Nie znaleziono takiego rozdziału."
   },
   "contact": {
     "title": "Wszystkie oficjalne profile twórcy"
@@ -147,8 +146,7 @@
     "loadMore": "Wczytaj więcej komentarzy",
     "author": "Autor",
     "moderator": "Moderator",
-    "admin": "Administrator",
-    "verifiedBadge": "Zweryfikowany e-mail"
+    "admin": "Administrator"
   },
   "admin": {
     "title": "Panel administratora",

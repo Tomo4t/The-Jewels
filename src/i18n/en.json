@@ -60,8 +60,7 @@
     "nextPage": "Next page",
     "pageOf": "Page {current} of {total}",
     "backToChapters": "Back to chapters",
-    "notFound": "That chapter could not be found.",
-    "fullscreenHint": "Double-tap a page to go fullscreen"
+    "notFound": "That chapter could not be found."
   },
   "contact": {
     "title": "All official socials for the creator"
@@ -147,8 +146,7 @@
     "loadMore": "Load more comments",
     "author": "Author",
     "moderator": "Moderator",
-    "admin": "Admin",
-    "verifiedBadge": "Verified email"
+    "admin": "Admin"
   },
   "admin": {
     "title": "Admin panel",

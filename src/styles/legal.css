@@ -105,6 +105,7 @@ html.dark .legal-section h2 {
 .site-footer {
   position: relative;
   z-index: 1;
+  flex: 0 0 auto;
   padding: var(--space-4);
   background-color: var(--color-footer-bg);
   color: var(--color-footer-text);

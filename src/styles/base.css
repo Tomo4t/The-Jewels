@@ -14,7 +14,14 @@ html {
 
 body {
   margin: 0;
+  /* A column so the footer can be pushed to the bottom of a short page --
+     home and contact are shorter than the viewport, and the footer was
+     floating up under the content with background showing beneath it.
+     svh over vh so a phone's collapsing address bar does not overshoot. */
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
+  min-height: 100svh;
   font-family: var(--font-body);
   color: var(--color-text);
   background-color: var(--color-bg);
@@ -39,7 +46,6 @@ a.icon-btn,
 .mode-btn,
 .navbtns,
 .page-indicator,
-.reader-hint,
 .chapter-box,
 .chapter-label {
   -webkit-user-select: none;
@@ -118,6 +124,9 @@ h3 {
 #page-content {
   position: relative;
   z-index: 1;
+  /* Takes the slack so the footer lands on the bottom edge. min-height stays
+     as a floor for pages that render nothing while they load. */
+  flex: 1 0 auto;
   min-height: 60vh;
   padding-bottom: var(--space-6);
 }
