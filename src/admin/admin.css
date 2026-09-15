@@ -355,6 +355,15 @@
   cursor: pointer;
 }
 
+/* .field-hint carries a negative top margin so it tucks into the bottom margin
+   of the .field above it. A .switch-label has no bottom margin to tuck into,
+   so the hint climbed on top of the label and the two lines overlapped. It
+   also lines up with the label's words rather than its checkbox. */
+.switch-label + .field-hint {
+  margin-top: var(--space-2);
+  margin-left: calc(1.1rem + var(--space-3));
+}
+
 .switch-label input {
   width: 1.1rem;
   height: 1.1rem;
