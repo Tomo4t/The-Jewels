@@ -14,6 +14,7 @@ import {
 import { initTheme, toggleTheme } from '../lib/theme.js';
 import session from '../lib/session.js';
 import api, { ApiError } from '../lib/api.js';
+import { confirmDialog, chooseDialog } from '../components/modal.js';
 import { toast, toastError, toastSuccess } from '../components/toast.js';
 
 const main = document.getElementById('admin-main');
@@ -255,7 +256,12 @@ async function renderChapters(panel) {
   panel.querySelectorAll('[data-delete-chapter]').forEach((button) => {
     button.addEventListener('click', async () => {
       const [lang, number] = button.dataset.deleteChapter.split(':');
-      if (!window.confirm(t('admin.confirmDeleteChapter'))) return;
+      const goAhead = await confirmDialog({
+        title: t('admin.confirmDeleteChapter'),
+        confirmLabel: t('common.delete'),
+        danger: true,
+      });
+      if (!goAhead) return;
       try {
         await api.adminDeleteChapter(lang, number);
         toastSuccess(t('common.delete'));
@@ -887,14 +893,17 @@ async function renderUsers(panel) {
       if (!lifting) {
         // A timeout is the common case and a standing ban the rare one, so the
         // choices are offered shortest-first rather than defaulting to the door.
-        const answer = window.prompt(
-          `${t('admin.muteWhich', { username })}\n\n` +
-            `1 = ${t('admin.muteHour')}\n2 = ${t('admin.muteDay')}\n` +
-            `3 = ${t('admin.muteWeek')}\n4 = ${t('admin.muteForever')}`,
-          '2'
-        );
-        if (answer === null) return;
-        span = { 1: 'hour', 2: 'day', 3: 'week', 4: 'forever' }[answer.trim()];
+        // They used to be typed as "1" to "4" into a prompt box, which asked a
+        // moderator to read a legend and then not fat-finger it.
+        span = await chooseDialog({
+          title: t('admin.muteWhich', { username }),
+          options: [
+            { label: t('admin.muteHour'), value: 'hour' },
+            { label: t('admin.muteDay'), value: 'day' },
+            { label: t('admin.muteWeek'), value: 'week' },
+            { label: t('admin.muteForever'), value: 'forever', danger: true },
+          ],
+        });
         if (!span) return;
       }
 
@@ -914,10 +923,18 @@ async function renderUsers(panel) {
       const id = raw.slice(0, raw.indexOf(':'));
       const username = raw.slice(raw.indexOf(':') + 1);
 
-      // Two questions, because the first is irreversible and the second decides
-      // whether anything they wrote survives.
-      if (!window.confirm(t('admin.confirmRemove', { username }))) return;
-      const mode = window.confirm(t('admin.chooseMode')) ? 'purge' : 'anonymise';
+      // One question with both answers on it. This used to be two stacked
+      // confirms where OK meant erase and Cancel meant keep -- a coin toss
+      // dressed up as a question.
+      const mode = await chooseDialog({
+        title: t('admin.confirmRemove', { username }),
+        hint: t('admin.removeHint'),
+        options: [
+          { label: t('admin.removeKeep'), value: 'anonymise' },
+          { label: t('admin.removePurge'), value: 'purge', danger: true },
+        ],
+      });
+      if (!mode) return;
 
       try {
         await api.adminDeleteUser(id, mode);
@@ -1116,13 +1133,16 @@ async function renderPushSetup(host) {
       </div>`;
 
     host.querySelector('[data-setup-push]')?.addEventListener('click', async (event) => {
-      event.currentTarget.disabled = true;
+      // Held in a variable rather than read back off the event: once this
+      // handler awaits, dispatch is over and event.currentTarget is null.
+      const button = event.currentTarget;
+      button.disabled = true;
       try {
         draw(await api.adminSetupPush());
         toastSuccess(t('admin.push.done'));
       } catch (err) {
         fail(err);
-        event.currentTarget.disabled = false;
+        button.disabled = false;
       }
     });
   };
@@ -1205,18 +1225,26 @@ async function renderBackups(host) {
     `;
 
     host.querySelector('[data-connect]')?.addEventListener('click', async (event) => {
-      event.currentTarget.disabled = true;
+      // Held in a variable rather than read back off the event: once this
+      // handler awaits, dispatch is over and event.currentTarget is null.
+      const button = event.currentTarget;
+      button.disabled = true;
       try {
         const { url } = await api.adminDriveConnect();
         window.location.href = url;
       } catch (err) {
         fail(err);
-        event.currentTarget.disabled = false;
+        button.disabled = false;
       }
     });
 
     host.querySelector('[data-disconnect]')?.addEventListener('click', async () => {
-      if (!window.confirm(t('admin.backups.confirmDisconnect'))) return;
+      const goAhead = await confirmDialog({
+        title: t('admin.backups.confirmDisconnect'),
+        confirmLabel: t('admin.backups.disconnect'),
+        danger: true,
+      });
+      if (!goAhead) return;
       try {
         await api.adminDriveDisconnect();
         await renderBackups(host);
@@ -1648,19 +1676,25 @@ async function renderNewsletter(panel) {
     );
 
     panel.querySelector('#news-save')?.addEventListener('click', async (event) => {
-      event.currentTarget.disabled = true;
+      // Held in a variable rather than read back off the event: once this
+      // handler awaits, dispatch is over and event.currentTarget is null.
+      const button = event.currentTarget;
+      button.disabled = true;
       try {
         Object.assign(current, await api.saveNewsletter(current.id, current));
         toastSuccess(t('admin.news.saved'));
         shell();
       } catch (err) {
         fail(err);
-        event.currentTarget.disabled = false;
+        button.disabled = false;
       }
     });
 
     panel.querySelector('#news-test')?.addEventListener('click', async (event) => {
-      event.currentTarget.disabled = true;
+      // Held in a variable rather than read back off the event: once this
+      // handler awaits, dispatch is over and event.currentTarget is null.
+      const button = event.currentTarget;
+      button.disabled = true;
       try {
         await api.saveNewsletter(current.id, current);
         const { to } = await api.testNewsletter(current.id);
@@ -1668,14 +1702,27 @@ async function renderNewsletter(panel) {
       } catch (err) {
         fail(err);
       } finally {
-        event.currentTarget.disabled = false;
+        button.disabled = false;
       }
     });
 
     panel.querySelector('#news-send')?.addEventListener('click', async (event) => {
-      // Irreversible and public. A confirm here is worth the friction.
-      if (!window.confirm(t('admin.news.confirmSend', { count: subscribers }))) return;
-      event.currentTarget.disabled = true;
+      // Held in a variable rather than read back off the event: once this
+      // handler awaits, dispatch is over and event.currentTarget is null.
+      const button = event.currentTarget;
+
+      // Irreversible and public, so it is worth asking -- but asked in the page.
+      // This was a window.confirm, and a browser that had suppressed native
+      // dialogs made it return false every time, which turned the send button
+      // into one that did nothing at all and said nothing about why.
+      const goAhead = await confirmDialog({
+        title: t('admin.news.confirmSend', { count: subscribers }),
+        confirmLabel: t('admin.news.sendToAll', { count: subscribers }),
+        danger: true,
+      });
+      if (!goAhead) return;
+
+      button.disabled = true;
       try {
         await api.saveNewsletter(current.id, current);
         const { queued } = await api.sendNewsletter(current.id);
@@ -1683,7 +1730,7 @@ async function renderNewsletter(panel) {
         renderNewsletter(panel);
       } catch (err) {
         fail(err);
-        event.currentTarget.disabled = false;
+        button.disabled = false;
       }
     });
   };

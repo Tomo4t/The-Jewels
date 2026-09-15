@@ -33,7 +33,8 @@
     "edit": "Editar",
     "close": "Cerrar",
     "submit": "Enviar",
-    "required": "Este campo es obligatorio."
+    "required": "Este campo es obligatorio.",
+    "confirm": "Confirmar"
   },
   "home": {
     "updates": "Novedades",
@@ -314,7 +315,6 @@
     },
     "removeUser": "Eliminar",
     "confirmRemove": "¿Eliminar {username} para siempre? No se puede deshacer.",
-    "chooseMode": "¿Borrar la cuenta por completo? Aceptar borra todo. Cancelar conserva sus comentarios como «Cuenta eliminada».",
     "removed": "{username} ha sido eliminado.",
     "mute": "Silenciar",
     "muteHour": "1 hora",
@@ -326,7 +326,10 @@
     "mutedForever": "No puede comentar",
     "muteDone": "{username} ya no puede comentar.",
     "muteLifted": "{username} puede comentar otra vez.",
-    "muteWhich": "¿Cuánto tiempo no podrá comentar {username}?"
+    "muteWhich": "¿Cuánto tiempo no podrá comentar {username}?",
+    "removeKeep": "Conservar sus comentarios",
+    "removePurge": "Borrarlo todo",
+    "removeHint": "Borrar no se puede deshacer. Conservar los comentarios los deja firmados como «Cuenta eliminada»."
   },
   "errors": {
     "notFound": "Página no encontrada",

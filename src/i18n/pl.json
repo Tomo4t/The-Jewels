@@ -33,7 +33,8 @@
     "edit": "Edytuj",
     "close": "Zamknij",
     "submit": "Wyślij",
-    "required": "To pole jest wymagane."
+    "required": "To pole jest wymagane.",
+    "confirm": "Potwierdź"
   },
   "home": {
     "updates": "Aktualności",
@@ -314,7 +315,6 @@
     },
     "removeUser": "Usuń",
     "confirmRemove": "Usunąć {username} na zawsze? Tego nie można cofnąć.",
-    "chooseMode": "Wymazać konto całkowicie? OK wymazuje wszystko. Anuluj zachowa komentarze jako „Usunięte konto”.",
     "removed": "{username} został usunięty.",
     "mute": "Wyciszenie",
     "muteHour": "1 godzina",
@@ -326,7 +326,10 @@
     "mutedForever": "Nie może komentować",
     "muteDone": "{username} nie może już komentować.",
     "muteLifted": "{username} może znów komentować.",
-    "muteWhich": "Jak długo {username} nie ma móc komentować?"
+    "muteWhich": "Jak długo {username} nie ma móc komentować?",
+    "removeKeep": "Zachowaj komentarze",
+    "removePurge": "Wymaż wszystko",
+    "removeHint": "Wymazania nie można cofnąć. Zachowane komentarze zostaną podpisane „Usunięte konto”."
   },
   "errors": {
     "notFound": "Nie znaleziono strony",

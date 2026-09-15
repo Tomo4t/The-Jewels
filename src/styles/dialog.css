@@ -1,0 +1,90 @@
+/* --- the in-page question box ------------------------------------------- */
+/*
+ * Above everything: the navbar sits at 999, the skip link at 1000 and toasts at
+ * 900. A question you cannot see is worse than no question.
+ */
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: rgb(0 0 0 / 55%);
+  overscroll-behavior: contain;
+}
+
+.dialog {
+  width: 100%;
+  max-width: 28rem;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  box-shadow: var(--shadow-md);
+  animation: dialog-in var(--transition-fast) ease-out;
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog {
+    animation: none;
+  }
+}
+
+.dialog-title {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.4;
+}
+
+.dialog-message {
+  margin: var(--space-3) 0 0;
+  line-height: 1.55;
+}
+
+.dialog-hint {
+  margin: var(--space-3) 0 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: flex-end;
+  margin-top: var(--space-5);
+}
+
+/* The way out is always present but never the loudest thing in the box. */
+.button--quiet {
+  border-color: transparent;
+  background: none;
+  color: var(--color-text-muted);
+}
+
+.button--quiet:hover:not(:disabled) {
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+/* On a phone the buttons stop competing for one line and stack full width. */
+@media (max-width: 26rem) {
+  .dialog-actions {
+    flex-direction: column-reverse;
+  }
+
+  .dialog-actions .button {
+    width: 100%;
+  }
+}

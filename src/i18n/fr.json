@@ -33,7 +33,8 @@
     "edit": "Modifier",
     "close": "Fermer",
     "submit": "Envoyer",
-    "required": "Ce champ est obligatoire."
+    "required": "Ce champ est obligatoire.",
+    "confirm": "Confirmer"
   },
   "home": {
     "updates": "Actualités",
@@ -314,7 +315,6 @@
     },
     "removeUser": "Supprimer",
     "confirmRemove": "Supprimer {username} définitivement ? Irréversible.",
-    "chooseMode": "Tout effacer ? OK efface tout. Annuler conserve ses commentaires en « Compte supprimé ».",
     "removed": "{username} a été supprimé.",
     "mute": "Suspension",
     "muteHour": "1 heure",
@@ -326,7 +326,10 @@
     "mutedForever": "Ne peut pas commenter",
     "muteDone": "{username} ne peut plus commenter.",
     "muteLifted": "{username} peut à nouveau commenter.",
-    "muteWhich": "Pendant combien de temps {username} ne pourra-t-il pas commenter ?"
+    "muteWhich": "Pendant combien de temps {username} ne pourra-t-il pas commenter ?",
+    "removeKeep": "Garder ses commentaires",
+    "removePurge": "Tout effacer",
+    "removeHint": "L’effacement est irréversible. Garder les commentaires les laisse signés « Compte supprimé »."
   },
   "errors": {
     "notFound": "Page introuvable",

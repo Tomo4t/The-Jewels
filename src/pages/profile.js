@@ -3,6 +3,7 @@ import { t, formatDate } from '../lib/i18n.js';
 import { buildHash, navigate } from '../router.js';
 import session from '../lib/session.js';
 import api, { ApiError } from '../lib/api.js';
+import { confirmDialog } from '../components/modal.js';
 import { toastSuccess, toastError } from '../components/toast.js';
 
 /**
@@ -691,7 +692,13 @@ export function mount(params = {}) {
     // One last plain question. Everything past this point is irreversible, and
     // the two choices mean different things, so the question names which one.
     const warning = mode === 'purge' ? t('account.deletePurgeHint') : t('account.deleteKeepHint');
-    if (!window.confirm(`${t('account.deleteWarn')}\n\n${warning}`)) return;
+    const goAhead = await confirmDialog({
+      title: t('account.deleteWarn'),
+      message: warning,
+      confirmLabel: t('common.delete'),
+      danger: true,
+    });
+    if (!goAhead) return;
 
     const submit = deleteForm.querySelector('button[type="submit"]');
     submit.disabled = true;

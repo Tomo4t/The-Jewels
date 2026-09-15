@@ -3,6 +3,7 @@ import { t, formatRelative } from '../lib/i18n.js';
 import { buildHash } from '../router.js';
 import session from '../lib/session.js';
 import api, { ApiError } from '../lib/api.js';
+import { confirmDialog } from './modal.js';
 import { toastError, toastSuccess } from './toast.js';
 
 /**
@@ -211,7 +212,8 @@ function header(comment) {
   );
 }
 
-const body = (comment) => el('div', { class: 'comment-body', html: textToHTML(comment.body, { links: true }) });
+const body = (comment) =>
+  el('div', { class: 'comment-body', html: textToHTML(comment.body, { links: true }) });
 
 function actions(comment, ctx, item) {
   const row = el('div', { class: 'comment-actions' });
@@ -246,7 +248,12 @@ function actions(comment, ctx, item) {
         class: 'link-button link-button--danger',
         text: t('common.delete'),
         onClick: async () => {
-          if (!window.confirm(t('comments.confirmDelete'))) return;
+          const goAhead = await confirmDialog({
+            title: t('comments.confirmDelete'),
+            confirmLabel: t('common.delete'),
+            danger: true,
+          });
+          if (!goAhead) return;
           try {
             await api.deleteComment(comment.id);
             await ctx.refresh();

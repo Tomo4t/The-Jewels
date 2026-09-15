@@ -33,7 +33,8 @@
     "edit": "Edit",
     "close": "Close",
     "submit": "Submit",
-    "required": "This field is required."
+    "required": "This field is required.",
+    "confirm": "Confirm"
   },
   "home": {
     "updates": "Updates",
@@ -314,7 +315,6 @@
     },
     "removeUser": "Remove",
     "confirmRemove": "Remove {username} for good? This cannot be undone.",
-    "chooseMode": "Erase the account completely? OK erases everything. Cancel keeps their comments as \"Deleted account\".",
     "removed": "{username} has been removed.",
     "mute": "Timeout",
     "muteHour": "1 hour",
@@ -326,7 +326,10 @@
     "mutedForever": "Cannot comment",
     "muteDone": "{username} can no longer comment.",
     "muteLifted": "{username} can comment again.",
-    "muteWhich": "How long should {username} be unable to comment?"
+    "muteWhich": "How long should {username} be unable to comment?",
+    "removeKeep": "Keep their comments",
+    "removePurge": "Erase everything",
+    "removeHint": "Erasing cannot be undone. Keeping their comments leaves them signed \"Deleted account\"."
   },
   "errors": {
     "notFound": "Page not found",

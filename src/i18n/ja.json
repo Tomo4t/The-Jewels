@@ -33,7 +33,8 @@
     "edit": "編集",
     "close": "閉じる",
     "submit": "送信",
-    "required": "この項目は必須です。"
+    "required": "この項目は必須です。",
+    "confirm": "実行"
   },
   "home": {
     "updates": "お知らせ",
@@ -314,7 +315,6 @@
     },
     "removeUser": "削除",
     "confirmRemove": "{username} を完全に削除しますか？取り消せません。",
-    "chooseMode": "アカウントを完全に消去しますか？OK ですべて消去します。キャンセルするとコメントは「削除されたアカウント」として残ります。",
     "removed": "{username} を削除しました。",
     "mute": "コメント停止",
     "muteHour": "1 時間",
@@ -326,7 +326,10 @@
     "mutedForever": "コメントできません",
     "muteDone": "{username} はコメントできなくなりました。",
     "muteLifted": "{username} は再びコメントできます。",
-    "muteWhich": "{username} がコメントできない期間は？"
+    "muteWhich": "{username} がコメントできない期間は？",
+    "removeKeep": "コメントは残す",
+    "removePurge": "すべて消去する",
+    "removeHint": "消去は取り消せません。コメントを残すと「削除されたアカウント」として表示されます。"
   },
   "errors": {
     "notFound": "ページが見つかりません",
