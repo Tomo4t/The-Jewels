@@ -132,7 +132,9 @@
     "resetInvalid": "That reset link is invalid or has expired.",
     "sendResetLink": "Send reset link",
     "backToSignIn": "Back to sign in",
-    "notVerifiedToComment": "Confirm your email address before posting a comment."
+    "notVerifiedToComment": "Confirm your email address before posting a comment.",
+    "verifyNotConfigured": "Your account is ready. Email confirmation is not switched on at the moment, so there is no link to wait for.",
+    "verifyClaiming": "We sent a link to {email}. That address is on an account that never confirmed it — opening the link moves it to you."
   },
   "comments": {
     "title": "Comments",
@@ -294,7 +296,9 @@
     "deleteConfirmPassword": "Your password",
     "deleteConfirmUsername": "Type your username to confirm",
     "deleteButton": "Delete my account",
-    "deleteDone": "Your account has been deleted."
+    "deleteDone": "Your account has been deleted.",
+    "pendingEmail": "{email} — waiting for you to open the link we sent",
+    "pendingExplain": "This address is on another account that never confirmed it, so it moves to yours the moment you open the link."
   },
   "fanart": {
     "title": "Fan art",

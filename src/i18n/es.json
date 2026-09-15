@@ -132,7 +132,9 @@
     "resetInvalid": "Ese enlace no es válido o ha caducado.",
     "sendResetLink": "Enviar enlace",
     "backToSignIn": "Volver a iniciar sesión",
-    "notVerifiedToComment": "Confirma tu correo antes de publicar un comentario."
+    "notVerifiedToComment": "Confirma tu correo antes de publicar un comentario.",
+    "verifyNotConfigured": "Tu cuenta está lista. La confirmación por correo no está activada ahora mismo, así que no hay ningún enlace que esperar.",
+    "verifyClaiming": "Enviamos un enlace a {email}. Esa dirección está en una cuenta que nunca la confirmó: abrir el enlace te la traspasa."
   },
   "comments": {
     "title": "Comentarios",
@@ -294,7 +296,9 @@
     "deleteConfirmPassword": "Tu contraseña",
     "deleteConfirmUsername": "Escribe tu nombre de usuario para confirmar",
     "deleteButton": "Eliminar mi cuenta",
-    "deleteDone": "Tu cuenta ha sido eliminada."
+    "deleteDone": "Tu cuenta ha sido eliminada.",
+    "pendingEmail": "{email} — esperando a que abras el enlace que enviamos",
+    "pendingExplain": "Esta dirección está en otra cuenta que nunca la confirmó, así que pasará a la tuya en cuanto abras el enlace."
   },
   "fanart": {
     "title": "Fan art",

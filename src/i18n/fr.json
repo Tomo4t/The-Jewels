@@ -132,7 +132,9 @@
     "resetInvalid": "Ce lien est invalide ou a expiré.",
     "sendResetLink": "Envoyer le lien",
     "backToSignIn": "Retour à la connexion",
-    "notVerifiedToComment": "Confirmez votre adresse e-mail avant de publier un commentaire."
+    "notVerifiedToComment": "Confirmez votre adresse e-mail avant de publier un commentaire.",
+    "verifyNotConfigured": "Votre compte est prêt. La confirmation par e-mail n’est pas activée pour le moment, il n’y a donc aucun lien à attendre.",
+    "verifyClaiming": "Nous avons envoyé un lien à {email}. Cette adresse figure sur un compte qui ne l’a jamais confirmée — ouvrir le lien vous la transfère."
   },
   "comments": {
     "title": "Commentaires",
@@ -294,7 +296,9 @@
     "deleteConfirmPassword": "Votre mot de passe",
     "deleteConfirmUsername": "Tapez votre nom d'utilisateur pour confirmer",
     "deleteButton": "Supprimer mon compte",
-    "deleteDone": "Votre compte a été supprimé."
+    "deleteDone": "Votre compte a été supprimé.",
+    "pendingEmail": "{email} — en attente de l’ouverture du lien envoyé",
+    "pendingExplain": "Cette adresse figure sur un autre compte qui ne l’a jamais confirmée ; elle passera au vôtre dès que vous ouvrirez le lien."
   },
   "fanart": {
     "title": "Fan art",

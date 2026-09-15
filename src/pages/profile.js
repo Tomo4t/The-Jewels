@@ -156,6 +156,11 @@ export async function render(params = {}) {
 
   const emailBody = `
     ${
+      !user.email && user.pendingEmail
+        ? `<p class="field-hint">${escapeHTML(t('account.pendingExplain'))}</p>`
+        : ''
+    }
+    ${
       user.email && !user.emailVerified && session.emailVerification
         ? `<button type="button" class="button" id="resend-verify">
              ${escapeHTML(t('auth.resendVerification'))}
@@ -205,13 +210,19 @@ export async function render(params = {}) {
       </button>
     </form>`;
 
+  // An account can have a link out for an address that is not on it yet --
+  // that happens when the address belongs to another account that never
+  // confirmed it. Saying "no email address" there is simply untrue to the
+  // person, who is looking at our email in their inbox.
   const emailSummary = user.email
     ? `${escapeHTML(user.email)}${
         user.emailVerified
           ? ''
           : ` <span class="setting-flag">${escapeHTML(t('auth.unverified'))}</span>`
       }`
-    : `<span class="setting-empty">${escapeHTML(t('account.noEmail'))}</span>`;
+    : user.pendingEmail
+      ? `${escapeHTML(t('account.pendingEmail', { email: user.pendingEmail }))}`
+      : `<span class="setting-empty">${escapeHTML(t('account.noEmail'))}</span>`;
 
   return `
     <div class="account-page">

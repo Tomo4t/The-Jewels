@@ -46,8 +46,33 @@ export const toPrivateUser = (row) =>
         // to appear under -- in practice a fresh Google sign-up, where the
         // server chose both from the Google profile without asking.
         profileSetupPending: !row.profile_setup_at,
+        // The address a verification link is currently out for. Usually the
+        // same as `email`; it differs -- with `email` null -- when somebody
+        // signed up with an address another unconfirmed account is holding, and
+        // without this the account simply reads as having no email at all while
+        // a link for it sits in their inbox.
+        pendingEmail: pendingEmailFor(row.id),
       }
     : null;
+
+/**
+ * The unexpired, unused verification address for this account, if any.
+ *
+ * Scoped to purpose 'verify' on purpose: this table also holds password-reset
+ * tokens, and without that clause requesting a reset would make the profile
+ * claim an email confirmation was pending.
+ */
+export function pendingEmailFor(userId) {
+  const row = db
+    .prepare(
+      `SELECT email FROM email_tokens
+        WHERE user_id = ? AND purpose = 'verify'
+          AND used_at IS NULL AND expires_at > datetime('now')
+        ORDER BY created_at DESC LIMIT 1`
+    )
+    .get(userId);
+  return row?.email || null;
+}
 
 export function findByUsername(username) {
   // A deleted account is a headstone, not somebody who can sign in -- and its

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import config, { absoluteUrl, googleEnabled, mailEnabled } from '../config.js';
 import { getSetting } from '../services/settings.js';
+import { checkDeliverable } from '../services/deliverability.js';
 import { audit } from '../db.js';
 import { ApiError, asyncRoute } from '../middleware/errors.js';
 import { authLimiter } from '../middleware/security.js';
@@ -275,6 +276,10 @@ router.post(
       );
     }
 
+    // Before the account exists, so a typo is a correction on the form rather
+    // than an account holding an address that can never be confirmed.
+    if (address) await assertDeliverable(address);
+
     if (findByUsername(username)) {
       throw ApiError.conflict('username_taken', 'That username is already taken.');
     }
@@ -385,15 +390,49 @@ router.post(
  * afternoon, must not turn a successful registration into a failure. The return
  * value tells the caller what actually happened so the UI can be honest about it.
  */
+
+/**
+ * Refuses an address nothing could ever be delivered to.
+ *
+ * Every send costs a credit, and the two ways one is reliably wasted are a
+ * mistyped domain and a domain that takes no mail at all -- both visible in DNS
+ * for a few milliseconds beforehand. It also turns "the link never arrived"
+ * into an error the person can act on while they are still looking at the form.
+ *
+ * It cannot tell whether the mailbox itself exists: asking the mail server
+ * directly is unreliable and a good way to get the sending domain blocked. A
+ * lookup that times out is treated as fine, because a slow resolver here is not
+ * a reason to stop somebody signing up.
+ */
+async function assertDeliverable(address) {
+  const verdict = await checkDeliverable(address);
+  if (verdict.ok) return;
+
+  if (verdict.reason === 'likely_typo') {
+    throw ApiError.badRequest(
+      'email_probably_typo',
+      `Did you mean ${address.split('@')[0]}@${verdict.suggestion}?`,
+      { field: 'email', suggestion: verdict.suggestion }
+    );
+  }
+  throw ApiError.badRequest(
+    'email_undeliverable',
+    verdict.reason === 'no_such_domain'
+      ? `There is no mail server at ${address.split('@').pop()}. Check the spelling.`
+      : 'That address cannot receive email. Check the spelling.',
+    { field: 'email' }
+  );
+}
+
 async function startVerification(user, addressOverride = null) {
   // `addressOverride` carries a claim: an address that is not on the account
   // yet because somebody else is holding it unconfirmed. The link is still sent
   // there, and redeeming it is what moves the address across.
   const address = normaliseEmail(addressOverride) || user.email;
-  if (!address) return { status: 'no_email', claiming: false };
+  if (!address) return { status: 'no_email', claiming: false, address: null };
 
   const claiming = address !== user.email;
-  if (!mailEnabled()) return { status: 'not_configured', claiming };
+  if (!mailEnabled()) return { status: 'not_configured', claiming, address };
 
   const token = createEmailToken(user.id, address, 'verify');
   const link = absoluteUrl(`/api/auth/verify?token=${encodeURIComponent(token)}`);
@@ -403,7 +442,11 @@ async function startVerification(user, addressOverride = null) {
     link,
   });
 
-  return { status: result.sent ? 'sent' : 'send_failed', claiming };
+  // The address is reported back so the page can name it -- when `claiming` is
+  // true it is NOT on the account yet, so the client has nowhere else to read
+  // it from and would otherwise have to say "we sent a link" without saying
+  // where.
+  return { status: result.sent ? 'sent' : 'send_failed', claiming, address };
 }
 
 /**
@@ -458,6 +501,8 @@ router.put(
         field: 'email',
       });
     }
+
+    await assertDeliverable(address);
 
     const confirmedHolder = verifiedHolderOf(address);
     if (confirmedHolder && confirmedHolder.id !== req.user.id) {

@@ -132,7 +132,9 @@
     "resetInvalid": "この再設定リンクは無効か、有効期限が切れています。",
     "sendResetLink": "再設定リンクを送る",
     "backToSignIn": "ログインに戻る",
-    "notVerifiedToComment": "コメントするにはメールアドレスの確認が必要です。"
+    "notVerifiedToComment": "コメントするにはメールアドレスの確認が必要です。",
+    "verifyNotConfigured": "アカウントの準備ができました。現在メール確認は有効になっていないため、待つべきリンクはありません。",
+    "verifyClaiming": "{email} にリンクを送信しました。このアドレスは未確認のアカウントに登録されています。リンクを開くとあなたに移ります。"
   },
   "comments": {
     "title": "コメント",
@@ -294,7 +296,9 @@
     "deleteConfirmPassword": "パスワード",
     "deleteConfirmUsername": "確認のためユーザー名を入力してください",
     "deleteButton": "アカウントを削除",
-    "deleteDone": "アカウントを削除しました。"
+    "deleteDone": "アカウントを削除しました。",
+    "pendingEmail": "{email} — 送信したリンクを開くのをお待ちしています",
+    "pendingExplain": "このアドレスは確認されないままの別のアカウントに登録されています。リンクを開いた時点であなたのアカウントに移ります。"
   },
   "fanart": {
     "title": "ファンアート",

@@ -3,7 +3,7 @@ import { t } from '../lib/i18n.js';
 import { navigate, buildHash } from '../router.js';
 import session from '../lib/session.js';
 import { ApiError } from '../lib/api.js';
-import { toastSuccess, toastError } from '../components/toast.js';
+import { toast, toastSuccess, toastError } from '../components/toast.js';
 
 /**
  * Sign in and sign up share one page; `mode` decides which fields show.
@@ -194,8 +194,21 @@ function page(mode) {
 
             toastSuccess(t('auth.accountCreated'));
             // Only promise an inbox check when one is genuinely on its way.
-            if (verification?.status === 'sent') toastSuccess(t('auth.verifySent'));
-            else if (verification?.status === 'send_failed') toastError(t('auth.verifySendFailed'));
+            // Every outcome says something. 'not_configured' and 'no_email'
+            // used to pass in silence, so a reader whose link was never sent --
+            // because the mail provider was misconfigured -- had no way to tell
+            // that from one still in flight.
+            if (verification?.status === 'sent') {
+              toastSuccess(
+                verification.claiming
+                  ? t('auth.verifyClaiming', { email: verification.address || '' })
+                  : t('auth.verifySent')
+              );
+            } else if (verification?.status === 'send_failed') {
+              toastError(t('auth.verifySendFailed'));
+            } else if (verification?.status === 'not_configured') {
+              toast(t('auth.verifyNotConfigured'));
+            }
 
             // The account is not finished yet, so land on the page that says so
             // and carries the resend button, rather than dropping them on the
