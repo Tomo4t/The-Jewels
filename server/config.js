@@ -50,9 +50,18 @@ export const config = {
   // The client id and secret identify the application and belong in the
   // environment; the refresh token is earned through the admin panel and kept
   // in the database, so no credential has to be copied between two consoles.
+  // Falls back to the sign-in credentials, because one OAuth client can serve
+  // both flows: they differ only in redirect URI and scope, and the client is
+  // already configured. Setting the GOOGLE_DRIVE_* pair separates them if that
+  // is ever wanted; leaving it unset means nobody has to copy a client secret
+  // between two web consoles to turn backups on.
   googleDrive: {
-    clientId: (process.env.GOOGLE_DRIVE_CLIENT_ID || '').trim(),
-    clientSecret: (process.env.GOOGLE_DRIVE_CLIENT_SECRET || '').trim(),
+    clientId: (process.env.GOOGLE_DRIVE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID || '').trim(),
+    clientSecret: (
+      process.env.GOOGLE_DRIVE_CLIENT_SECRET ||
+      process.env.GOOGLE_CLIENT_SECRET ||
+      ''
+    ).trim(),
   },
   backupIntervalDays: int(process.env.BACKUP_INTERVAL_DAYS, 7),
   backupKeep: int(process.env.BACKUP_KEEP, 8),
