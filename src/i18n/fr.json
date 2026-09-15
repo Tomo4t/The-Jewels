@@ -294,7 +294,16 @@
       "buttonLabel": "Texte du bouton",
       "buttonLink": "Lien du bouton",
       "whichChapter": "Quel chapitre",
-      "dividerHint": "Une ligne en travers de la page."
+      "dividerHint": "Une ligne en travers de la page.",
+      "kind_file": "Fichier",
+      "kind_video": "YouTube",
+      "fileHint": "Lié, non joint — une pièce jointe sur un envoi en masse mène droit aux indésirables.",
+      "addFile": "Choisir un fichier",
+      "replaceFile": "Remplacer le fichier",
+      "fileLabel": "Texte du lien",
+      "videoUrl": "Lien YouTube",
+      "videoTitle": "Texte du bouton",
+      "videoHint": "Les e-mails ne peuvent pas lire de vidéo — aucun client n’exécute d’intégration. Ceci envoie la vraie miniature avec un bouton qui ouvre YouTube."
     },
     "push": {
       "title": "Notifications push",
@@ -306,7 +315,18 @@
     "removeUser": "Supprimer",
     "confirmRemove": "Supprimer {username} définitivement ? Irréversible.",
     "chooseMode": "Tout effacer ? OK efface tout. Annuler conserve ses commentaires en « Compte supprimé ».",
-    "removed": "{username} a été supprimé."
+    "removed": "{username} a été supprimé.",
+    "mute": "Suspension",
+    "muteHour": "1 heure",
+    "muteDay": "1 jour",
+    "muteWeek": "1 semaine",
+    "muteForever": "Plus de commentaires",
+    "muteLift": "Autoriser à nouveau",
+    "mutedUntil": "Ne peut pas commenter avant le {when}",
+    "mutedForever": "Ne peut pas commenter",
+    "muteDone": "{username} ne peut plus commenter.",
+    "muteLifted": "{username} peut à nouveau commenter.",
+    "muteWhich": "Pendant combien de temps {username} ne pourra-t-il pas commenter ?"
   },
   "errors": {
     "notFound": "Page introuvable",

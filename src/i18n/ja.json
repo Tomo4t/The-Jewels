@@ -294,7 +294,16 @@
       "buttonLabel": "ボタンの文字",
       "buttonLink": "ボタンのリンク",
       "whichChapter": "どのチャプター",
-      "dividerHint": "横一本の線です。"
+      "dividerHint": "横一本の線です。",
+      "kind_file": "ファイル",
+      "kind_video": "YouTube",
+      "fileHint": "添付ではなくリンクです。一斉配信の添付ファイルは迷惑メール行きの近道です。",
+      "addFile": "ファイルを選ぶ",
+      "replaceFile": "ファイルを差し替える",
+      "fileLabel": "リンクの文字",
+      "videoUrl": "YouTube リンク",
+      "videoTitle": "ボタンの文字",
+      "videoHint": "メールでは動画を再生できません（埋め込みを実行するクライアントはありません）。実際のサムネイルと YouTube を開くボタンを送ります。"
     },
     "push": {
       "title": "プッシュ通知",
@@ -306,7 +315,18 @@
     "removeUser": "削除",
     "confirmRemove": "{username} を完全に削除しますか？取り消せません。",
     "chooseMode": "アカウントを完全に消去しますか？OK ですべて消去します。キャンセルするとコメントは「削除されたアカウント」として残ります。",
-    "removed": "{username} を削除しました。"
+    "removed": "{username} を削除しました。",
+    "mute": "コメント停止",
+    "muteHour": "1 時間",
+    "muteDay": "1 日",
+    "muteWeek": "1 週間",
+    "muteForever": "今後コメント不可",
+    "muteLift": "再びコメントを許可",
+    "mutedUntil": "{when} までコメントできません",
+    "mutedForever": "コメントできません",
+    "muteDone": "{username} はコメントできなくなりました。",
+    "muteLifted": "{username} は再びコメントできます。",
+    "muteWhich": "{username} がコメントできない期間は？"
   },
   "errors": {
     "notFound": "ページが見つかりません",

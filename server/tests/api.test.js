@@ -1752,3 +1752,90 @@ describe('files served under a fixed name are not cached for a year', () => {
     }
   });
 });
+
+describe('a muted reader cannot post', () => {
+  const asAdmin = makeClient();
+  const asMuted = makeClient();
+  let mutedId;
+
+  before(async () => {
+    await asAdmin('/api/auth/login', {
+      method: 'POST',
+      body: json({ username: 'tomo', password: 'a-very-long-password' }),
+    });
+    const created = await asMuted('/api/auth/register', {
+      method: 'POST',
+      body: json({
+        username: 'to-be-muted',
+        password: 'a-perfectly-fine-password',
+        displayName: 'Chatty',
+      }),
+    });
+    mutedId = created.body.user.id;
+    const { default: db } = await import('../db.js');
+    db.prepare(
+      `UPDATE users SET email = 'chatty@example.com', email_verified_at = datetime('now')
+        WHERE id = ?`
+    ).run(mutedId);
+  });
+
+  test('they can post before, and cannot after', async () => {
+    const post = () =>
+      asMuted('/api/comments', {
+        method: 'POST',
+        body: json({ lang: 'en', chapter: 1, body: 'A perfectly ordinary comment.' }),
+      });
+
+    const before = await post();
+    assert.ok(before.status < 400, `expected to post freely, got ${before.status}`);
+
+    const muted = await asAdmin(`/api/admin/users/${mutedId}/mute`, {
+      method: 'POST',
+      body: json({ for: 'day' }),
+    });
+    assert.equal(muted.status, 200);
+    assert.ok(muted.body.mutedUntil, 'the mute has an end date');
+
+    const after = await post();
+    assert.equal(after.status, 403);
+    assert.equal(after.body.error.code, 'muted');
+  });
+
+  test('reading still works while muted — it is a mute, not a ban', async () => {
+    const { status } = await asMuted('/api/comments?lang=en&chapter=1');
+    assert.equal(status, 200, 'a muted reader can still read the comments');
+    const me = await asMuted('/api/auth/me');
+    assert.equal(me.status, 200, 'and is still signed in');
+  });
+
+  test('lifting it lets them post again', async () => {
+    await asAdmin(`/api/admin/users/${mutedId}/mute`, {
+      method: 'POST',
+      body: json({ for: 'lift' }),
+    });
+    const { status } = await asMuted('/api/comments', {
+      method: 'POST',
+      body: json({ lang: 'en', chapter: 1, body: 'Back again.' }),
+    });
+    assert.ok(status < 400, `expected to post again, got ${status}`);
+  });
+
+  test('a moderator cannot mute an administrator', async () => {
+    const asModerator = makeClient();
+    await asModerator('/api/auth/login', {
+      method: 'POST',
+      body: json({ username: 'reader', password: 'another-long-password' }),
+    });
+    const users = await asAdmin('/api/admin/users');
+    const admin = users.body.users.find((u) => u.role === 'admin');
+    await asAdmin(`/api/admin/users/${users.body.users.find((u) => u.username === 'reader').id}`, {
+      method: 'PATCH',
+      body: json({ role: 'moderator' }),
+    });
+    const { status } = await asModerator(`/api/admin/users/${admin.id}/mute`, {
+      method: 'POST',
+      body: json({ for: 'day' }),
+    });
+    assert.equal(status, 403, 'otherwise a moderator can silence the people who appointed them');
+  });
+});

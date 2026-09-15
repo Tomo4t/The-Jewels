@@ -1,5 +1,6 @@
 import db, { audit } from '../db.js';
 import config from '../config.js';
+import { DEFAULT_BANNED_WORDS_TEXT } from './banned-words.js';
 
 /**
  * Settings an administrator can change at runtime.
@@ -30,7 +31,9 @@ export const DEFINITIONS = {
   },
   bannedWords: {
     type: 'text',
-    fallback: () => '',
+    // Starts populated rather than empty. An empty filter is one nobody gets
+    // round to filling in until after the comment that made them want it.
+    fallback: () => DEFAULT_BANNED_WORDS_TEXT,
     describe: 'Words and phrases to catch, one per line. Matching is case-insensitive.',
   },
   bannedWordsAction: {

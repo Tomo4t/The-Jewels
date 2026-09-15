@@ -294,7 +294,16 @@
       "buttonLabel": "Button text",
       "buttonLink": "Button link",
       "whichChapter": "Which chapter",
-      "dividerHint": "A line across the page."
+      "dividerHint": "A line across the page.",
+      "kind_file": "File",
+      "kind_video": "YouTube",
+      "fileHint": "Linked, not attached — an attachment on a bulk send is a fast route to the spam folder.",
+      "addFile": "Choose a file",
+      "replaceFile": "Replace file",
+      "fileLabel": "Link text",
+      "videoUrl": "YouTube link",
+      "videoTitle": "Button text",
+      "videoHint": "Emails cannot play video — no client runs an embed. This sends the real thumbnail with a play button that opens YouTube."
     },
     "push": {
       "title": "Push notifications",
@@ -306,7 +315,18 @@
     "removeUser": "Remove",
     "confirmRemove": "Remove {username} for good? This cannot be undone.",
     "chooseMode": "Erase the account completely? OK erases everything. Cancel keeps their comments as \"Deleted account\".",
-    "removed": "{username} has been removed."
+    "removed": "{username} has been removed.",
+    "mute": "Timeout",
+    "muteHour": "1 hour",
+    "muteDay": "1 day",
+    "muteWeek": "1 week",
+    "muteForever": "No more comments",
+    "muteLift": "Let them comment again",
+    "mutedUntil": "Cannot comment until {when}",
+    "mutedForever": "Cannot comment",
+    "muteDone": "{username} can no longer comment.",
+    "muteLifted": "{username} can comment again.",
+    "muteWhich": "How long should {username} be unable to comment?"
   },
   "errors": {
     "notFound": "Page not found",

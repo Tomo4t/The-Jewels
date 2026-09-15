@@ -87,7 +87,7 @@ async function mountUpdates(lang, signal) {
     window.setTimeout(() => {
       box.innerHTML = `
         ${update.date ? `<p class="update-date">${escapeHTML(formatDateTime(update.date))}</p>` : ''}
-        <div class="update-message">${textToHTML(update.body)}</div>
+        <div class="update-message">${textToHTML(update.body, { links: true })}</div>
       `;
       box.classList.remove('is-fading');
     }, 140);

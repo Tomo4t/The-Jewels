@@ -294,7 +294,16 @@
       "buttonLabel": "Texto del botón",
       "buttonLink": "Enlace del botón",
       "whichChapter": "Qué capítulo",
-      "dividerHint": "Una línea a lo ancho."
+      "dividerHint": "Una línea a lo ancho.",
+      "kind_file": "Archivo",
+      "kind_video": "YouTube",
+      "fileHint": "Enlazado, no adjunto — un adjunto en un envío masivo va directo a spam.",
+      "addFile": "Elegir un archivo",
+      "replaceFile": "Cambiar archivo",
+      "fileLabel": "Texto del enlace",
+      "videoUrl": "Enlace de YouTube",
+      "videoTitle": "Texto del botón",
+      "videoHint": "Los correos no pueden reproducir vídeo — ningún cliente ejecuta un embed. Esto envía la miniatura real con un botón que abre YouTube."
     },
     "push": {
       "title": "Notificaciones push",
@@ -306,7 +315,18 @@
     "removeUser": "Eliminar",
     "confirmRemove": "¿Eliminar {username} para siempre? No se puede deshacer.",
     "chooseMode": "¿Borrar la cuenta por completo? Aceptar borra todo. Cancelar conserva sus comentarios como «Cuenta eliminada».",
-    "removed": "{username} ha sido eliminado."
+    "removed": "{username} ha sido eliminado.",
+    "mute": "Silenciar",
+    "muteHour": "1 hora",
+    "muteDay": "1 día",
+    "muteWeek": "1 semana",
+    "muteForever": "Sin más comentarios",
+    "muteLift": "Permitir comentar de nuevo",
+    "mutedUntil": "No puede comentar hasta el {when}",
+    "mutedForever": "No puede comentar",
+    "muteDone": "{username} ya no puede comentar.",
+    "muteLifted": "{username} puede comentar otra vez.",
+    "muteWhich": "¿Cuánto tiempo no podrá comentar {username}?"
   },
   "errors": {
     "notFound": "Página no encontrada",

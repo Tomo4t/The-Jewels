@@ -797,6 +797,7 @@ async function renderUsers(panel) {
               <th scope="col">${escapeHTML(t('auth.username'))}</th>
               <th scope="col">${escapeHTML(t('admin.role'))}</th>
               <th scope="col">${escapeHTML(t('comments.title'))}</th>
+              <th scope="col">${escapeHTML(t('admin.mute'))}</th>
               <th scope="col"></th>
             </tr>
           </thead>
@@ -824,6 +825,15 @@ async function renderUsers(panel) {
                       </select>
                     </td>
                     <td>${user.commentCount}</td>
+                    <td class="mute-state">${
+                      user.mutedUntil
+                        ? escapeHTML(
+                            user.mutedForever
+                              ? t('admin.mutedForever')
+                              : t('admin.mutedUntil', { when: formatDateTime(user.mutedUntil) })
+                          )
+                        : ''
+                    }</td>
                     <td>
                       ${
                         user.id === session.user.id
@@ -834,6 +844,10 @@ async function renderUsers(panel) {
                               ${escapeHTML(
                                 user.status === 'banned' ? t('admin.unbanUser') : t('admin.banUser')
                               )}
+                            </button>
+                            <button type="button" class="link-button"
+                                    data-mute="${user.id}:${escapeHTML(user.username)}">
+                              ${escapeHTML(user.mutedUntil ? t('admin.muteLift') : t('admin.mute'))}
                             </button>
                             <button type="button" class="link-button link-button--danger"
                                     data-remove-user="${user.id}:${escapeHTML(user.username)}">
@@ -858,6 +872,38 @@ async function renderUsers(panel) {
       } catch (err) {
         fail(err);
         renderShell();
+      }
+    });
+  });
+
+  panel.querySelectorAll('[data-mute]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const raw = button.dataset.mute;
+      const id = raw.slice(0, raw.indexOf(':'));
+      const username = raw.slice(raw.indexOf(':') + 1);
+      const lifting = button.textContent.trim() === t('admin.muteLift');
+
+      let span = 'lift';
+      if (!lifting) {
+        // A timeout is the common case and a standing ban the rare one, so the
+        // choices are offered shortest-first rather than defaulting to the door.
+        const answer = window.prompt(
+          `${t('admin.muteWhich', { username })}\n\n` +
+            `1 = ${t('admin.muteHour')}\n2 = ${t('admin.muteDay')}\n` +
+            `3 = ${t('admin.muteWeek')}\n4 = ${t('admin.muteForever')}`,
+          '2'
+        );
+        if (answer === null) return;
+        span = { 1: 'hour', 2: 'day', 3: 'week', 4: 'forever' }[answer.trim()];
+        if (!span) return;
+      }
+
+      try {
+        await api.adminMuteUser(id, span);
+        toastSuccess(t(lifting ? 'admin.muteLifted' : 'admin.muteDone', { username }));
+        renderShell();
+      } catch (err) {
+        fail(err);
       }
     });
   });
@@ -1236,7 +1282,7 @@ function reportDriveReturn() {
  * resets the inbox will not provide.
  */
 
-const BLOCK_KINDS = ['heading', 'text', 'image', 'button', 'chapter', 'divider'];
+const BLOCK_KINDS = ['heading', 'text', 'image', 'video', 'file', 'button', 'chapter', 'divider'];
 
 const blockDefaults = {
   heading: () => ({ type: 'heading', text: '' }),
@@ -1244,6 +1290,8 @@ const blockDefaults = {
   image: () => ({ type: 'image', src: '', alt: '', href: '' }),
   button: () => ({ type: 'button', label: '', href: '' }),
   divider: () => ({ type: 'divider' }),
+  file: () => ({ type: 'file', src: '', name: '', label: '', kind: 'File' }),
+  video: () => ({ type: 'video', url: '', title: '' }),
   chapter: () => ({ type: 'chapter', lang: 'en', number: 1, title: '' }),
 };
 
@@ -1319,6 +1367,37 @@ function blockEditor(block, index, chapters) {
            </select>`
         )}`;
     },
+
+    file: () => `
+      <div class="block-image">
+        ${
+          block.src
+            ? `<p class="field-hint"><strong>${escapeHTML(block.name || block.src)}</strong>${
+                block.bytes ? ` &middot; ${Math.max(1, Math.round(block.bytes / 1024))} KB` : ''
+              }</p>`
+            : ''
+        }
+        <label class="link-button">
+          ${escapeHTML(block.src ? t('admin.news.replaceFile') : t('admin.news.addFile'))}
+          <input type="file" accept="audio/*,application/pdf,application/zip,text/plain" hidden data-file>
+        </label>
+        <p class="field-hint">${escapeHTML(t('admin.news.fileHint'))}</p>
+      </div>
+      ${field(
+        t('admin.news.fileLabel'),
+        `<input type="text" data-prop="label" maxlength="120" value="${escapeHTML(block.label || '')}">`
+      )}`,
+
+    video: () => `
+      ${field(
+        t('admin.news.videoUrl'),
+        `<input type="url" data-prop="url" maxlength="500" value="${escapeHTML(block.url || '')}" placeholder="https://www.youtube.com/watch?v=...">`
+      )}
+      ${field(
+        t('admin.news.videoTitle'),
+        `<input type="text" data-prop="title" maxlength="200" value="${escapeHTML(block.title || '')}">`
+      )}
+      <p class="field-hint">${escapeHTML(t('admin.news.videoHint'))}</p>`,
 
     divider: () => `<p class="field-hint">${escapeHTML(t('admin.news.dividerHint'))}</p>`,
   }[block.type];
@@ -1508,6 +1587,19 @@ async function renderNewsletter(panel) {
           title: meta?.title || '',
         };
         schedulePreview();
+      });
+
+      card.querySelector('[data-file]')?.addEventListener('change', async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        try {
+          const uploaded = await api.uploadNewsletterFile(file);
+          Object.assign(current.blocks[index], uploaded);
+          drawBlocks();
+          schedulePreview();
+        } catch (err) {
+          fail(err);
+        }
       });
 
       card.querySelector('[data-image]')?.addEventListener('change', async (event) => {

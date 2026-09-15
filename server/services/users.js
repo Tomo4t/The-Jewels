@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
-import db from '../db.js';
+import db, { audit } from '../db.js';
 import config from '../config.js';
 
 const BCRYPT_ROUNDS = 12;
@@ -16,7 +16,7 @@ export const MIN_PASSWORD_LENGTH = 10;
 export const UNUSABLE_PASSWORD = '!no-password';
 
 const PUBLIC_FIELDS =
-  'id, username, display_name, role, status, created_at, email, email_verified_at, google_sub';
+  'id, username, display_name, role, status, created_at, email, email_verified_at, google_sub, muted_until';
 
 export const toPublicUser = (row) =>
   row
@@ -52,6 +52,7 @@ export const toPrivateUser = (row) =>
         // without this the account simply reads as having no email at all while
         // a link for it sits in their inbox.
         pendingEmail: pendingEmailFor(row.id),
+        mutedUntil: muteFor(row)?.until || null,
       }
     : null;
 
@@ -152,6 +153,10 @@ export function listUsers({ limit = 100, offset = 0 } = {}) {
       email: row.email || null,
       linkedGoogle: Boolean(row.google_sub),
       commentCount: row.comment_count,
+      // Expired mutes read as null, so the list shows who is actually silenced
+      // now rather than everyone who ever was.
+      mutedUntil: muteFor(row)?.until || null,
+      mutedForever: muteFor(row)?.forever || false,
     }));
 }
 
@@ -404,6 +409,33 @@ export function suggestUsername(seed) {
   }
   return `reader-${randomBytes(4).toString('hex')}`;
 }
+
+// --- muting ----------------------------------------------------------------
+
+/** A mute with no end date. Far enough out that it will never quietly lapse. */
+export const FOREVER = '9999-12-31 23:59:59';
+
+/**
+ * Silences an account until a moment, or lifts the silence with null.
+ *
+ * The expiry does the work: nothing has to run on a schedule and nobody has to
+ * remember to undo a timeout, because every check compares against the clock.
+ */
+export function setMute(userId, until, actorId = null) {
+  db.prepare('UPDATE users SET muted_until = ? WHERE id = ?').run(until || null, userId);
+  audit(actorId, until ? 'user.muted' : 'user.unmuted', 'user', userId, { until: until || null });
+  return findById(userId);
+}
+
+/** When the mute ends, or null if they are not muted. Expired mutes read null. */
+export function muteFor(row) {
+  if (!row?.muted_until) return null;
+  const until = Date.parse(`${row.muted_until.replace(' ', 'T')}Z`);
+  if (Number.isNaN(until) || until <= Date.now()) return null;
+  return { until: row.muted_until, forever: row.muted_until === FOREVER };
+}
+
+export const isMuted = (row) => muteFor(row) !== null;
 
 // --- verification tokens --------------------------------------------------
 // Same shape as sessions: the link carries a random token, the database holds

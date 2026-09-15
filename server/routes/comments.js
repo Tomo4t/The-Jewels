@@ -8,7 +8,7 @@ import { assertLanguage, assertChapterNumber, readChapterMeta } from '../service
 import { screenComment } from '../services/moderation.js';
 import * as comments from '../services/comments.js';
 import { getSetting } from '../services/settings.js';
-import { findById } from '../services/users.js';
+import { findById, muteFor } from '../services/users.js';
 
 const router = Router();
 
@@ -77,6 +77,20 @@ router.post(
 
     if (!(await readChapterMeta(lang, chapter))) {
       throw ApiError.notFound('chapter_not_found', 'That chapter does not exist.');
+    }
+
+    // A mute stops posting and nothing else -- they keep the account and can
+    // still read. Checked against the clock rather than a flag somebody has to
+    // remember to clear, so a timeout ends by itself.
+    const mute = muteFor(req.userRow);
+    if (mute) {
+      throw ApiError.forbidden(
+        'muted',
+        mute.forever
+          ? 'You are no longer able to post comments.'
+          : 'You cannot post comments at the moment.',
+        { until: mute.forever ? null : mute.until }
+      );
     }
 
     // Posting can be held behind a confirmed address. Reading never is, and

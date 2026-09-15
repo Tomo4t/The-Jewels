@@ -283,6 +283,13 @@ export const api = {
   adminDeleteUpdate: (lang, id) =>
     request(`/api/admin/updates/${encodeURIComponent(lang)}/${Number(id)}`, { method: 'DELETE' }),
   adminUsers: () => request('/api/admin/users'),
+  adminMuteUser: (id, span) =>
+    request(`/api/admin/users/${id}/mute`, { method: 'POST', body: { for: span } }),
+  uploadNewsletterFile: (file) => {
+    const data = new FormData();
+    data.append('file', file);
+    return request('/api/admin/newsletters/file', { method: 'POST', body: data });
+  },
   adminDeleteUser: (id, mode) =>
     request(`/api/admin/users/${id}`, { method: 'DELETE', body: { mode } }),
   adminUpdateUser: (id, payload) =>

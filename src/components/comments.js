@@ -211,7 +211,7 @@ function header(comment) {
   );
 }
 
-const body = (comment) => el('div', { class: 'comment-body', html: textToHTML(comment.body) });
+const body = (comment) => el('div', { class: 'comment-body', html: textToHTML(comment.body, { links: true }) });
 
 function actions(comment, ctx, item) {
   const row = el('div', { class: 'comment-actions' });

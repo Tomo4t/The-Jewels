@@ -37,6 +37,19 @@ const BLOCK = z.discriminatedUnion('type', [
   z.object({ type: z.literal('button'), label: z.string().max(60), href: z.string().max(500) }),
   z.object({ type: z.literal('divider') }),
   z.object({
+    type: z.literal('file'),
+    src: z.string().max(500),
+    name: z.string().max(200).default(''),
+    label: z.string().max(120).default(''),
+    kind: z.string().max(40).default('File'),
+    bytes: z.number().int().nonnegative().optional(),
+  }),
+  z.object({
+    type: z.literal('video'),
+    url: z.string().max(500),
+    title: z.string().max(200).default(''),
+  }),
+  z.object({
     type: z.literal('chapter'),
     lang: z.string().length(2),
     number: z.number().int().positive(),
@@ -308,6 +321,65 @@ router.post(
       src: `/content/newsletter/${name}`,
       bytes: bytes.length,
       animated: req.file.mimetype === 'image/gif',
+    });
+  })
+);
+
+const FILE_KINDS = {
+  'audio/mpeg': 'MP3',
+  'audio/mp4': 'Audio',
+  'audio/ogg': 'Audio',
+  'audio/wav': 'Audio',
+  'application/pdf': 'PDF',
+  'application/zip': 'ZIP',
+  'text/plain': 'Text',
+};
+
+const fileUpload = multer({
+  storage: multer.memoryStorage(),
+  // Linked rather than attached, so this is about what a reader will wait to
+  // download and what the volume can hold -- not an email size limit.
+  limits: { fileSize: 25 * 1024 * 1024, files: 1 },
+});
+
+/**
+ * Stores a file the newsletter can link to.
+ *
+ * Stored, never attached. A bulk send with an attachment is a spam-filter
+ * magnet -- size is one of the strongest signals there is -- and every
+ * recipient pays the download whether they open it or not.
+ */
+router.post(
+  '/file',
+  requireRole('admin'),
+  uploadLimiter,
+  fileUpload.single('file'),
+  asyncRoute(async (req, res) => {
+    if (!req.file) throw ApiError.badRequest('no_file', 'No file arrived.');
+
+    const kind = FILE_KINDS[req.file.mimetype];
+    if (!kind) {
+      throw ApiError.badRequest('unsupported_type', 'Audio, PDF, zip and plain text only.');
+    }
+
+    const dir = join(config.contentDir, 'newsletter');
+    await fs.mkdir(dir, { recursive: true });
+
+    // The reader sees the original name; the stored name is sanitised, because
+    // an uploaded name is not a safe path component.
+    const safe =
+      (req.file.originalname || 'file')
+        .replace(/[^\w.\- ]+/g, '')
+        .replace(/\s+/g, '-')
+        .slice(-60) || 'file';
+    const name = `${Date.now().toString(36)}-${randomBytes(3).toString('hex')}-${safe}`;
+
+    await fs.writeFile(join(dir, name), req.file.buffer);
+    res.status(201).json({
+      src: `/content/newsletter/${name}`,
+      name: req.file.originalname,
+      kind,
+      bytes: req.file.size,
     });
   })
 );

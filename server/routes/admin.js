@@ -32,6 +32,9 @@ import {
   findById,
   deleteAccount,
   countAdmins,
+  setMute,
+  muteFor,
+  FOREVER,
 } from '../services/users.js';
 import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { getSecret, setSecret } from '../services/secrets.js';
@@ -445,6 +448,48 @@ router.get(
  * asks for a password and re-confirms, which is the right amount of friction
  * for the one deletion nobody else can undo for you.
  */
+/**
+ * A timeout, or a standing ban from commenting.
+ *
+ * Distinct from suspending the account: a muted reader keeps their login and
+ * can still read, they simply cannot post. Most misbehaviour deserves a pause
+ * rather than a door, and a pause that has to be undone by hand is one that
+ * mostly does not get undone.
+ */
+router.post(
+  '/users/:id/mute',
+  requireRole('moderator'),
+  asyncRoute(async (req, res) => {
+    const id = Number(req.params.id);
+    const target = findById(id);
+    if (!target) throw ApiError.notFound('user_not_found', 'No such user.');
+    if (target.id === req.user.id) {
+      throw ApiError.badRequest('self_mute', 'You cannot mute yourself.');
+    }
+    // Otherwise a moderator could silence the people who appointed them.
+    if (target.role === 'admin' && req.user.role !== 'admin') {
+      throw ApiError.forbidden('not_allowed', 'You cannot mute an administrator.');
+    }
+
+    const MINUTES = { hour: 60, day: 1440, week: 10080 };
+    const span = String(req.body?.for || '');
+
+    let until = null;
+    if (span === 'forever') until = FOREVER;
+    else if (MINUTES[span]) {
+      until = new Date(Date.now() + MINUTES[span] * 60_000)
+        .toISOString()
+        .replace('T', ' ')
+        .slice(0, 19);
+    } else if (span !== 'lift') {
+      throw ApiError.badRequest('bad_span', 'Choose an hour, a day, a week, forever, or lift.');
+    }
+
+    setMute(id, until, req.user.id);
+    res.json({ ok: true, mutedUntil: muteFor(findById(id))?.until || null });
+  })
+);
+
 router.delete(
   '/users/:id',
   requireRole('admin'),

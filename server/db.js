@@ -245,6 +245,13 @@ addColumn('email_tokens', 'purpose', "TEXT NOT NULL DEFAULT 'verify'");
 // asked for mail must never receive any.
 addColumn('users', 'newsletter_opt_in', 'INTEGER NOT NULL DEFAULT 0');
 addColumn('users', 'release_opt_in', 'INTEGER NOT NULL DEFAULT 0');
+// A mute is separate from a ban on purpose: a banned account cannot sign in at
+// all, whereas a muted reader keeps their account and can still read -- they
+// simply cannot post. One nullable timestamp rather than a flag plus a date,
+// because two columns can disagree about whether somebody is muted and a single
+// one cannot. A mute with no end is stored as a date far enough out that it will
+// not arrive, since SQLite has no way to say "never".
+addColumn('users', 'muted_until', 'TEXT');
 
 /** Remove expired sessions. Cheap enough to run on boot and on a timer. */
 export function pruneSessions() {

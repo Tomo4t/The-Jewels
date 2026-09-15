@@ -294,7 +294,16 @@
       "buttonLabel": "Tekst przycisku",
       "buttonLink": "Link przycisku",
       "whichChapter": "Który rozdział",
-      "dividerHint": "Linia w poprzek strony."
+      "dividerHint": "Linia w poprzek strony.",
+      "kind_file": "Plik",
+      "kind_video": "YouTube",
+      "fileHint": "Link, nie załącznik — załącznik w masowej wysyłce to prosta droga do spamu.",
+      "addFile": "Wybierz plik",
+      "replaceFile": "Zmień plik",
+      "fileLabel": "Tekst linku",
+      "videoUrl": "Link YouTube",
+      "videoTitle": "Tekst przycisku",
+      "videoHint": "E-maile nie odtwarzają wideo — żaden klient nie uruchomi osadzenia. Wysyłamy prawdziwą miniaturę z przyciskiem otwierającym YouTube."
     },
     "push": {
       "title": "Powiadomienia push",
@@ -306,7 +315,18 @@
     "removeUser": "Usuń",
     "confirmRemove": "Usunąć {username} na zawsze? Tego nie można cofnąć.",
     "chooseMode": "Wymazać konto całkowicie? OK wymazuje wszystko. Anuluj zachowa komentarze jako „Usunięte konto”.",
-    "removed": "{username} został usunięty."
+    "removed": "{username} został usunięty.",
+    "mute": "Wyciszenie",
+    "muteHour": "1 godzina",
+    "muteDay": "1 dzień",
+    "muteWeek": "1 tydzień",
+    "muteForever": "Koniec z komentarzami",
+    "muteLift": "Pozwól znów komentować",
+    "mutedUntil": "Nie może komentować do {when}",
+    "mutedForever": "Nie może komentować",
+    "muteDone": "{username} nie może już komentować.",
+    "muteLifted": "{username} może znów komentować.",
+    "muteWhich": "Jak długo {username} nie ma móc komentować?"
   },
   "errors": {
     "notFound": "Nie znaleziono strony",

@@ -116,6 +116,69 @@ const BLOCKS = {
     );
   },
 
+  /**
+   * A file to download -- an MP3, a PDF, a zip.
+   *
+   * A link, not an attachment. Attaching a file to a bulk send is how a
+   * newsletter lands in spam: size is one of the strongest filter signals, and
+   * every recipient downloads it whether they wanted it or not. Linked, only
+   * the interested pay for it, and the file can be replaced afterwards.
+   */
+  file: (block) => {
+    const href = safeUrl(block.src) || (block.src?.startsWith('/') ? absolute(block.src) : null);
+    if (!href) return '';
+    const size = block.bytes ? ` &middot; ${Math.max(1, Math.round(block.bytes / 1024))} KB` : '';
+    return row(
+      `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+              style="margin:6px 0 20px;background:${BACKDROP};border-radius:10px;">
+         <tr><td style="padding:16px 18px;">
+           <p style="margin:0 0 6px;font:600 12px/1 -apple-system,Segoe UI,Helvetica,Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:${MUTED};">
+             ${escapeHTML(block.kind || 'File')}${size}
+           </p>
+           <a href="${escapeHTML(href)}" style="font:600 16px/1.4 -apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:${ACCENT};">
+             ${escapeHTML(block.label || block.name || 'Download')} &darr;
+           </a>
+         </td></tr>
+       </table>`
+    );
+  },
+
+  /**
+   * A video, as the only thing that actually works in an inbox.
+   *
+   * No email client runs an iframe and none will play a YouTube embed -- Gmail,
+   * Outlook and Apple Mail all strip it, and what the reader gets is a blank
+   * space. So this is the thumbnail with a play badge drawn over it, linking
+   * out to the video. It looks like a player and behaves like a link, which is
+   * what every newsletter that appears to embed video is actually doing.
+   */
+  video: (block) => {
+    const id = youtubeId(block.url);
+    if (!id) return '';
+    const watch = `https://www.youtube.com/watch?v=${id}`;
+    return row(
+      `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:6px 0 20px;">
+         <tr><td style="position:relative;">
+           <a href="${escapeHTML(watch)}" style="text-decoration:none;">
+             <img src="https://i.ytimg.com/vi/${escapeHTML(id)}/hqdefault.jpg"
+                  alt="${escapeHTML(block.title || 'Watch the video')}" width="540"
+                  style="display:block;width:100%;max-width:540px;height:auto;border-radius:10px;border:0;">
+           </a>
+         </td></tr>
+         <tr><td align="center" style="padding:10px 0 0;">
+           <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+             <tr><td bgcolor="#cc0000" style="border-radius:8px;">
+               <a href="${escapeHTML(watch)}"
+                  style="display:inline-block;padding:10px 22px;font:600 15px/1 -apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#fff;text-decoration:none;">
+                 &#9654;&nbsp; ${escapeHTML(block.title || 'Watch on YouTube')}
+               </a>
+             </td></tr>
+           </table>
+         </td></tr>
+       </table>`
+    );
+  },
+
   divider: () =>
     row(`<div style="border-top:1px solid #e2d8c2;margin:22px 0;line-height:0;">&nbsp;</div>`),
 
@@ -140,6 +203,29 @@ const BLOCKS = {
   },
 };
 
+/**
+ * The video id out of any of the shapes people paste: a watch URL, a youtu.be
+ * short link, an embed URL, a Short, or the bare id itself.
+ */
+export function youtubeId(value) {
+  const raw = String(value || '').trim();
+  if (/^[\w-]{11}$/.test(raw)) return raw;
+  try {
+    const url = new URL(raw.startsWith('http') ? raw : `https://${raw}`);
+    if (url.hostname.endsWith('youtu.be')) {
+      const id = url.pathname.slice(1);
+      return /^[\w-]{11}$/.test(id) ? id : null;
+    }
+    if (!/(^|\.)youtube(-nocookie)?\.com$/.test(url.hostname)) return null;
+    const direct = url.searchParams.get('v');
+    if (direct && /^[\w-]{11}$/.test(direct)) return direct;
+    const path = url.pathname.match(/\/(embed|shorts|live|v)\/([\w-]{11})/);
+    return path ? path[2] : null;
+  } catch {
+    return null;
+  }
+}
+
 const absolute = (path) => `${config.publicOrigin}${path}`;
 
 // --- plain text ------------------------------------------------------------
@@ -160,6 +246,12 @@ const TEXT = {
       .replace(/(^|[^*])\*([^*\n]+)\*/g, '$1$2'),
   image: (b) => (b.alt ? `[image: ${b.alt}]` : ''),
   button: (b) => (b.href ? `${b.label}: ${b.href}` : ''),
+  file: (b) =>
+    `${b.label || b.name || 'Download'}: ${b.src?.startsWith('/') ? absolute(b.src) : b.src}`,
+  video: (b) => {
+    const id = youtubeId(b.url);
+    return id ? `${b.title || 'Watch'}: https://www.youtube.com/watch?v=${id}` : '';
+  },
   divider: () => '\n---\n',
   chapter: (b) =>
     `Chapter ${b.number}: ${b.title || ''}\n${absolute(

@@ -227,3 +227,113 @@ test('the private half is never handed to a client', async () => {
     'nothing resembling the private key leaves the server'
   );
 });
+
+// --- moderation and newsletter blocks ---------------------------------------
+
+test('a timeout expires on its own; a standing ban does not', async () => {
+  const { setMute, muteFor, FOREVER } = await import('../services/users.js');
+  const { createUser } = await import('../services/users.js');
+  const user = await createUser({
+    username: 'noisy-reader',
+    password: 'Password123!',
+    displayName: 'Noisy',
+  });
+
+  assert.equal(muteFor(db.prepare('SELECT * FROM users WHERE id = ?').get(user.id)), null);
+
+  // An hour from now: muted.
+  const soon = new Date(Date.now() + 3600_000).toISOString().replace('T', ' ').slice(0, 19);
+  setMute(user.id, soon);
+  const active = muteFor(db.prepare('SELECT * FROM users WHERE id = ?').get(user.id));
+  assert.ok(active, 'they are muted');
+  assert.equal(active.forever, false);
+
+  // A moment in the past: the mute is over, with nothing having run to end it.
+  const past = new Date(Date.now() - 60_000).toISOString().replace('T', ' ').slice(0, 19);
+  setMute(user.id, past);
+  assert.equal(
+    muteFor(db.prepare('SELECT * FROM users WHERE id = ?').get(user.id)),
+    null,
+    'an expired timeout lifts itself'
+  );
+
+  setMute(user.id, FOREVER);
+  const forever = muteFor(db.prepare('SELECT * FROM users WHERE id = ?').get(user.id));
+  assert.ok(forever?.forever, 'a standing ban does not expire');
+
+  setMute(user.id, null);
+  assert.equal(muteFor(db.prepare('SELECT * FROM users WHERE id = ?').get(user.id)), null);
+});
+
+test('a YouTube block renders a thumbnail and a link, never an embed', async () => {
+  const { renderBlocks } = await import('../services/templates.js');
+  const { html, text } = renderBlocks([
+    { type: 'video', url: 'https://youtu.be/dQw4w9WgXcQ', title: 'Watch chapter one' },
+  ]);
+
+  assert.match(html, /i\.ytimg\.com\/vi\/dQw4w9WgXcQ/, 'the real thumbnail');
+  assert.match(html, /youtube\.com\/watch\?v=dQw4w9WgXcQ/, 'links out to the video');
+  // The point of the whole block: an iframe would be stripped and the reader
+  // would get a blank space where the video was meant to be.
+  assert.doesNotMatch(html, /<iframe/i, 'no embed, which no email client would run');
+  assert.doesNotMatch(html, /<video/i);
+  assert.match(text, /dQw4w9WgXcQ/, 'the plain-text half carries the link');
+});
+
+test('a video block with a link that is not YouTube renders nothing', async () => {
+  const { renderBlocks } = await import('../services/templates.js');
+  for (const url of ['https://vimeo.com/12345', 'not a url', '', 'https://evil.example/x']) {
+    assert.equal(renderBlocks([{ type: 'video', url }]).html, '', `${url} should render nothing`);
+  }
+});
+
+test('a file block links rather than attaching', async () => {
+  const { renderBlocks } = await import('../services/templates.js');
+  const { html } = renderBlocks([
+    {
+      type: 'file',
+      src: '/content/newsletter/song.mp3',
+      name: 'song.mp3',
+      kind: 'MP3',
+      bytes: 4_200_000,
+    },
+  ]);
+  assert.match(html, /href="https:\/\/www\.tomojw\.com\/content\/newsletter\/song\.mp3"/);
+  assert.match(html, /MP3/);
+  assert.match(html, /4102 KB/, 'the size is stated so nobody taps a 4MB download blind');
+  assert.doesNotMatch(html, /<audio/i, 'no player, because no inbox has one');
+});
+
+test('links in comments become links, and nothing else does', async () => {
+  const { textToHTML } = await import('../../src/lib/dom.js');
+
+  const plain = textToHTML('Read it at https://www.tomojw.com/#chapters', { links: true });
+  assert.match(plain, /<a href="https:\/\/www\.tomojw\.com\/#chapters"/);
+  // Without these a comment box hands the site's search ranking to whatever a
+  // stranger pastes, and a target=_blank link can navigate the page it came from.
+  assert.match(plain, /rel="nofollow ugc noopener noreferrer"/);
+
+  // A bare domain is what people actually type.
+  assert.match(
+    textToHTML('Go to www.tomojw.com now', { links: true }),
+    /href="https:\/\/www\.tomojw\.com"/
+  );
+
+  // Sentence punctuation belongs to the sentence, not the URL.
+  const bracketed = textToHTML('Great chapter (https://tomojw.com).', { links: true });
+  assert.match(bracketed, /tomojw\.com<\/a>\)\./);
+
+  // Escaping happens first, so markup can never survive as markup.
+  const nasty = textToHTML('<script>alert(1)</script> https://tomojw.com', { links: true });
+  assert.doesNotMatch(nasty, /<script/i);
+  assert.match(nasty, /&lt;script&gt;/);
+  assert.match(nasty, /<a href="https:\/\/tomojw\.com"/);
+
+  // Only http(s). A scheme that runs code must stay inert text.
+  for (const bad of ['javascript:alert(1)', 'data:text/html,<b>x', 'file:///etc/passwd']) {
+    assert.doesNotMatch(textToHTML(bad, { links: true }), /<a /, `${bad} must not become a link`);
+  }
+
+  // And off by default, so nothing starts linkifying where it was not asked for.
+  assert.doesNotMatch(textToHTML('https://tomojw.com'), /<a /);
+});
