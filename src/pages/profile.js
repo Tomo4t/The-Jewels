@@ -294,6 +294,8 @@ export async function render(params = {}) {
         </div>
       </section>
 
+      <div id="notify-section"></div>
+
       ${
         queue
           ? `<section class="account-section" id="queue-section">
@@ -370,8 +372,146 @@ export async function render(params = {}) {
   `;
 }
 
-export function mount() {
+// --- notifications ---------------------------------------------------------
+
+/**
+ * What the reader has asked to receive.
+ *
+ * Push is the awkward one. Safari on iPhone will not grant a subscription
+ * unless the site has been added to the home screen, and the browser reports no
+ * error about it -- the request simply never resolves into anything. A switch
+ * that silently does nothing is worse than no switch, so the condition is
+ * stated on the page rather than discovered.
+ */
+const pushSupported = () =>
+  'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+
+// An iPhone that is not running the site from the home screen. `standalone` is
+// Safari's own flag for that, and exists nowhere else.
+const iosWithoutHomeScreen = () =>
+  /iphone|ipad|ipod/i.test(navigator.userAgent) &&
+  !window.matchMedia('(display-mode: standalone)').matches &&
+  !window.navigator.standalone;
+
+const urlBase64ToUint8Array = (base64) => {
+  const padded = `${base64}${'='.repeat((4 - (base64.length % 4)) % 4)}`
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
+  const raw = window.atob(padded);
+  return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
+};
+
+const toggleRow = (id, label, hint, on, { disabled = false, note = '' } = {}) => `
+  <div class="notify-row">
+    <label class="switch-label">
+      <input type="checkbox" data-notify="${id}" ${on ? 'checked' : ''} ${
+        disabled ? 'disabled' : ''
+      }>
+      <span class="notify-name">${escapeHTML(label)}</span>
+    </label>
+    <p class="field-hint">${escapeHTML(hint)}</p>
+    ${note ? `<p class="field-hint is-warn">${escapeHTML(note)}</p>` : ''}
+  </div>`;
+
+async function renderNotifications(host, user) {
+  let state;
+  try {
+    state = await api.notifications();
+  } catch {
+    host.innerHTML = '';
+    return;
+  }
+
+  const confirmed = Boolean(user.email && user.emailVerified);
+  const permission = pushSupported() ? Notification.permission : 'unsupported';
+
+  const pushNote = !pushSupported()
+    ? t('notify.pushUnsupported')
+    : !state.push.configured
+      ? t('notify.pushNotConfigured')
+      : permission === 'denied'
+        ? t('notify.pushBlocked')
+        : iosWithoutHomeScreen()
+          ? t('notify.pushIos')
+          : state.push.devices
+            ? t('notify.pushOnDevices', { count: state.push.devices })
+            : '';
+
+  host.innerHTML = `
+    <section class="account-section">
+      <h2>${escapeHTML(t('notify.section'))}</h2>
+      ${confirmed ? '' : `<p class="field-hint is-warn">${escapeHTML(t('notify.needsEmail'))}</p>`}
+      <div class="notify-list">
+        ${toggleRow('newsletter', t('notify.newsletter'), t('notify.newsletterHint'), state.preferences.newsletter, { disabled: !confirmed })}
+        ${toggleRow('release', t('notify.release'), t('notify.releaseHint'), state.preferences.release, { disabled: !confirmed })}
+        ${toggleRow('push', t('notify.push'), t('notify.pushHint'), state.push.devices > 0, {
+          disabled: !pushSupported() || !state.push.configured || permission === 'denied',
+          note: pushNote,
+        })}
+      </div>
+    </section>`;
+
+  host.querySelectorAll('[data-notify]').forEach((input) => {
+    input.addEventListener('change', async (event) => {
+      const box = event.currentTarget;
+      const kind = box.dataset.notify;
+      const wanted = box.checked;
+      box.disabled = true;
+
+      try {
+        if (kind === 'push') await togglePush(wanted, state.push.publicKey);
+        else await api.setNotification(kind, wanted);
+        await renderNotifications(host, user);
+      } catch (err) {
+        // Put the switch back where it was: leaving it showing a state the
+        // server never accepted is how somebody ends up believing they are
+        // subscribed when they are not.
+        box.checked = !wanted;
+        box.disabled = false;
+        toastError(err instanceof ApiError ? err.message : t('common.error'));
+      }
+    });
+  });
+}
+
+async function togglePush(on, publicKey) {
+  const registration = await navigator.serviceWorker.register('/sw.js');
+  await navigator.serviceWorker.ready;
+
+  if (!on) {
+    const existing = await registration.pushManager.getSubscription();
+    if (existing) {
+      await api.unsubscribePush(existing.endpoint);
+      await existing.unsubscribe();
+    }
+    return;
+  }
+
+  const permission = await Notification.requestPermission();
+  if (permission !== 'granted') throw new Error(t('notify.pushBlocked'));
+
+  const subscription =
+    (await registration.pushManager.getSubscription()) ||
+    (await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(publicKey),
+    }));
+
+  await api.subscribePush(subscription.toJSON());
+}
+
+export function mount(params = {}) {
   const cleanups = [];
+
+  // Somebody arriving from an unsubscribe link needs to be told it worked --
+  // silence looks exactly like a link that did nothing.
+  if (params.unsubscribed) {
+    if (params.unsubscribed === 'failed') toastError(t('notify.unsubscribeFailed'));
+    else toastSuccess(t('notify.unsubscribed'));
+  }
+
+  const notifyHost = document.getElementById('notify-section');
+  if (notifyHost && session.user) renderNotifications(notifyHost, session.user);
   const bind = (node, event, handler) => {
     if (!node) return;
     node.addEventListener(event, handler);

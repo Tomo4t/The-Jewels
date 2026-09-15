@@ -15,6 +15,7 @@ import contentRoutes from './routes/content.js';
 import commentRoutes from './routes/comments.js';
 import adminRoutes from './routes/admin.js';
 import notifyRoutes from './routes/notify.js';
+import newsletterRoutes from './routes/newsletter.js';
 
 validateConfig();
 
@@ -70,6 +71,7 @@ app.use('/api/content', contentRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/notify', notifyRoutes);
+app.use('/api/admin/newsletters', newsletterRoutes);
 
 // --- published content ----------------------------------------------------
 // Chapter images and update files. Served with a long cache because uploads

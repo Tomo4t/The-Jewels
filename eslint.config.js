@@ -36,6 +36,20 @@ export default [
     rules: { ...shared },
   },
 
+  // The service worker is neither a page script nor a module: it has its own
+  // globals (self, clients, registration) and, unlike theme-init.js, it only
+  // ever runs in a browser new enough to support service workers at all -- so
+  // there is no reason to hold it to ES2019.
+  {
+    files: ['public/sw.js'],
+    languageOptions: {
+      ecmaVersion: 2023,
+      sourceType: 'script',
+      globals: { ...globals.serviceworker },
+    },
+    rules: { ...shared },
+  },
+
   // Server code and build config.
   {
     files: ['server/**/*.js', '*.config.js'],

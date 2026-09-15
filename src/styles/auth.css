@@ -678,3 +678,35 @@ html.dark .button--google:hover:not(:disabled) {
   font-style: italic;
   color: var(--color-text-muted);
 }
+
+/* --- notification switches ------------------------------------------------ */
+
+.notify-list {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.notify-row .switch-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+}
+
+.notify-row .notify-name {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.notify-row input[disabled] + .notify-name {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.notify-row .field-hint {
+  margin: var(--space-1) 0 0 calc(1rem + var(--space-3));
+}
+
+.notify-row .field-hint.is-warn {
+  color: var(--color-warning, #a4611c);
+}

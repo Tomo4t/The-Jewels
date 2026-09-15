@@ -226,6 +226,31 @@ export const api = {
       body: payload,
     }),
   adminSettings: () => request('/api/admin/settings'),
+  notifications: () => request('/api/notify/'),
+  setNotification: (kind, on) => request('/api/notify/', { method: 'PUT', body: { kind, on } }),
+  subscribePush: (subscription) =>
+    request('/api/notify/push', { method: 'POST', body: { subscription } }),
+  unsubscribePush: (endpoint) =>
+    request('/api/notify/push', { method: 'DELETE', body: { endpoint } }),
+  adminNewsletters: () => request('/api/admin/newsletters/'),
+  createNewsletter: () => request('/api/admin/newsletters/', { method: 'POST' }),
+  saveNewsletter: (id, draft) =>
+    request(`/api/admin/newsletters/${id}`, {
+      method: 'PUT',
+      body: { subject: draft.subject, blocks: draft.blocks },
+    }),
+  previewNewsletter: (id, draft) =>
+    request(`/api/admin/newsletters/${id}/preview`, {
+      method: 'POST',
+      body: { subject: draft.subject, blocks: draft.blocks },
+    }),
+  testNewsletter: (id) => request(`/api/admin/newsletters/${id}/test`, { method: 'POST' }),
+  sendNewsletter: (id) => request(`/api/admin/newsletters/${id}/send`, { method: 'POST' }),
+  uploadNewsletterImage: (file) => {
+    const data = new FormData();
+    data.append('image', file);
+    return request('/api/admin/newsletters/image', { method: 'POST', body: data });
+  },
   adminBackups: () => request('/api/admin/backups'),
   adminRunBackup: () => request('/api/admin/backups', { method: 'POST' }),
   adminDriveConnect: () => request('/api/admin/drive/connect'),

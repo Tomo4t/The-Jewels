@@ -65,7 +65,7 @@ async function boot() {
 
 function renderShell() {
   const tabs = session.isAdmin
-    ? ['chapters', 'updates', 'moderation', 'users', 'settings']
+    ? ['chapters', 'updates', 'newsletter', 'moderation', 'users', 'settings']
     : ['moderation'];
 
   main.replaceChildren(
@@ -97,6 +97,7 @@ function renderShell() {
     updates: renderUpdates,
     moderation: renderModeration,
     users: renderUsers,
+    newsletter: renderNewsletter,
     settings: renderSettings,
   }[activeTab];
 
@@ -1145,6 +1146,404 @@ function reportDriveReturn() {
   if (outcome === 'connected') toastSuccess(t('admin.backups.connected'));
   else toastError(t('admin.backups.connectFailed', { message: params.get('message') || outcome }));
   return true;
+}
+
+// --- newsletter ------------------------------------------------------------
+
+/**
+ * The composer.
+ *
+ * A newsletter is a list of blocks, not a blob of HTML. The server owns how a
+ * block becomes email markup, so a draft written today picks up any later fix
+ * to how a button renders in Outlook -- which would not happen if the browser
+ * had frozen its own HTML into the record.
+ *
+ * The preview is an iframe with the real email inside it. Dropping that markup
+ * into the page directly would let the email's own body styling loose on the
+ * admin panel, and would also flatter it: the preview would inherit fonts and
+ * resets the inbox will not provide.
+ */
+
+const BLOCK_KINDS = ['heading', 'text', 'image', 'button', 'chapter', 'divider'];
+
+const blockDefaults = {
+  heading: () => ({ type: 'heading', text: '' }),
+  text: () => ({ type: 'text', text: '' }),
+  image: () => ({ type: 'image', src: '', alt: '', href: '' }),
+  button: () => ({ type: 'button', label: '', href: '' }),
+  divider: () => ({ type: 'divider' }),
+  chapter: () => ({ type: 'chapter', lang: 'en', number: 1, title: '' }),
+};
+
+const field = (label, inner) => `
+  <label class="field">
+    <span>${escapeHTML(label)}</span>
+    ${inner}
+  </label>`;
+
+function blockEditor(block, index, chapters) {
+  const body = {
+    heading: () =>
+      field(
+        t('admin.news.headingText'),
+        `<input type="text" data-prop="text" maxlength="200" value="${escapeHTML(block.text || '')}">`
+      ),
+
+    text: () => `
+      ${field(
+        t('admin.news.bodyText'),
+        `<textarea data-prop="text" rows="5" maxlength="8000">${escapeHTML(block.text || '')}</textarea>`
+      )}
+      <p class="field-hint">${escapeHTML(t('admin.news.textHint'))}</p>`,
+
+    image: () => `
+      <div class="block-image">
+        ${
+          block.src
+            ? `<img src="${escapeHTML(block.src)}" alt="" class="block-thumb">`
+            : `<p class="field-hint">${escapeHTML(t('admin.news.noImage'))}</p>`
+        }
+        <label class="link-button">
+          ${escapeHTML(block.src ? t('admin.news.replaceImage') : t('admin.news.addImage'))}
+          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden data-image>
+        </label>
+        <p class="field-hint">${escapeHTML(t('admin.news.gifHint'))}</p>
+      </div>
+      ${field(
+        t('admin.news.altText'),
+        `<input type="text" data-prop="alt" maxlength="200" value="${escapeHTML(block.alt || '')}">`
+      )}
+      ${field(
+        t('admin.news.imageLink'),
+        `<input type="url" data-prop="href" maxlength="500" value="${escapeHTML(block.href || '')}" placeholder="https://">`
+      )}`,
+
+    button: () => `
+      ${field(
+        t('admin.news.buttonLabel'),
+        `<input type="text" data-prop="label" maxlength="60" value="${escapeHTML(block.label || '')}">`
+      )}
+      ${field(
+        t('admin.news.buttonLink'),
+        `<input type="url" data-prop="href" maxlength="500" value="${escapeHTML(block.href || '')}" placeholder="https://">`
+      )}`,
+
+    chapter: () => {
+      const all = Object.entries(chapters || {}).flatMap(([lang, list]) =>
+        list.map((c) => ({ lang, number: c.number, title: c.title }))
+      );
+      return `
+        ${field(
+          t('admin.news.whichChapter'),
+          `<select data-chapter>
+             ${all
+               .map(
+                 (c) =>
+                   `<option value="${c.lang}:${c.number}" ${
+                     c.lang === block.lang && c.number === block.number ? 'selected' : ''
+                   }>${escapeHTML(`${LANGUAGE_NAMES[c.lang] || c.lang} — ${c.number}. ${c.title}`)}</option>`
+               )
+               .join('')}
+           </select>`
+        )}`;
+    },
+
+    divider: () => `<p class="field-hint">${escapeHTML(t('admin.news.dividerHint'))}</p>`,
+  }[block.type];
+
+  return `
+    <li class="block-card" data-index="${index}">
+      <div class="block-head">
+        <span class="block-kind">${escapeHTML(t(`admin.news.kind_${block.type}`))}</span>
+        <span class="block-tools">
+          <button type="button" class="page-tool" data-move="-1" ${index === 0 ? 'disabled' : ''}
+                  title="${escapeHTML(t('admin.release.moveUp'))}">↑</button>
+          <button type="button" class="page-tool" data-move="1" title="${escapeHTML(t('admin.release.moveDown'))}">↓</button>
+          <button type="button" class="page-tool is-danger" data-remove
+                  title="${escapeHTML(t('common.delete'))}">×</button>
+        </span>
+      </div>
+      <div class="block-body">${body ? body() : ''}</div>
+    </li>`;
+}
+
+async function renderNewsletter(panel) {
+  const { newsletters, subscribers, dailyLimit } = await api.adminNewsletters();
+  const { chapters } = await api.adminChapters();
+
+  let current = newsletters.find((n) => n.status === 'draft') || null;
+
+  const shell = () => {
+    panel.innerHTML = `
+      <section class="admin-section">
+        <h2>${escapeHTML(t('admin.tabs.newsletter'))}</h2>
+        <p class="field-hint">
+          ${escapeHTML(t('admin.news.subscriberCount', { count: subscribers }))}
+          ${
+            subscribers > dailyLimit
+              ? escapeHTML(t('admin.news.overDailyLimit', { limit: dailyLimit }))
+              : ''
+          }
+        </p>
+        <div class="news-layout">
+          <aside class="news-list">
+            <button type="button" class="button button--primary" id="new-draft">
+              ${escapeHTML(t('admin.news.newDraft'))}
+            </button>
+            <ul>
+              ${newsletters
+                .map(
+                  (n) => `
+                <li>
+                  <button type="button" class="news-item ${current?.id === n.id ? 'is-active' : ''}"
+                          data-open="${n.id}" ${n.status === 'sent' ? 'data-sent' : ''}>
+                    <span class="news-subject">${escapeHTML(n.subject || t('admin.news.untitled'))}</span>
+                    <span class="news-meta">${escapeHTML(
+                      n.status === 'sent'
+                        ? t('admin.news.sentTo', { count: n.recipients })
+                        : t('admin.news.draft')
+                    )}</span>
+                  </button>
+                </li>`
+                )
+                .join('')}
+            </ul>
+          </aside>
+          <div class="news-editor" id="news-editor"></div>
+        </div>
+      </section>`;
+
+    panel.querySelector('#new-draft').addEventListener('click', async () => {
+      current = await api.createNewsletter();
+      newsletters.unshift(current);
+      shell();
+    });
+
+    panel.querySelectorAll('[data-open]').forEach((button) =>
+      button.addEventListener('click', () => {
+        current = newsletters.find((n) => n.id === Number(button.dataset.open));
+        shell();
+      })
+    );
+
+    drawEditor();
+  };
+
+  const drawEditor = () => {
+    const host = panel.querySelector('#news-editor');
+    if (!current) {
+      host.innerHTML = `<p class="empty-note">${escapeHTML(t('admin.news.pickOne'))}</p>`;
+      return;
+    }
+
+    const sent = current.status === 'sent';
+    host.innerHTML = `
+      <form class="admin-form" id="news-form">
+        <label class="field">
+          <span>${escapeHTML(t('admin.news.subject'))}</span>
+          <input type="text" id="news-subject" maxlength="200" ${sent ? 'disabled' : ''}
+                 value="${escapeHTML(current.subject || '')}">
+        </label>
+
+        <ol class="block-list" id="block-list"></ol>
+
+        ${
+          sent
+            ? `<p class="field-hint">${escapeHTML(t('admin.news.alreadySent'))}</p>`
+            : `<div class="block-add">
+                 ${BLOCK_KINDS.map(
+                   (kind) =>
+                     `<button type="button" class="button" data-add="${kind}">+ ${escapeHTML(
+                       t(`admin.news.kind_${kind}`)
+                     )}</button>`
+                 ).join('')}
+               </div>
+               <div class="setting-actions">
+                 <button type="button" class="button button--primary" id="news-save">
+                   ${escapeHTML(t('admin.news.save'))}
+                 </button>
+                 <button type="button" class="button" id="news-test">
+                   ${escapeHTML(t('admin.news.sendTest'))}
+                 </button>
+                 <button type="button" class="button button--danger" id="news-send">
+                   ${escapeHTML(t('admin.news.sendToAll', { count: subscribers }))}
+                 </button>
+               </div>`
+        }
+      </form>
+
+      <div class="news-preview">
+        <h3>${escapeHTML(t('admin.news.preview'))}</h3>
+        <div class="news-preview-shell" id="news-preview-shell">
+          <iframe id="news-preview-frame" title="${escapeHTML(t('admin.news.preview'))}"
+                  sandbox=""></iframe>
+        </div>
+      </div>`;
+
+    drawBlocks();
+    bindEditor();
+    fitPreview();
+    refreshPreview();
+  };
+
+  // The email is 600px wide whatever this column happens to be, so the scale is
+  // measured rather than guessed -- and re-measured when the window changes.
+  const fitPreview = () => {
+    const shell = panel.querySelector('#news-preview-shell');
+    if (!shell) return;
+    const apply = () => {
+      const scale = Math.min(1, shell.clientWidth / 640);
+      shell.style.setProperty('--preview-scale', String(scale || 1));
+    };
+    apply();
+    if (window.ResizeObserver && !shell.dataset.watched) {
+      shell.dataset.watched = '1';
+      new ResizeObserver(apply).observe(shell);
+    }
+  };
+
+  const drawBlocks = () => {
+    const list = panel.querySelector('#block-list');
+    list.innerHTML = current.blocks
+      .map((block, index) => blockEditor(block, index, chapters))
+      .join('');
+    if (current.status === 'sent') {
+      list.querySelectorAll('input, textarea, select, button').forEach((n) => {
+        n.disabled = true;
+      });
+    }
+    bindBlocks();
+  };
+
+  const bindBlocks = () => {
+    panel.querySelectorAll('.block-card').forEach((card) => {
+      const index = Number(card.dataset.index);
+
+      card.querySelectorAll('[data-prop]').forEach((input) =>
+        input.addEventListener('input', () => {
+          current.blocks[index][input.dataset.prop] = input.value;
+          schedulePreview();
+        })
+      );
+
+      card.querySelector('[data-chapter]')?.addEventListener('change', (event) => {
+        const [lang, number] = event.target.value.split(':');
+        const meta = (chapters[lang] || []).find((c) => c.number === Number(number));
+        current.blocks[index] = {
+          type: 'chapter',
+          lang,
+          number: Number(number),
+          title: meta?.title || '',
+        };
+        schedulePreview();
+      });
+
+      card.querySelector('[data-image]')?.addEventListener('change', async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        try {
+          const uploaded = await api.uploadNewsletterImage(file);
+          current.blocks[index].src = uploaded.src;
+          drawBlocks();
+          schedulePreview();
+        } catch (err) {
+          fail(err);
+        }
+      });
+
+      card.querySelectorAll('[data-move]').forEach((button) =>
+        button.addEventListener('click', () => {
+          const to = index + Number(button.dataset.move);
+          if (to < 0 || to >= current.blocks.length) return;
+          [current.blocks[index], current.blocks[to]] = [current.blocks[to], current.blocks[index]];
+          drawBlocks();
+          schedulePreview();
+        })
+      );
+
+      card.querySelector('[data-remove]')?.addEventListener('click', () => {
+        current.blocks.splice(index, 1);
+        drawBlocks();
+        schedulePreview();
+      });
+    });
+  };
+
+  const bindEditor = () => {
+    panel.querySelector('#news-subject')?.addEventListener('input', (event) => {
+      current.subject = event.target.value;
+      schedulePreview();
+    });
+
+    panel.querySelectorAll('[data-add]').forEach((button) =>
+      button.addEventListener('click', () => {
+        current.blocks.push(blockDefaults[button.dataset.add]());
+        drawBlocks();
+        schedulePreview();
+      })
+    );
+
+    panel.querySelector('#news-save')?.addEventListener('click', async (event) => {
+      event.currentTarget.disabled = true;
+      try {
+        Object.assign(current, await api.saveNewsletter(current.id, current));
+        toastSuccess(t('admin.news.saved'));
+        shell();
+      } catch (err) {
+        fail(err);
+        event.currentTarget.disabled = false;
+      }
+    });
+
+    panel.querySelector('#news-test')?.addEventListener('click', async (event) => {
+      event.currentTarget.disabled = true;
+      try {
+        await api.saveNewsletter(current.id, current);
+        const { to } = await api.testNewsletter(current.id);
+        toastSuccess(t('admin.news.testSent', { email: to }));
+      } catch (err) {
+        fail(err);
+      } finally {
+        event.currentTarget.disabled = false;
+      }
+    });
+
+    panel.querySelector('#news-send')?.addEventListener('click', async (event) => {
+      // Irreversible and public. A confirm here is worth the friction.
+      if (!window.confirm(t('admin.news.confirmSend', { count: subscribers }))) return;
+      event.currentTarget.disabled = true;
+      try {
+        await api.saveNewsletter(current.id, current);
+        const { queued } = await api.sendNewsletter(current.id);
+        toastSuccess(t('admin.news.queued', { count: queued }));
+        renderNewsletter(panel);
+      } catch (err) {
+        fail(err);
+        event.currentTarget.disabled = false;
+      }
+    });
+  };
+
+  // The preview is rendered by the server, so it is the real email rather than
+  // a guess at one -- but that means a request per keystroke without a pause.
+  let previewTimer = null;
+  const schedulePreview = () => {
+    window.clearTimeout(previewTimer);
+    previewTimer = window.setTimeout(refreshPreview, 400);
+  };
+
+  const refreshPreview = async () => {
+    const frame = panel.querySelector('#news-preview-frame');
+    if (!frame || !current) return;
+    try {
+      const { html } = await api.previewNewsletter(current.id, current);
+      frame.srcdoc = html;
+    } catch {
+      /* a half-typed draft failing to render is not worth shouting about */
+    }
+  };
+
+  shell();
 }
 
 boot().catch((err) => {
