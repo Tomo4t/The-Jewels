@@ -834,6 +834,10 @@ async function renderUsers(panel) {
                               ${escapeHTML(
                                 user.status === 'banned' ? t('admin.unbanUser') : t('admin.banUser')
                               )}
+                            </button>
+                            <button type="button" class="link-button link-button--danger"
+                                    data-remove-user="${user.id}:${escapeHTML(user.username)}">
+                              ${escapeHTML(t('admin.removeUser'))}
                             </button>`
                       }
                     </td>
@@ -854,6 +858,27 @@ async function renderUsers(panel) {
       } catch (err) {
         fail(err);
         renderShell();
+      }
+    });
+  });
+
+  panel.querySelectorAll('[data-remove-user]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const raw = button.dataset.removeUser;
+      const id = raw.slice(0, raw.indexOf(':'));
+      const username = raw.slice(raw.indexOf(':') + 1);
+
+      // Two questions, because the first is irreversible and the second decides
+      // whether anything they wrote survives.
+      if (!window.confirm(t('admin.confirmRemove', { username }))) return;
+      const mode = window.confirm(t('admin.chooseMode')) ? 'purge' : 'anonymise';
+
+      try {
+        await api.adminDeleteUser(id, mode);
+        toastSuccess(t('admin.removed', { username }));
+        renderShell();
+      } catch (err) {
+        fail(err);
       }
     });
   });

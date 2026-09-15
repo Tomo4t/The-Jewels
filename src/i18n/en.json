@@ -302,7 +302,11 @@
       "notReady": "Not set up yet. This makes the keys the browsers need; it only has to be done once.",
       "setUp": "Set up push notifications",
       "done": "Push notifications are ready."
-    }
+    },
+    "removeUser": "Remove",
+    "confirmRemove": "Remove {username} for good? This cannot be undone.",
+    "chooseMode": "Erase the account completely? OK erases everything. Cancel keeps their comments as \"Deleted account\".",
+    "removed": "{username} has been removed."
   },
   "errors": {
     "notFound": "Page not found",

@@ -302,7 +302,11 @@
       "notReady": "Aún sin configurar. Esto crea las claves que necesitan los navegadores; solo se hace una vez.",
       "setUp": "Configurar notificaciones push",
       "done": "Las notificaciones push están listas."
-    }
+    },
+    "removeUser": "Eliminar",
+    "confirmRemove": "¿Eliminar {username} para siempre? No se puede deshacer.",
+    "chooseMode": "¿Borrar la cuenta por completo? Aceptar borra todo. Cancelar conserva sus comentarios como «Cuenta eliminada».",
+    "removed": "{username} ha sido eliminado."
   },
   "errors": {
     "notFound": "Página no encontrada",

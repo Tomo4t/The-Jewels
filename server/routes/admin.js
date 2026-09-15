@@ -25,7 +25,14 @@ import {
   saveUpdate,
   syncConfigFromDisk,
 } from '../services/content.js';
-import { listUsers, setRole, setStatus, findById } from '../services/users.js';
+import {
+  listUsers,
+  setRole,
+  setStatus,
+  findById,
+  deleteAccount,
+  countAdmins,
+} from '../services/users.js';
 import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { getSecret, setSecret } from '../services/secrets.js';
 import {
@@ -422,6 +429,49 @@ router.get(
     const limit = Math.min(Number(req.query.limit) || 100, 500);
     const offset = Math.max(Number(req.query.offset) || 0, 0);
     res.json({ users: listUsers({ limit, offset }) });
+  })
+);
+
+/**
+ * Removing an account outright.
+ *
+ * Until now an administrator could ban somebody but never remove them, which
+ * left test accounts and abandoned sign-ups sitting in the list forever with no
+ * way out but a database. Same two modes a reader gets for their own account:
+ * anonymise keeps the row so their comments survive as "Deleted account", purge
+ * erases it entirely.
+ *
+ * Deleting yourself goes through the account page instead. That route already
+ * asks for a password and re-confirms, which is the right amount of friction
+ * for the one deletion nobody else can undo for you.
+ */
+router.delete(
+  '/users/:id',
+  requireRole('admin'),
+  asyncRoute(async (req, res) => {
+    const id = Number(req.params.id);
+    const target = findById(id);
+    if (!target) throw ApiError.notFound('user_not_found', 'No such user.');
+
+    if (target.id === req.user.id) {
+      throw ApiError.badRequest(
+        'self_deletion',
+        'Delete your own account from your account page, not here.'
+      );
+    }
+    // Locking everybody out of a site with no administrator is not a thing an
+    // interface should let somebody do by accident.
+    if (target.role === 'admin' && countAdmins() <= 1) {
+      throw ApiError.badRequest('last_admin', 'You cannot remove the only administrator.');
+    }
+
+    const mode = req.body?.mode === 'purge' ? 'purge' : 'anonymise';
+    deleteAccount(id, mode);
+    audit(req.user.id, 'user.deleted_by_admin', 'user', id, {
+      mode,
+      username: target.username,
+    });
+    res.json({ ok: true, mode });
   })
 );
 

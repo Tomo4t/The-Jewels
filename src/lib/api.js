@@ -283,6 +283,8 @@ export const api = {
   adminDeleteUpdate: (lang, id) =>
     request(`/api/admin/updates/${encodeURIComponent(lang)}/${Number(id)}`, { method: 'DELETE' }),
   adminUsers: () => request('/api/admin/users'),
+  adminDeleteUser: (id, mode) =>
+    request(`/api/admin/users/${id}`, { method: 'DELETE', body: { mode } }),
   adminUpdateUser: (id, payload) =>
     request(`/api/admin/users/${Number(id)}`, { method: 'PATCH', body: payload }),
 };

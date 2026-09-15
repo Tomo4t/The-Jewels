@@ -302,7 +302,11 @@
       "notReady": "Pas encore configuré. Ceci crée les clés dont les navigateurs ont besoin ; une seule fois.",
       "setUp": "Configurer les notifications push",
       "done": "Les notifications push sont prêtes."
-    }
+    },
+    "removeUser": "Supprimer",
+    "confirmRemove": "Supprimer {username} définitivement ? Irréversible.",
+    "chooseMode": "Tout effacer ? OK efface tout. Annuler conserve ses commentaires en « Compte supprimé ».",
+    "removed": "{username} a été supprimé."
   },
   "errors": {
     "notFound": "Page introuvable",

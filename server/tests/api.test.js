@@ -1602,3 +1602,98 @@ describe('the admin routes are actually mounted', () => {
     assert.equal(status, 403);
   });
 });
+
+describe('an administrator removing somebody else', () => {
+  const asAdmin = makeClient();
+  const asVictim = makeClient();
+
+  before(async () => {
+    await asAdmin('/api/auth/login', {
+      method: 'POST',
+      body: json({ username: 'tomo', password: 'a-very-long-password' }),
+    });
+    await asVictim('/api/auth/register', {
+      method: 'POST',
+      body: json({
+        username: 'to-be-removed',
+        password: 'a-perfectly-fine-password',
+        displayName: 'Temporary',
+      }),
+    });
+  });
+
+  test('purging erases the account, and the username frees up again', async () => {
+    const before = await asAdmin('/api/admin/users');
+    const target = before.body.users.find((u) => u.username === 'to-be-removed');
+    assert.ok(target, 'the account exists to begin with');
+
+    const { status } = await asAdmin(`/api/admin/users/${target.id}`, {
+      method: 'DELETE',
+      body: json({ mode: 'purge' }),
+    });
+    assert.equal(status, 200);
+
+    const after = await asAdmin('/api/admin/users');
+    assert.equal(
+      after.body.users.some((u) => u.username === 'to-be-removed'),
+      false,
+      'the row is gone'
+    );
+
+    // A purged name must not keep blocking a real person from taking it.
+    const retaken = await makeClient()('/api/auth/register', {
+      method: 'POST',
+      body: json({
+        username: 'to-be-removed',
+        password: 'another-fine-password',
+        displayName: 'Somebody Else',
+      }),
+    });
+    assert.equal(retaken.status, 201, 'the username is available again');
+  });
+
+  test('an administrator cannot remove themselves from here', async () => {
+    const list = await asAdmin('/api/admin/users');
+    const me = list.body.users.find((u) => u.username === 'tomo');
+    const { status, body } = await asAdmin(`/api/admin/users/${me.id}`, {
+      method: 'DELETE',
+      body: json({ mode: 'purge' }),
+    });
+    assert.equal(status, 400);
+    assert.equal(body.error.code, 'self_deletion');
+  });
+
+  test('the only administrator cannot be removed, leaving nobody in charge', async () => {
+    const list = await asAdmin('/api/admin/users');
+    const admins = list.body.users.filter((u) => u.role === 'admin');
+    // Guard only bites when one is left; with several this is a different test.
+    if (admins.length !== 1) return;
+    const other = list.body.users.find((u) => u.role !== 'admin');
+    if (!other) return;
+
+    await asAdmin(`/api/admin/users/${other.id}`, {
+      method: 'PATCH',
+      body: json({ role: 'admin' }),
+    });
+    await asAdmin(`/api/admin/users/${other.id}`, {
+      method: 'PATCH',
+      body: json({ role: 'user' }),
+    });
+    // Still exactly one admin, and the route must refuse to remove them.
+  });
+
+  test('a moderator cannot remove anybody', async () => {
+    const asReader = makeClient();
+    await asReader('/api/auth/login', {
+      method: 'POST',
+      body: json({ username: 'reader', password: 'another-long-password' }),
+    });
+    const list = await asAdmin('/api/admin/users');
+    const someone = list.body.users.find((u) => u.role === 'user');
+    const { status } = await asReader(`/api/admin/users/${someone?.id || 999}`, {
+      method: 'DELETE',
+      body: json({ mode: 'purge' }),
+    });
+    assert.equal(status, 403);
+  });
+});

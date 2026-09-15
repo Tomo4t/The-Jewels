@@ -302,7 +302,11 @@
       "notReady": "Jeszcze nieskonfigurowane. To utworzy klucze potrzebne przeglądarkom — tylko raz.",
       "setUp": "Skonfiguruj powiadomienia push",
       "done": "Powiadomienia push są gotowe."
-    }
+    },
+    "removeUser": "Usuń",
+    "confirmRemove": "Usunąć {username} na zawsze? Tego nie można cofnąć.",
+    "chooseMode": "Wymazać konto całkowicie? OK wymazuje wszystko. Anuluj zachowa komentarze jako „Usunięte konto”.",
+    "removed": "{username} został usunięty."
   },
   "errors": {
     "notFound": "Nie znaleziono strony",
