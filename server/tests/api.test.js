@@ -1697,3 +1697,58 @@ describe('an administrator removing somebody else', () => {
     assert.equal(status, 403);
   });
 });
+
+describe('sending yourself a test newsletter', () => {
+  const asAdmin = makeClient();
+
+  before(async () => {
+    await asAdmin('/api/auth/login', {
+      method: 'POST',
+      body: json({ username: 'tomo', password: 'a-very-long-password' }),
+    });
+    // The precondition the route actually requires. Without it "no address" is
+    // the correct answer, and the test would pass while proving nothing.
+    const { default: db } = await import('../db.js');
+    db.prepare(
+      `UPDATE users SET email = 'tomo@tomojw.com', email_verified_at = datetime('now')
+        WHERE username = 'tomo'`
+    ).run();
+  });
+
+  test('a confirmed administrator can send one to themselves', async () => {
+    // This is the check that was missing. The route read req.user.email, which
+    // does not exist on the public view of an account, so the guard rejected
+    // everybody and told them their confirmed address was unconfirmed.
+    const draft = await asAdmin('/api/admin/newsletters/', { method: 'POST' });
+    assert.equal(draft.status, 201);
+
+    await asAdmin(`/api/admin/newsletters/${draft.body.id}`, {
+      method: 'PUT',
+      body: json({ subject: 'Hello', blocks: [{ type: 'text', text: 'Hi there.' }] }),
+    });
+
+    const { status, body } = await asAdmin(`/api/admin/newsletters/${draft.body.id}/test`, {
+      method: 'POST',
+    });
+    assert.notEqual(
+      body?.error?.code,
+      'no_address',
+      'a confirmed address must not read as missing'
+    );
+    assert.equal(status, 200);
+    assert.ok(body.to?.includes('@'), 'it reports the address it went to');
+  });
+});
+
+describe('files served under a fixed name are not cached for a year', () => {
+  test('the service worker and theme script revalidate', async () => {
+    // Both are fetched by a fixed name, so a long cache pins an old copy well
+    // after the file has changed.
+    for (const path of ['/sw.js', '/theme-init.js']) {
+      const res = await fetch(`${base}${path}`);
+      if (res.status !== 200) continue;
+      const header = res.headers.get('cache-control') || '';
+      assert.ok(!/max-age=\d{5,}/.test(header), `${path} is cached for a long time: ${header}`);
+    }
+  });
+});

@@ -100,8 +100,20 @@ if (hasBuild) {
       index: false,
       maxAge: '1y',
       setHeaders: (res, path) => {
-        // Hashed asset filenames can be cached forever; the HTML cannot.
-        if (path.endsWith('.html')) res.setHeader('Cache-Control', 'no-cache');
+        // A year is right for hashed asset names, where a change means a new
+        // name. It is wrong for everything shipped under a fixed name, because
+        // a year is how long a browser would keep serving the old one.
+        if (path.endsWith('.html')) {
+          res.setHeader('Cache-Control', 'no-cache');
+          return;
+        }
+        // The service worker is the worst case: it decides how push behaves and
+        // is fetched by its own fixed name, so a cached copy pins that
+        // behaviour long after the file changed. theme-init runs before paint
+        // and sets the theme, so a stale copy is visible immediately.
+        if (/\/(sw|theme-init)\.js$/.test(path)) {
+          res.setHeader('Cache-Control', 'no-cache');
+        }
       },
     })
   );

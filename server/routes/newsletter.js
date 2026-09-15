@@ -158,7 +158,14 @@ router.post(
   asyncRoute(async (req, res) => {
     const row = findDraft(Number(req.params.id));
     if (!row) throw ApiError.notFound('not_found', 'That newsletter is gone.');
-    if (!req.user.email || !req.user.email_verified_at) {
+
+    // req.user is the PUBLIC view of an account -- it carries emailVerified but
+    // no address at all, because most routes have no business reading one. The
+    // full row is req.userRow. Reading req.user.email here made this check fail
+    // for everybody, since undefined is never truthy, and told the sender their
+    // own confirmed address was unconfirmed.
+    const owner = req.userRow;
+    if (!owner?.email || !owner.email_verified_at) {
       throw ApiError.badRequest('no_address', 'Confirm your own email address first.');
     }
 
@@ -172,7 +179,7 @@ router.post(
     enqueue([
       {
         userId: req.user.id,
-        address: req.user.email,
+        address: owner.email,
         subject: mail.subject,
         html: mail.html,
         text: mail.text,
@@ -183,7 +190,7 @@ router.post(
       },
     ]);
     drainQueue().catch(() => {});
-    res.json({ ok: true, to: req.user.email });
+    res.json({ ok: true, to: owner.email });
   })
 );
 
