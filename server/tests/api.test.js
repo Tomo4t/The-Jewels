@@ -1545,3 +1545,60 @@ describe('deleting your own account', () => {
     assert.equal(status, 401);
   });
 });
+
+/**
+ * These exist because a route once shipped missing while its service function
+ * was fully tested. Testing the function proves the logic; only asking the
+ * server proves the button is wired to anything.
+ */
+describe('the admin routes are actually mounted', () => {
+  const asAdmin = makeClient();
+  const asReader = makeClient();
+
+  before(async () => {
+    await asAdmin('/api/auth/login', {
+      method: 'POST',
+      body: json({ username: 'tomo', password: 'a-very-long-password' }),
+    });
+    await asReader('/api/auth/login', {
+      method: 'POST',
+      body: json({ username: 'reader', password: 'another-long-password' }),
+    });
+  });
+
+  test('every admin endpoint the panel calls answers something other than 404', async () => {
+    const endpoints = [
+      ['GET', '/api/admin/backups'],
+      ['POST', '/api/admin/push/keys'],
+      ['GET', '/api/admin/newsletters/'],
+      ['GET', '/api/admin/settings'],
+      ['GET', '/api/admin/users'],
+      ['GET', '/api/notify/'],
+    ];
+
+    const missing = [];
+    for (const [method, path] of endpoints) {
+      const { status } = await asAdmin(path, { method });
+      if (status === 404) missing.push(`${method} ${path}`);
+    }
+    assert.deepEqual(missing, [], 'these are called by the interface but not mounted');
+  });
+
+  test('setting up push is idempotent over HTTP, and never returns the private key', async () => {
+    const first = await asAdmin('/api/admin/push/keys', { method: 'POST' });
+    assert.equal(first.status, 200);
+    assert.ok(first.body.publicKey?.length > 20);
+    assert.equal('privateKey' in first.body, false, 'the private half must never be served');
+
+    // Pressing it again must hand back the same key. A new pair would silently
+    // invalidate every subscription a browser has already granted.
+    const second = await asAdmin('/api/admin/push/keys', { method: 'POST' });
+    assert.equal(second.body.created, false);
+    assert.equal(second.body.publicKey, first.body.publicKey);
+  });
+
+  test('a reader cannot set up push', async () => {
+    const { status } = await asReader('/api/admin/push/keys', { method: 'POST' });
+    assert.equal(status, 403);
+  });
+});

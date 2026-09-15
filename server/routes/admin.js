@@ -36,6 +36,7 @@ import {
   exchangeCode,
 } from '../services/drive.js';
 import { backupState, runBackup } from '../services/backup.js';
+import { ensureKeys, pushSummary } from '../services/push.js';
 
 const router = Router();
 
@@ -614,6 +615,18 @@ router.delete(
     driveDisconnect();
     audit(req.user.id, 'drive.disconnected', 'drive', null);
     res.json({ ok: true });
+  })
+);
+
+router.post(
+  '/push/keys',
+  requireRole('admin'),
+  asyncRoute(async (req, res) => {
+    // ensureKeys refuses to replace an existing pair, so this is safe to press
+    // twice: the second press returns the key already in use rather than
+    // quietly invalidating every subscription a browser has granted.
+    const result = ensureKeys(req.user.id);
+    res.json({ ...result, ...pushSummary() });
   })
 );
 
