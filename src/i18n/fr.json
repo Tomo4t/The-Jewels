@@ -70,7 +70,8 @@
     "focusMode": "Mode lecture",
     "exitFocus": "Quitter le mode lecture",
     "focusEntered": "Mode lecture activé. Appuyez sur Échap pour quitter.",
-    "focusLeft": "Mode lecture désactivé."
+    "focusLeft": "Mode lecture désactivé.",
+    "zoom": "Zoom"
   },
   "contact": {
     "title": "Tous les réseaux officiels du créateur"

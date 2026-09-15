@@ -77,5 +77,6 @@ export const KEYS = {
   theme: 'theme',
   sound: 'sound',
   readerMode: 'readerMode',
+  readerZoom: 'readerZoom',
   progress: (lang) => `lastRead-${lang}`,
 };

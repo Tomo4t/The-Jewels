@@ -70,7 +70,8 @@
     "focusMode": "集中モード",
     "exitFocus": "集中モードを終了",
     "focusEntered": "集中モードをオンにしました。Esc キーで終了します。",
-    "focusLeft": "集中モードをオフにしました。"
+    "focusLeft": "集中モードをオフにしました。",
+    "zoom": "表示の大きさ"
   },
   "contact": {
     "title": "作者の公式SNS一覧"

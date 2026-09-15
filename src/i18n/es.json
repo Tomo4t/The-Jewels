@@ -70,7 +70,8 @@
     "focusMode": "Modo enfoque",
     "exitFocus": "Salir del modo enfoque",
     "focusEntered": "Modo enfoque activado. Pulsa Esc para salir.",
-    "focusLeft": "Modo enfoque desactivado."
+    "focusLeft": "Modo enfoque desactivado.",
+    "zoom": "Zoom"
   },
   "contact": {
     "title": "Todas las redes oficiales del creador"

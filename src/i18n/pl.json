@@ -70,7 +70,8 @@
     "focusMode": "Tryb skupienia",
     "exitFocus": "Wyjdź z trybu skupienia",
     "focusEntered": "Tryb skupienia włączony. Naciśnij Esc, aby wyjść.",
-    "focusLeft": "Tryb skupienia wyłączony."
+    "focusLeft": "Tryb skupienia wyłączony.",
+    "zoom": "Powiększenie"
   },
   "contact": {
     "title": "Wszystkie oficjalne profile twórcy"

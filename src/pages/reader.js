@@ -22,6 +22,28 @@ import { mountComments } from '../components/comments.js';
 const MODES = ['flip', 'scroll', 'card'];
 const PRELOAD_RADIUS = 2;
 
+/**
+ * Focus mode sizes a page to the whole window, which is the right default and
+ * not always what somebody wants -- a full-height page on a 27" monitor is a
+ * lot of comic to hold in one eyeful. The slider scales it back down; 100 is
+ * the window, and there is nothing above it because past that the page would
+ * be bigger than the screen it has to fit in.
+ */
+const ZOOM_MIN = 50;
+const ZOOM_MAX = 100;
+
+function storedZoom() {
+  const value = Number(read(KEYS.readerZoom, ZOOM_MAX));
+  if (!Number.isFinite(value)) return ZOOM_MAX;
+  return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(value)));
+}
+
+function applyZoom(percent) {
+  // On the wrapper rather than on .book, so the pane, the sheets and the
+  // scrolling column all read the same number.
+  document.querySelector('.reader-wrapper')?.style.setProperty('--reader-zoom', percent / 100);
+}
+
 let state = null;
 
 export function title(params) {
@@ -94,6 +116,13 @@ export async function render(params) {
       <p class="page-indicator" id="page-indicator" aria-live="polite">
         ${escapeHTML(t('reader.pageOf', { current: startPage + 1, total }))}
       </p>
+
+      <div class="reader-zoom">
+        <input type="range" id="zoom-range" class="reader-zoom-range"
+               min="${ZOOM_MIN}" max="${ZOOM_MAX}" step="5" value="${storedZoom()}"
+               title="${escapeHTML(t('reader.zoom'))}"
+               aria-label="${escapeHTML(t('reader.zoom'))}">
+      </div>
     </div>
 
     <section class="comments-section" id="comments-section" aria-labelledby="comments-heading">
@@ -607,13 +636,35 @@ function bindToolbar() {
   });
 
   document.getElementById('focus-btn')?.addEventListener('click', () => setFocus(!inFocus()));
+
+  const zoom = document.getElementById('zoom-range');
+  if (zoom) {
+    applyZoom(Number(zoom.value));
+    zoom.addEventListener('input', () => {
+      const percent = Number(zoom.value);
+      applyZoom(percent);
+      write(KEYS.readerZoom, percent);
+    });
+  }
 }
 
 function bindInput() {
   const book = document.getElementById('book');
 
   const onKeydown = (event) => {
-    if (event.repeat || !state?.actions) return;
+    if (event.repeat) return;
+
+    // Escape is answered even while a control has focus. The zoom slider keeps
+    // focus after it is dragged, and Escape is the way out of focus mode --
+    // being stuck in it because the last thing you touched was a slider would
+    // be a poor trade.
+    if (event.key === 'Escape' && inFocus()) {
+      event.preventDefault();
+      setFocus(false);
+      return;
+    }
+
+    if (!state?.actions) return;
     const tag = document.activeElement?.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA') return;
 
@@ -629,14 +680,6 @@ function bindInput() {
     } else if (event.key === 'f' || event.key === 'F') {
       event.preventDefault();
       setFocus(!inFocus());
-    } else if (event.key === 'Escape' && inFocus()) {
-      // Real fullscreen answers Escape itself and reports back through
-      // fullscreenchange, which lands in the same place -- but when fullscreen
-      // was never granted, nothing else would let go of the screen. Handling it
-      // here either way costs nothing, because setFocus does nothing when it is
-      // asked for the state it is already in.
-      event.preventDefault();
-      setFocus(false);
     }
   };
 

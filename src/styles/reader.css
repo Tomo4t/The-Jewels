@@ -495,6 +495,72 @@ html.dark .mode-btn.active img {
   }
 }
 
+/* The zoom slider. It exists only in focus mode: on the site's own layout the
+   page is already sized to leave room for the bar, the footer and the comments,
+   so there is nothing for it to do there. */
+.reader-zoom {
+  display: none;
+}
+
+.reader-zoom-range {
+  /* A vertical range. writing-mode turns it, and direction: rtl puts the
+     largest value at the top, where "more" belongs. */
+  appearance: none;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 1.5rem;
+  height: 9rem;
+  margin: 0;
+  background: none;
+  cursor: pointer;
+}
+
+/* Track and thumb are drawn rather than left native, because this control can
+   end up over the artwork -- a scrolling column at full zoom reaches the edge
+   the slider sits on -- and a native track is a pale line that disappears on a
+   white page. The same answer as the arrows: a light shape with a dark edge,
+   which holds on either. Each engine's pseudo-element needs its own rule: one
+   it does not recognise in a selector list throws the whole rule away. */
+.reader-zoom-range::-webkit-slider-runnable-track {
+  width: 0.5rem;
+  border: 1px solid rgb(0 0 0 / 60%);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 55%);
+}
+
+.reader-zoom-range::-moz-range-track {
+  width: 0.5rem;
+  border: 1px solid rgb(0 0 0 / 60%);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 55%);
+}
+
+.reader-zoom-range::-webkit-slider-thumb {
+  /* Firefox centres its own thumb; WebKit does not, and the offset is half the
+     difference between the two widths. */
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  margin-left: calc((0.5rem - 1rem) / 2);
+  border: 1.5px solid rgb(0 0 0 / 75%);
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+.reader-zoom-range::-moz-range-thumb {
+  width: 1rem;
+  height: 1rem;
+  border: 1.5px solid rgb(0 0 0 / 75%);
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+.reader-zoom-range:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
 /* --- focus mode ----------------------------------------------------------
    Nothing on the screen but the pages. The class on <html> is what does the
    work; fullscreen is asked for on top of it and is allowed to fail. */
@@ -550,8 +616,10 @@ html.reading-focus .reader-wrapper {
    is set aside, nothing resizes when they come and go, and the page is free to
    be exactly as tall as the window. */
 html.reading-focus .book {
-  --page-h: 100svh;
-  --pane-w: 100vw;
+  /* --reader-zoom is set on the wrapper by the slider, and defaults to 1 so
+     the page fills the window when nobody has touched it. */
+  --page-h: calc(100svh * var(--reader-zoom, 1));
+  --pane-w: calc(100vw * var(--reader-zoom, 1));
 
   /* A stacking context around the comic, so nothing inside it can paint over
      the controls. Card mode gives the visible card z-index 3 to stack it above
@@ -572,11 +640,11 @@ html.reading-focus .book {
 html.reading-focus .card-page {
   top: 50%;
   translate: 0 -50%;
-  max-width: min(100vw, var(--page-w));
+  max-width: min(var(--pane-w), var(--page-w));
 }
 
 html.reading-focus .card-page img {
-  max-width: min(100vw, var(--page-w));
+  max-width: min(var(--pane-w), var(--page-w));
 }
 
 /* Scroll mode was a column one page wide and one page tall, so focus mode
@@ -585,7 +653,10 @@ html.reading-focus .card-page img {
    single page's height happens to imply: wider than the art it holds is just a
    softer version of the same page. */
 html.reading-focus .Wepcomic-inner {
-  max-width: min(100vw, 1100px);
+  /* The column narrows rather than the window shrinking: a narrower column is
+     smaller pages, which is more of the comic on screen at once -- which is
+     what zooming out of a scrolling comic means. */
+  max-width: calc(min(100vw, 1100px) * var(--reader-zoom, 1));
   height: 100svh;
 }
 
@@ -648,6 +719,21 @@ html.reading-focus .navbtns button {
   pointer-events: auto;
 }
 
+/* Big screens only, as asked -- and it is also the only place it makes sense.
+   A phone's page is bounded by the width of the screen rather than its height,
+   so there is no "too big" to back off from, and no room for the control
+   either. Bottom right, clear of the arrows at the vertical middle and of the
+   counter along the bottom. */
+@media (min-width: 1024px) and (min-height: 640px) {
+  html.reading-focus .reader-zoom {
+    position: absolute;
+    right: calc(var(--space-3) + env(safe-area-inset-right, 0px));
+    bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+    z-index: 2;
+    display: block;
+  }
+}
+
 /* The backdrop is near-black in BOTH themes, so whatever is left on it has to
    be light in both. The paging arrows carry no colour filter at all -- they are
    raw black SVG, which is right on the site's own pale backdrop and measures
@@ -672,7 +758,8 @@ html.reading-focus .navbtns img {
    controls come and go. */
 html.reading-focus .reader-toolbar,
 html.reading-focus .page-indicator,
-html.reading-focus .navbtns {
+html.reading-focus .navbtns,
+html.reading-focus .reader-zoom {
   transition: opacity 400ms ease;
 }
 
@@ -680,7 +767,8 @@ html.reading-focus .reader-wrapper.is-idle::before,
 html.reading-focus .reader-wrapper.is-idle::after,
 html.reading-focus .reader-wrapper.is-idle .reader-toolbar,
 html.reading-focus .reader-wrapper.is-idle .page-indicator,
-html.reading-focus .reader-wrapper.is-idle .navbtns {
+html.reading-focus .reader-wrapper.is-idle .navbtns,
+html.reading-focus .reader-wrapper.is-idle .reader-zoom {
   opacity: 0;
   pointer-events: none;
 }
@@ -690,7 +778,8 @@ html.reading-focus .reader-wrapper.is-idle .navbtns {
   html.reading-focus .reader-wrapper::after,
   html.reading-focus .reader-toolbar,
   html.reading-focus .page-indicator,
-  html.reading-focus .navbtns {
+  html.reading-focus .navbtns,
+  html.reading-focus .reader-zoom {
     transition: none;
   }
 }
