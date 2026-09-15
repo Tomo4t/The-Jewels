@@ -92,6 +92,24 @@ export const config = {
     // Reset links are far more dangerous than verification links if they leak
     // from an inbox, so they live for hours rather than days.
     resetTtlHours: int(process.env.PASSWORD_RESET_TTL_HOURS, 2),
+
+    // The provider's plan caps messages per day. Going over does not queue at
+    // their end, it fails the send -- so the queue here respects the cap and a
+    // subscriber list larger than it simply goes out over several days.
+    dailyLimit: int(process.env.MAIL_DAILY_LIMIT, 90),
+    batchSize: int(process.env.MAIL_BATCH_SIZE, 20),
+    sendSpacingMs: int(process.env.MAIL_SEND_SPACING_MS, 600),
+    drainEveryMs: int(process.env.MAIL_DRAIN_EVERY_MS, 5 * 60_000),
+    announceEveryMs: int(process.env.MAIL_ANNOUNCE_EVERY_MS, 5 * 60_000),
+  },
+
+  // Browser push. Both halves or nothing: the public key goes to the browser,
+  // the private one signs each message. They must stay put -- regenerating them
+  // silently invalidates every subscription anybody has already granted.
+  push: {
+    publicKey: (process.env.VAPID_PUBLIC_KEY || '').trim(),
+    privateKey: (process.env.VAPID_PRIVATE_KEY || '').trim(),
+    subject: (process.env.VAPID_SUBJECT || '').trim(),
   },
 
   // Google sign-in. Without both halves the button stays hidden and the routes

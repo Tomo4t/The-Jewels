@@ -16,7 +16,7 @@ const escapeHTML = (value) =>
  * on anything, so a provider outage must never turn into a failed sign-up. The
  * caller gets a boolean and decides what to tell the user.
  */
-async function send({ to, subject, html, text }) {
+async function send({ to, subject, html, text, headers }) {
   if (!mailEnabled()) return { sent: false, reason: 'not_configured' };
 
   const controller = new AbortController();
@@ -29,7 +29,7 @@ async function send({ to, subject, html, text }) {
         authorization: `Bearer ${config.mail.resendApiKey}`,
         'content-type': 'application/json',
       },
-      body: JSON.stringify({ from: config.mail.from, to: [to], subject, html, text }),
+      body: JSON.stringify({ from: config.mail.from, to: [to], subject, html, text, headers }),
       signal: controller.signal,
     });
 
@@ -45,6 +45,25 @@ async function send({ to, subject, html, text }) {
   } finally {
     clearTimeout(timer);
   }
+}
+
+/**
+ * Sends a row straight off the queue.
+ *
+ * The List-Unsubscribe headers are not decoration: Gmail and Outlook put a
+ * one-click unsubscribe button in their own interface when they see them, and
+ * a reader who can leave in one click is a reader who does not press "spam"
+ * instead -- which is what actually decides whether the next message reaches
+ * anybody's inbox.
+ */
+export async function sendQueued({ address, subject, html, text, unsubscribeUrl }) {
+  const headers = unsubscribeUrl
+    ? {
+        'List-Unsubscribe': `<${unsubscribeUrl}>`,
+        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+      }
+    : undefined;
+  return send({ to: address, subject, html, text, headers });
 }
 
 /** The one message the site sends. Plain text mirrors the HTML exactly. */

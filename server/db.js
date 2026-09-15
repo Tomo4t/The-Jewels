@@ -27,6 +27,64 @@ CREATE TABLE IF NOT EXISTS users (
   last_seen_at   TEXT
 );
 
+-- Outbound mail waits here rather than going out inside a request.
+-- The provider's plan caps how many messages a day it will take, so a send to
+-- every subscriber is drained over time by a worker; and because the queue is
+-- on disk, a container that restarts halfway through resumes instead of either
+-- stopping silently or starting the whole send again.
+CREATE TABLE IF NOT EXISTS mail_queue (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id     INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  address     TEXT    NOT NULL,
+  subject     TEXT    NOT NULL,
+  html        TEXT    NOT NULL,
+  text        TEXT    NOT NULL,
+  kind        TEXT    NOT NULL,
+  dedupe_key  TEXT    UNIQUE,
+  status      TEXT    NOT NULL DEFAULT 'queued'
+                      CHECK (status IN ('queued', 'sent', 'failed', 'skipped')),
+  attempts    INTEGER NOT NULL DEFAULT 0,
+  created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
+  sent_at     TEXT,
+  error       TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_mail_queue_pending ON mail_queue(status, id);
+
+-- A chapter does not "become released"; releaseAt simply passes and every
+-- later read reports it as out. There is no event to hang an announcement on,
+-- so one is recorded here the first time a chapter is seen to be out, and the
+-- primary key is what stops a rescheduled chapter mailing everybody twice.
+CREATE TABLE IF NOT EXISTS announcements (
+  lang         TEXT    NOT NULL,
+  chapter      INTEGER NOT NULL,
+  announced_at TEXT    NOT NULL DEFAULT (datetime('now')),
+  recipients   INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (lang, chapter)
+);
+
+CREATE TABLE IF NOT EXISTS newsletters (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  subject    TEXT    NOT NULL DEFAULT '',
+  blocks     TEXT    NOT NULL DEFAULT '[]',
+  status     TEXT    NOT NULL DEFAULT 'draft'
+                     CHECK (status IN ('draft', 'sending', 'sent')),
+  created_at TEXT    NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT    NOT NULL DEFAULT (datetime('now')),
+  sent_at    TEXT,
+  recipients INTEGER NOT NULL DEFAULT 0,
+  created_by INTEGER REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  endpoint   TEXT    PRIMARY KEY,
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  p256dh     TEXT    NOT NULL,
+  auth       TEXT    NOT NULL,
+  created_at TEXT    NOT NULL DEFAULT (datetime('now')),
+  failures   INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_push_user ON push_subscriptions(user_id);
+
 CREATE TABLE IF NOT EXISTS app_secrets (
   key        TEXT PRIMARY KEY,
   value      TEXT NOT NULL,
@@ -183,6 +241,10 @@ CREATE TABLE IF NOT EXISTS oauth_states (
 // it, so rows need to say which they are; everything already stored is a
 // verification link.
 addColumn('email_tokens', 'purpose', "TEXT NOT NULL DEFAULT 'verify'");
+// Opting in is a deliberate act, so both default to off: an account that never
+// asked for mail must never receive any.
+addColumn('users', 'newsletter_opt_in', 'INTEGER NOT NULL DEFAULT 0');
+addColumn('users', 'release_opt_in', 'INTEGER NOT NULL DEFAULT 0');
 
 /** Remove expired sessions. Cheap enough to run on boot and on a timer. */
 export function pruneSessions() {

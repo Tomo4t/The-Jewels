@@ -1,6 +1,7 @@
 import config from './config.js';
 import app, { frontendIsBuilt } from './app.js';
 import { startBackupSchedule } from './services/backup.js';
+import { startMailWorker } from './services/mailer.js';
 
 const server = app.listen(config.port, () => {
   console.log(`The Jewels listening on http://localhost:${config.port}`);
@@ -14,9 +15,11 @@ const server = app.listen(config.port, () => {
 });
 
 const stopBackups = startBackupSchedule();
+const stopMail = startMailWorker();
 
 const shutdown = (signal) => () => {
   stopBackups();
+  stopMail();
   console.log(`\n${signal} received, shutting down.`);
   server.close(() => process.exit(0));
   setTimeout(() => process.exit(1), 10_000).unref();
