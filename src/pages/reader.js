@@ -119,7 +119,7 @@ export async function render(params) {
 
       <div class="reader-zoom">
         <input type="range" id="zoom-range" class="reader-zoom-range"
-               min="${ZOOM_MIN}" max="${ZOOM_MAX}" step="5" value="${storedZoom()}"
+               min="${ZOOM_MIN}" max="${ZOOM_MAX}" step="1" value="${storedZoom()}"
                title="${escapeHTML(t('reader.zoom'))}"
                aria-label="${escapeHTML(t('reader.zoom'))}">
       </div>
@@ -640,11 +640,10 @@ function bindToolbar() {
   const zoom = document.getElementById('zoom-range');
   if (zoom) {
     applyZoom(Number(zoom.value));
-    zoom.addEventListener('input', () => {
-      const percent = Number(zoom.value);
-      applyZoom(percent);
-      write(KEYS.readerZoom, percent);
-    });
+    // Resize on input so the comic tracks the thumb, but save on change --
+    // which fires once when the drag ends, rather than on every pixel of it.
+    zoom.addEventListener('input', () => applyZoom(Number(zoom.value)));
+    zoom.addEventListener('change', () => write(KEYS.readerZoom, Number(zoom.value)));
   }
 }
 
