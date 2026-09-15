@@ -648,18 +648,6 @@ html.reading-focus .navbtns button {
   pointer-events: auto;
 }
 
-/* A disc behind each arrow for the same reason as the wash above. 70% rather
-   than 45%: over a white page the lighter disc left the arrow at 2.2:1 against
-   its own backing, under the 3:1 a control needs. This lands at 5.6:1 there,
-   and the arrows were already around 12:1 on the dark backdrop. */
-html.reading-focus .navbtnL,
-html.reading-focus .navbtnR {
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background: rgb(0 0 0 / 70%);
-}
-
 /* The backdrop is near-black in BOTH themes, so whatever is left on it has to
    be light in both. The paging arrows carry no colour filter at all -- they are
    raw black SVG, which is right on the site's own pale backdrop and measures
@@ -669,8 +657,15 @@ html.reading-focus .page-indicator {
   color: var(--color-focus-ink);
 }
 
+/* A white arrow with a black edge, drawn the way a mouse cursor is drawn --
+   which is exactly why a cursor stays readable over anything, and the arrows
+   have the cursor's problem now that the page reaches the screen edges.
+   Four offset shadows chained on the end of the filter: each applies to the
+   result of the one before, so they build an edge all the way round instead of
+   four separate shadows. */
 html.reading-focus .navbtns img {
-  filter: brightness(0) invert(0.82);
+  filter: brightness(0) invert(1) drop-shadow(1.5px 0 0 #000) drop-shadow(-1.5px 0 0 #000)
+    drop-shadow(0 1.5px 0 #000) drop-shadow(0 -1.5px 0 #000);
 }
 
 /* Faded rather than removed, so the page does not resize every time the
