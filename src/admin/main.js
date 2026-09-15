@@ -1554,8 +1554,17 @@ async function renderNewsletter(panel) {
       <div class="news-preview">
         <h3>${escapeHTML(t('admin.news.preview'))}</h3>
         <div class="news-preview-shell" id="news-preview-shell">
+          <!--
+            allow-same-origin, and nothing else. A bare sandbox="" gives the
+            frame an opaque origin, and this page's CSP allows images from
+            'self' -- which an opaque origin can never match, so every image in
+            the preview came out broken while the real email was fine. The
+            preview lying about the email is worse than having no preview.
+            Scripts stay off: allow-scripts is what would make this dangerous,
+            and it is not here.
+          -->
           <iframe id="news-preview-frame" title="${escapeHTML(t('admin.news.preview'))}"
-                  sandbox=""></iframe>
+                  sandbox="allow-same-origin"></iframe>
         </div>
       </div>`;
 

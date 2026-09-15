@@ -38,7 +38,10 @@ app.use(
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
         fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
-        imgSrc: ["'self'", 'data:', 'blob:'],
+        // i.ytimg.com is for the newsletter preview only: a video block sends
+        // the real YouTube thumbnail, and the preview has to show what the
+        // email will show.
+        imgSrc: ["'self'", 'data:', 'blob:', 'https://i.ytimg.com'],
         mediaSrc: ["'self'"],
         connectSrc: ["'self'"],
         objectSrc: ["'none'"],

@@ -127,3 +127,33 @@ test('no handler reads event.currentTarget after awaiting', () => {
   }
   assert.deepEqual(offenders, []);
 });
+
+test('the newsletter preview can actually show its images', () => {
+  // A fully sandboxed iframe gets an opaque origin, and an opaque origin never
+  // matches img-src 'self' -- so every image in the preview was blocked while
+  // the email itself was fine. allow-same-origin fixes that; allow-scripts is
+  // the one that must never be added beside it.
+  const source = fs.readFileSync(path.join(root, 'src/admin/main.js'), 'utf8');
+  const frame = source.match(/<iframe id="news-preview-frame"[^>]*>/s);
+  assert.ok(frame, 'the preview iframe is gone');
+  const sandbox = frame[0].match(/sandbox="([^"]*)"/);
+  assert.ok(sandbox, 'the preview iframe must stay sandboxed');
+  assert.ok(
+    sandbox[1].includes('allow-same-origin'),
+    'images would be blocked without allow-same-origin'
+  );
+  assert.ok(
+    !sandbox[1].includes('allow-scripts'),
+    'the preview must never be allowed to run scripts'
+  );
+});
+
+test('the newsletter preview can show a YouTube thumbnail', () => {
+  const csp = fs.readFileSync(path.join(root, 'server/app.js'), 'utf8');
+  const imgSrc = csp.match(/imgSrc: \[([^\]]*)\]/);
+  assert.ok(imgSrc, 'imgSrc directive is gone');
+  assert.ok(
+    imgSrc[1].includes('i.ytimg.com'),
+    'a video block sends a real thumbnail, so the preview needs it'
+  );
+});
