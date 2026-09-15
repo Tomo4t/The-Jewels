@@ -719,6 +719,17 @@ html.reading-focus .navbtns button {
   pointer-events: auto;
 }
 
+/* No paging arrows in focus mode without a mouse. A swipe turns the page, and
+   so does a tap on the half of the page you want to move towards -- so on a
+   phone the arrows are two things sitting on the artwork to do what the
+   artwork already does. The toolbar stays: it is the only way back out, and
+   there is no Escape key to fall back on. */
+@media (hover: none) {
+  html.reading-focus .navbtns {
+    display: none;
+  }
+}
+
 /* Big screens only, as asked -- and it is also the only place it makes sense.
    A phone's page is bounded by the width of the screen rather than its height,
    so there is no "too big" to back off from, and no room for the control
