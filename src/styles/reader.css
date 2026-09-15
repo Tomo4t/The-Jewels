@@ -542,26 +542,96 @@ html.reading-focus .reader-wrapper {
   padding: 0;
 }
 
-/* The chrome left in focus mode is the button row, the counter and the two
-   arrows -- roughly 190px, against the 320px the normal layout has to reserve.
-   The page takes the difference. */
+/* The whole window, and nothing held back.
+   The controls used to sit in the column above and below the comic, so about
+   190px of screen stayed reserved for them -- and reserved is reserved whether
+   or not anything is drawn there, so the page shrank to make room for controls
+   that were faded out most of the time. They float over the pages now. Nothing
+   is set aside, nothing resizes when they come and go, and the page is free to
+   be exactly as tall as the window. */
 html.reading-focus .book {
-  --page-h: clamp(300px, calc(100svh - 190px), 1200px);
+  --page-h: 100svh;
+  --pane-w: 100vw;
 
   padding-top: 0;
 }
 
-html.reading-focus .reader-toolbar {
-  padding: var(--space-3) var(--space-3) var(--space-2);
+/* Scroll mode was a column one page wide and one page tall, so focus mode
+   showed one page and could not show more. It takes the full height here. Its
+   width stops at the artwork's own 1080px rather than at whatever width a
+   single page's height happens to imply: wider than the art it holds is just a
+   softer version of the same page. */
+html.reading-focus .Wepcomic-inner {
+  max-width: min(100vw, 1100px);
+  height: 100svh;
 }
 
-/* The arrows are spaced by `max-width: 20%` against auto margins, which works
-   on a block but not here: an auto margin in a flex column shrinks the item to
-   its content, and the two arrows ended up touching in the middle. An explicit
-   width puts the gap back without depending on the parent's display. */
+/* A wash at the top and bottom, because a page can be any colour at its edge
+   and a white-filtered control on a white panel is not a control. It fades with
+   the controls it exists for. */
+html.reading-focus .reader-wrapper::before,
+html.reading-focus .reader-wrapper::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  z-index: 1;
+  height: 6rem;
+  pointer-events: none;
+  transition: opacity 400ms ease;
+}
+
+html.reading-focus .reader-wrapper::before {
+  top: 0;
+  background: linear-gradient(to bottom, rgb(0 0 0 / 55%), rgb(0 0 0 / 0%));
+}
+
+html.reading-focus .reader-wrapper::after {
+  bottom: 0;
+  background: linear-gradient(to top, rgb(0 0 0 / 55%), rgb(0 0 0 / 0%));
+}
+
+html.reading-focus .reader-toolbar {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 2;
+  padding: calc(var(--space-3) + env(safe-area-inset-top, 0px)) var(--space-3) var(--space-3);
+}
+
+html.reading-focus .page-indicator {
+  position: absolute;
+  inset-inline: 0;
+  bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+  z-index: 2;
+  margin: 0;
+}
+
+/* The arrows move out to the left and right edges. Centred under the page they
+   would now be sitting on the artwork, which is the one thing focus mode is
+   for. The row spans the pane and lets clicks through everywhere except on the
+   buttons themselves. */
 html.reading-focus .navbtns {
-  width: min(22rem, 45vw);
+  position: absolute;
+  inset: 0 calc(var(--space-3) + env(safe-area-inset-right, 0px)) 0
+    calc(var(--space-3) + env(safe-area-inset-left, 0px));
+  z-index: 2;
+  width: auto;
   max-width: none;
+  align-items: center;
+  padding: 0;
+  pointer-events: none;
+}
+
+html.reading-focus .navbtns button {
+  pointer-events: auto;
+}
+
+/* A disc behind each arrow for the same reason as the wash above. */
+html.reading-focus .navbtnL,
+html.reading-focus .navbtnR {
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 45%);
 }
 
 /* The backdrop is near-black in BOTH themes, so whatever is left on it has to
@@ -585,6 +655,8 @@ html.reading-focus .navbtns {
   transition: opacity 400ms ease;
 }
 
+html.reading-focus .reader-wrapper.is-idle::before,
+html.reading-focus .reader-wrapper.is-idle::after,
 html.reading-focus .reader-wrapper.is-idle .reader-toolbar,
 html.reading-focus .reader-wrapper.is-idle .page-indicator,
 html.reading-focus .reader-wrapper.is-idle .navbtns {
@@ -593,17 +665,11 @@ html.reading-focus .reader-wrapper.is-idle .navbtns {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html.reading-focus .reader-wrapper::before,
+  html.reading-focus .reader-wrapper::after,
   html.reading-focus .reader-toolbar,
   html.reading-focus .page-indicator,
   html.reading-focus .navbtns {
     transition: none;
-  }
-}
-
-/* The phone rule below reserves 200px for a bar and a footer that focus mode
-   has already taken away. */
-@media (max-width: 640px) {
-  html.reading-focus .Wepcomic-inner {
-    --scroll-h: min(calc(100vw * 3 / 2), calc(100svh - 150px));
   }
 }
