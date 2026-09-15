@@ -251,6 +251,7 @@ export const api = {
     data.append('image', file);
     return request('/api/admin/newsletters/image', { method: 'POST', body: data });
   },
+  adminSetupPush: () => request('/api/admin/push/keys', { method: 'POST' }),
   adminBackups: () => request('/api/admin/backups'),
   adminRunBackup: () => request('/api/admin/backups', { method: 'POST' }),
   adminDriveConnect: () => request('/api/admin/drive/connect'),

@@ -295,6 +295,13 @@
       "buttonLink": "Button link",
       "whichChapter": "Which chapter",
       "dividerHint": "A line across the page."
+    },
+    "push": {
+      "title": "Push notifications",
+      "ready": "Ready. {devices} device(s) subscribed.",
+      "notReady": "Not set up yet. This makes the keys the browsers need; it only has to be done once.",
+      "setUp": "Set up push notifications",
+      "done": "Push notifications are ready."
     }
   },
   "errors": {

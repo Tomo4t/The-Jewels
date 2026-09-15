@@ -1,6 +1,7 @@
 import webpush from 'web-push';
 import db, { audit } from '../db.js';
 import config from '../config.js';
+import { getSecret, setSecret } from './secrets.js';
 
 /**
  * Browser push.
@@ -17,16 +18,56 @@ import config from '../config.js';
  * environment rather than being generated on boot.
  */
 
-export const pushConfigured = () => Boolean(config.push.publicKey && config.push.privateKey);
+const PUBLIC_KEY = 'push.vapid_public';
+const PRIVATE_KEY = 'push.vapid_private';
+
+/**
+ * The keys, from the database first and the environment second.
+ *
+ * Generating them from the admin panel means nobody has to carry a private key
+ * between a terminal and a hosting console by hand -- the same reasoning as the
+ * Drive connection. The environment stays as a fallback, so an operator who
+ * would rather manage them that way still can.
+ */
+const keys = () => ({
+  publicKey: getSecret(PUBLIC_KEY) || config.push.publicKey,
+  privateKey: getSecret(PRIVATE_KEY) || config.push.privateKey,
+});
+
+export const pushConfigured = () => {
+  const { publicKey, privateKey } = keys();
+  return Boolean(publicKey && privateKey);
+};
+
+/**
+ * Makes a pair, once.
+ *
+ * Deliberately refuses to replace an existing pair. The public half is baked
+ * into every subscription a browser has already granted, so regenerating would
+ * silently kill all of them -- readers would stay switched on and simply stop
+ * receiving anything, which is the worst way for this to fail.
+ */
+export function ensureKeys(actorId = null) {
+  if (pushConfigured()) return { created: false, publicKey: keys().publicKey };
+
+  const pair = webpush.generateVAPIDKeys();
+  setSecret(PUBLIC_KEY, pair.publicKey, actorId);
+  setSecret(PRIVATE_KEY, pair.privateKey, actorId);
+  ready = false;
+  audit(actorId, 'push.keys_created', 'push', null);
+  return { created: true, publicKey: pair.publicKey };
+}
 
 let ready = false;
 
 function configure() {
-  if (ready || !pushConfigured()) return pushConfigured();
+  if (ready) return true;
+  const { publicKey, privateKey } = keys();
+  if (!publicKey || !privateKey) return false;
   webpush.setVapidDetails(
     config.push.subject || `mailto:noreply@${new URL(config.publicOrigin).hostname}`,
-    config.push.publicKey,
-    config.push.privateKey
+    publicKey,
+    privateKey
   );
   ready = true;
   return true;
@@ -111,6 +152,6 @@ export async function pushToUser(userId, payload) {
 
 export const pushSummary = () => ({
   configured: pushConfigured(),
-  publicKey: config.push.publicKey || null,
+  publicKey: keys().publicKey || null,
   devices: db.prepare('SELECT COUNT(*) AS n FROM push_subscriptions').get().n,
 });

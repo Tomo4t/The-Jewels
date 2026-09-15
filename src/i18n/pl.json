@@ -295,6 +295,13 @@
       "buttonLink": "Link przycisku",
       "whichChapter": "Który rozdział",
       "dividerHint": "Linia w poprzek strony."
+    },
+    "push": {
+      "title": "Powiadomienia push",
+      "ready": "Gotowe. Subskrybuje {devices} urządzeń.",
+      "notReady": "Jeszcze nieskonfigurowane. To utworzy klucze potrzebne przeglądarkom — tylko raz.",
+      "setUp": "Skonfiguruj powiadomienia push",
+      "done": "Powiadomienia push są gotowe."
     }
   },
   "errors": {

@@ -196,3 +196,34 @@ test('a button with no usable link renders nothing rather than a dead one', () =
     /Read/
   );
 });
+
+test('push keys are made once and never silently replaced', async () => {
+  const { ensureKeys, pushConfigured, pushSummary } = await import('../services/push.js');
+
+  assert.equal(pushConfigured(), false, 'nothing is configured to begin with');
+
+  const first = ensureKeys(1);
+  assert.equal(first.created, true);
+  assert.ok(first.publicKey?.length > 20, 'a real key came back');
+  assert.equal(pushConfigured(), true);
+
+  // The public half is baked into every subscription a browser has already
+  // granted. Replacing it would leave readers switched on and receiving
+  // nothing at all -- so asking again must be a no-op, not a new pair.
+  const second = ensureKeys(1);
+  assert.equal(second.created, false, 'a second call must not make new keys');
+  assert.equal(second.publicKey, first.publicKey, 'the key is unchanged');
+  assert.equal(pushSummary().publicKey, first.publicKey);
+});
+
+test('the private half is never handed to a client', async () => {
+  const { pushSummary } = await import('../services/push.js');
+  const summary = pushSummary();
+  assert.ok('publicKey' in summary);
+  assert.ok(!('privateKey' in summary), 'the private key must not be in anything serialised');
+  assert.equal(
+    JSON.stringify(summary).includes('private'),
+    false,
+    'nothing resembling the private key leaves the server'
+  );
+});

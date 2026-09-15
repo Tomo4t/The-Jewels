@@ -962,9 +962,11 @@ async function renderSettings(panel) {
         <span class="setting-saved" id="settings-saved" hidden>${escapeHTML(t('admin.settings.saved'))}</span>
       </div>
     </section>
+    <section class="admin-section" id="push-section"></section>
     <section class="admin-section" id="backups-section"></section>
   `;
 
+  renderPushSetup(panel.querySelector('#push-section'));
   renderBackups(panel.querySelector('#backups-section'));
 
   // Saved in one go rather than on every keystroke: a banned-words list is
@@ -1015,6 +1017,51 @@ const bytes = (n) => {
   }
   return `${value < 10 && unit > 0 ? value.toFixed(1) : Math.round(value)} ${units[unit]}`;
 };
+
+/**
+ * Push setup.
+ *
+ * The keys are made here rather than by hand, so no private key has to travel
+ * through a terminal and a hosting console. There is no "regenerate" button on
+ * purpose: the public half is baked into every subscription already granted,
+ * and replacing it would leave readers switched on and silently receiving
+ * nothing.
+ */
+async function renderPushSetup(host) {
+  const draw = (state) => {
+    host.innerHTML = `
+      <div class="setting-group">
+        <h3>${escapeHTML(t('admin.push.title'))}</h3>
+        ${
+          state.configured
+            ? `<p class="backup-state">${escapeHTML(
+                t('admin.push.ready', { devices: state.devices })
+              )}</p>`
+            : `<p class="backup-state is-warn">${escapeHTML(t('admin.push.notReady'))}</p>
+               <button type="button" class="button button--primary" data-setup-push>
+                 ${escapeHTML(t('admin.push.setUp'))}
+               </button>`
+        }
+      </div>`;
+
+    host.querySelector('[data-setup-push]')?.addEventListener('click', async (event) => {
+      event.currentTarget.disabled = true;
+      try {
+        draw(await api.adminSetupPush());
+        toastSuccess(t('admin.push.done'));
+      } catch (err) {
+        fail(err);
+        event.currentTarget.disabled = false;
+      }
+    });
+  };
+
+  try {
+    draw((await api.adminBackups()).push || { configured: false, devices: 0 });
+  } catch {
+    host.innerHTML = '';
+  }
+}
 
 async function renderBackups(host) {
   const draw = (state) => {

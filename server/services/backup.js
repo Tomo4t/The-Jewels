@@ -5,6 +5,7 @@ import db from '../db.js';
 import config from '../config.js';
 import { writeArchive, walk } from './archive.js';
 import * as drive from './drive.js';
+import { pushSummary } from './push.js';
 
 /**
  * A weekly copy of everything that cannot be rebuilt from the repository: the
@@ -185,5 +186,6 @@ export const backupState = async () => {
     lastSuccess: lastSuccess()?.at || null,
     due: connected ? backupDue() : false,
     history: recentBackups(),
+    push: pushSummary(),
   };
 };

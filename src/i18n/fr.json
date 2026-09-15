@@ -295,6 +295,13 @@
       "buttonLink": "Lien du bouton",
       "whichChapter": "Quel chapitre",
       "dividerHint": "Une ligne en travers de la page."
+    },
+    "push": {
+      "title": "Notifications push",
+      "ready": "Prêt. {devices} appareil(s) abonné(s).",
+      "notReady": "Pas encore configuré. Ceci crée les clés dont les navigateurs ont besoin ; une seule fois.",
+      "setUp": "Configurer les notifications push",
+      "done": "Les notifications push sont prêtes."
     }
   },
   "errors": {
