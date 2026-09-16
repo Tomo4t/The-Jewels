@@ -767,3 +767,302 @@ footer a:hover {
   color: var(--color-title-text);
   opacity: 0.85;
 }
+
+/* --- the phone drawer ----------------------------------------------------
+   Eight icons and a title do not fit on a phone: the bar was down to 20px
+   icons at 360px wide, and an icon that small with no label is a guess. On a
+   phone the bar keeps chapters and the account -- the two things people came
+   to do -- and the rest moves in here, where there is room to write down what
+   each thing is. At desktop widths none of this exists. */
+
+.nav-burger {
+  display: none;
+}
+
+.nav-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1002;
+  background: rgb(0 0 0 / 45%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 240ms ease;
+}
+
+html.drawer-open .nav-scrim {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Full height, because the bar scrolls away with the page rather than sticking
+   -- a drawer hung underneath it would start sixty pixels down from nothing as
+   soon as the page had moved. Covering the bar means covering the burger, so
+   the drawer carries its own way out at the top. */
+.nav-drawer {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 1003;
+  display: flex;
+  flex-direction: column;
+  width: min(19rem, 82vw);
+  padding: calc(var(--space-3) + env(safe-area-inset-top, 0px)) var(--space-3)
+    calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--color-surface-raised);
+  border-right: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  transform: translateX(-100%);
+  visibility: hidden;
+  transition:
+    transform 240ms ease,
+    visibility 0s linear 240ms;
+}
+
+html.drawer-open .nav-drawer {
+  transform: none;
+  visibility: visible;
+  transition: transform 240ms ease;
+}
+
+html.drawer-open {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-drawer,
+  .nav-scrim {
+    transition: none;
+  }
+}
+
+.drawer-head {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.drawer-close {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.drawer-close:hover {
+  border-color: var(--color-accent);
+}
+
+/* An X drawn from two lines rather than a glyph, so it is the same shape in
+   every font the site might fall back to. */
+.drawer-close span {
+  position: relative;
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.drawer-close span::before,
+.drawer-close span::after {
+  content: '';
+  position: absolute;
+  inset: 50% 0 auto;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+}
+
+.drawer-close span::before {
+  rotate: 45deg;
+}
+
+.drawer-close span::after {
+  rotate: -45deg;
+}
+
+/* The site's own mark, borrowed as a divider: a line that fades out at both
+   ends with a gold stone set in the middle. */
+.drawer-rule {
+  position: relative;
+  height: 1px;
+  margin: var(--space-4) var(--space-2);
+  background: linear-gradient(to right, transparent, var(--color-border), transparent);
+}
+
+.drawer-rule::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.4rem;
+  height: 0.4rem;
+  background: var(--color-accent);
+  rotate: 45deg;
+  translate: -50% -50%;
+}
+
+.drawer-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.drawer-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.drawer-row:hover {
+  border-color: var(--color-accent);
+}
+
+.drawer-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: var(--color-bg);
+}
+
+.drawer-icon img {
+  width: 1.15rem;
+  height: 1.15rem;
+  filter: var(--color-icon);
+}
+
+.drawer-label {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.drawer-value {
+  flex: 0 0 auto;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+/* Only on rows that go somewhere. A settings row shows what it is set to and
+   changes in place, and a chevron there would promise a page that is not
+   there. */
+.drawer-chevron {
+  flex: 0 0 auto;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  rotate: 45deg;
+  opacity: 0.45;
+}
+
+#drawer-language[aria-expanded='true'] .drawer-chevron {
+  rotate: 135deg;
+}
+
+/* Where they left off, and the only row worth opening the menu for. */
+.drawer-row--feature {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+}
+
+.drawer-row--feature .drawer-icon {
+  background: rgb(255 255 255 / 45%);
+}
+
+.drawer-row--feature .drawer-icon img {
+  filter: brightness(0) invert(0.08);
+}
+
+.drawer-eyebrow {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.drawer-strong {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.drawer-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: var(--space-1) 0 0;
+  padding: 0 0 0 3.1rem;
+  list-style: none;
+}
+
+.drawer-sub li {
+  list-style: none;
+}
+
+.drawer-sub-option {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.drawer-sub-option:hover {
+  color: var(--color-text);
+}
+
+.drawer-sub-option[aria-current='true'] {
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+@media (max-width: 600px) {
+  .nav-burger {
+    display: flex;
+  }
+
+  .nav-collapses {
+    display: none;
+  }
+}
+
+/* There is room for the whole bar here, so hiding it behind a tap would be
+   hiding things for no reason. */
+@media (min-width: 601px) {
+  .nav-drawer,
+  .nav-scrim {
+    display: none;
+  }
+}

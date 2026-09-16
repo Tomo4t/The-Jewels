@@ -21,7 +21,14 @@
     "admin": "Admin panel",
     "skipToContent": "Skip to content",
     "fanart": "Fan art",
-    "profile": "Profile"
+    "profile": "Profile",
+    "menu": "Menu",
+    "themeName": "Theme",
+    "soundName": "Sound",
+    "light": "Light",
+    "dark": "Dark",
+    "on": "On",
+    "off": "Off"
   },
   "common": {
     "loading": "Loading…",

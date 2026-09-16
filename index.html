@@ -61,8 +61,21 @@
 
     <header class="navbar">
       <div class="nav-left">
+        <!-- Phone only. Everything it opens is still on the bar at desktop
+             widths, where there is room for it. -->
+        <button
+          type="button"
+          class="icon-btn nav-burger"
+          id="nav-burger"
+          aria-expanded="false"
+          aria-controls="nav-drawer"
+          data-sound="click"
+          data-i18n-attr="title:nav.menu aria-label:nav.menu"
+        >
+          <img src="/images/menu.svg" alt="" aria-hidden="true" />
+        </button>
         <a
-          class="icon-btn"
+          class="icon-btn nav-collapses"
           href="#home"
           data-sound="ui"
           data-i18n-attr="title:nav.home aria-label:nav.home"
@@ -78,7 +91,7 @@
           <img src="/images/chapters.svg" alt="" aria-hidden="true" />
         </a>
         <a
-          class="icon-btn"
+          class="icon-btn nav-collapses"
           href="#contact"
           data-sound="ui"
           data-i18n-attr="title:nav.contact aria-label:nav.contact"
@@ -86,7 +99,7 @@
           <img src="/images/contact.svg" alt="" aria-hidden="true" />
         </a>
         <a
-          class="icon-btn"
+          class="icon-btn nav-collapses"
           href="#fanart"
           data-sound="ui"
           data-i18n-attr="title:nav.fanart aria-label:nav.fanart"
@@ -112,7 +125,7 @@
             <img src="/images/account.svg" alt="" aria-hidden="true" />
           </a>
 
-          <div class="dropdown" id="language-dropdown">
+          <div class="dropdown nav-collapses" id="language-dropdown">
             <button
               type="button"
               class="icon-btn"
@@ -130,7 +143,7 @@
 
           <button
             type="button"
-            class="icon-btn"
+            class="icon-btn nav-collapses"
             id="theme-toggle"
             data-sound="click"
             aria-pressed="false"
@@ -162,7 +175,7 @@
 
           <button
             type="button"
-            class="icon-btn"
+            class="icon-btn nav-collapses"
             id="sound-toggle"
             aria-pressed="true"
             data-i18n-attr="title:nav.sound aria-label:nav.sound"
@@ -175,6 +188,16 @@
         </div>
       </div>
     </header>
+
+    <!-- Filled in and bound by src/components/navbar.js, so the rows and their
+         labels come from one place rather than being kept in step by hand. -->
+    <div class="nav-scrim" id="nav-scrim"></div>
+    <nav
+      class="nav-drawer"
+      id="nav-drawer"
+      aria-label="Menu"
+      data-i18n-attr="aria-label:nav.menu"
+    ></nav>
 
     <main id="page-content" tabindex="-1"></main>
 

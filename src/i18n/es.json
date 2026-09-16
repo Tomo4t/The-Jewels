@@ -21,7 +21,14 @@
     "admin": "Panel de administración",
     "skipToContent": "Saltar al contenido",
     "fanart": "Fan art",
-    "profile": "Perfil"
+    "profile": "Perfil",
+    "menu": "Menú",
+    "themeName": "Tema",
+    "soundName": "Sonido",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "on": "Activado",
+    "off": "Desactivado"
   },
   "common": {
     "loading": "Cargando…",
