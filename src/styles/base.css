@@ -105,7 +105,7 @@ h3 {
 .skip-link {
   position: absolute;
   top: -100px;
-  left: var(--space-4);
+  inset-inline-start: var(--space-4);
   z-index: 1000;
   padding: var(--space-2) var(--space-4);
   background: var(--color-surface-raised);
@@ -427,4 +427,37 @@ h3 {
   #particle-canvas {
     display: none;
   }
+}
+
+/* ===========================================================================
+   Right to left
+   ===========================================================================
+   The layout itself needs almost nothing here: the direction-dependent rules
+   across the site are written as logical properties, so `dir` on <html> --
+   which i18n.js sets from each bundle's meta.dir -- flips margins, padding,
+   borders and flex rows on its own.
+
+   What logical properties cannot flip is a shape. An arrow is a picture of a
+   direction, and a chevron drawn out of two borders is the same. Those read as
+   backwards in a right-to-left page unless they are mirrored, so the three
+   custom properties below do it in one place rather than by restating every
+   hover and active state. */
+
+[dir='rtl'] {
+  --chevron-flip: -1;
+  --drawer-side: -1;
+  --arrow-back: 1;
+  --arrow-forward: -1;
+}
+
+/* Latin runs inside Arabic text -- a username, a chapter title left in English,
+   an email address -- otherwise get their punctuation dragged to the wrong end
+   by the bidirectional algorithm: "tomo@tomojw.com." can render with the stop
+   in front. Isolating them keeps each run's own direction to itself. */
+[dir='rtl'] .contact-email a,
+[dir='rtl'] code,
+[dir='rtl'] kbd,
+[dir='rtl'] samp {
+  unicode-bidi: isolate;
+  direction: ltr;
 }

@@ -9,7 +9,7 @@ import { join } from 'node:path';
 const sandbox = mkdtempSync(join(tmpdir(), 'jewels-test-'));
 const contentDir = join(sandbox, 'content');
 
-for (const lang of ['en', 'ja', 'pl', 'es', 'fr']) {
+for (const lang of ['en', 'ja', 'pl', 'es', 'fr', 'ar']) {
   mkdirSync(join(contentDir, 'chapters', lang), { recursive: true });
   mkdirSync(join(contentDir, 'updates', lang), { recursive: true });
 }
@@ -29,6 +29,7 @@ writeFileSync(
       pl: { chapters: 0, updates: 0 },
       es: { chapters: 0, updates: 0 },
       fr: { chapters: 0, updates: 0 },
+      ar: { chapters: 0, updates: 0 },
     },
   })
 );
@@ -108,14 +109,20 @@ describe('health and content', () => {
   test('config lists every language', async () => {
     const client = makeClient();
     const { body } = await client('/api/content/config');
-    assert.deepEqual(body.availableLanguages, ['en', 'ja', 'pl', 'es', 'fr']);
+    // Read from config rather than spelled out here. This test used to carry
+    // its own copy of the list and failed the day a sixth language was added,
+    // which told us nothing except that the list had changed.
+    const { default: config } = await import('../config.js');
+    assert.deepEqual(body.availableLanguages, config.languages);
     assert.equal(body.languages.en.chapters, 1);
     assert.equal(body.languages.pl.chapters, 0);
   });
 
   test('unknown language is rejected', async () => {
     const client = makeClient();
-    const { status, body } = await client('/api/content/chapters?lang=ar');
+    // 'zz' is unassigned and is going to stay that way. This test used to ask
+    // for 'ar', which stopped being unknown the moment Arabic was added.
+    const { status, body } = await client('/api/content/chapters?lang=zz');
     assert.equal(status, 400);
     assert.equal(body.error.code, 'bad_language');
   });

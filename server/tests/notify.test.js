@@ -7,7 +7,7 @@ import { join } from 'node:path';
 // config reads the environment at import time, so the sandbox comes first.
 const sandbox = mkdtempSync(join(tmpdir(), 'jewels-notify-'));
 const contentDir = join(sandbox, 'content');
-for (const lang of ['en', 'ja', 'pl', 'es', 'fr']) {
+for (const lang of ['en', 'ja', 'pl', 'es', 'fr', 'ar']) {
   mkdirSync(join(contentDir, 'chapters', lang), { recursive: true });
   mkdirSync(join(contentDir, 'updates', lang), { recursive: true });
 }
@@ -27,6 +27,7 @@ writeFileSync(
       pl: { chapters: 0, updates: 0 },
       es: { chapters: 0, updates: 0 },
       fr: { chapters: 0, updates: 0 },
+      ar: { chapters: 0, updates: 0 },
     },
   })
 );
@@ -378,8 +379,11 @@ test('picking languages narrows who a send reaches', async () => {
 });
 
 test('ticking every language is stored as no preference', async () => {
+  const { default: config } = await import('../config.js');
   const user = await readyReader('allofthem');
-  setMailLanguages(user.id, ['en', 'ja', 'pl', 'es', 'fr']);
+  // Taken from config so that this keeps testing "all of them" rather than
+  // "those five", which is the whole point of the behaviour it is checking.
+  setMailLanguages(user.id, config.languages);
   assert.deepEqual(
     mailLanguages(user.id),
     [],

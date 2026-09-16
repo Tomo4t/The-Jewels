@@ -66,7 +66,10 @@ test('a path too long for ustar is still archived', async (t) => {
 
   const archive = join(dir, 'long.tar.gz');
   const names = await walk(src);
-  assert.ok(`jewels-backup/${names[0]}`.length > 256, 'the path really does exceed the ustar limit');
+  assert.ok(
+    `jewels-backup/${names[0]}`.length > 256,
+    'the path really does exceed the ustar limit'
+  );
 
   await writeArchive(
     archive,

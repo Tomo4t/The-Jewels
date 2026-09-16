@@ -7,13 +7,14 @@ import { read, write, KEYS } from './store.js';
 
 const bundles = import.meta.glob('../i18n/*.json');
 
-export const LANGUAGES = ['en', 'ja', 'pl', 'es', 'fr'];
+export const LANGUAGES = ['en', 'ja', 'pl', 'es', 'fr', 'ar'];
 export const LANGUAGE_NAMES = {
   en: 'English',
   ja: '日本語',
   pl: 'Polski',
   es: 'Español',
   fr: 'Français',
+  ar: 'العربية',
 };
 
 const cache = new Map();

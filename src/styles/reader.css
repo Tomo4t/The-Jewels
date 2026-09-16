@@ -25,28 +25,42 @@
   transition-duration: 0.4s;
 }
 
+/*
+ * One arrow image, mirrored for whichever button is the backwards one.
+ *
+ * In a right-to-left page the flex row lays these out the other way round, so
+ * "previous" moves to the right -- and an arrow that did not move with it
+ * would sit on the right still pointing left. The two custom properties are
+ * swapped for [dir='rtl'] a few rules down, which keeps the hover and active
+ * states in step without repeating them.
+ */
 .navbtnL img {
-  transform: scaleX(-1);
+  transform: scaleX(var(--arrow-back, -1));
   transition-duration: 0.4s;
 }
 
-.navbtnR:hover {
-  transform: scale(1.05) translateY(-5px);
+.navbtnR img {
+  transform: scaleX(var(--arrow-forward, 1));
+  transition-duration: 0.4s;
+}
+
+.navbtnR:hover img {
+  transform: scaleX(calc(var(--arrow-forward, 1) * 1.05)) translateY(-5px);
   transition-duration: 0.2s;
 }
 
-.navbtnR:active {
-  transform: scale(0.95) translateY(5px);
+.navbtnR:active img {
+  transform: scaleX(calc(var(--arrow-forward, 1) * 0.95)) translateY(5px);
   transition-duration: 0.2s;
 }
 
 .navbtnL:hover img {
-  transform: scaleX(-1.05) translateY(-5px);
+  transform: scaleX(calc(var(--arrow-back, -1) * 1.05)) translateY(-5px);
   transition-duration: 0.2s;
 }
 
 .navbtnL:active img {
-  transform: scaleX(-0.95) translateY(5px);
+  transform: scaleX(calc(var(--arrow-back, -1) * 0.95)) translateY(5px);
   transition-duration: 0.2s;
 }
 
@@ -738,7 +752,7 @@ html.reading-focus .navbtns button {
 @media (min-width: 1024px) and (min-height: 640px) {
   html.reading-focus .reader-zoom {
     position: absolute;
-    right: calc(var(--space-3) + env(safe-area-inset-right, 0px));
+    inset-inline-end: calc(var(--space-3) + env(safe-area-inset-right, 0px));
     bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
     z-index: 2;
     display: block;

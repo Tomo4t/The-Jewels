@@ -16,7 +16,13 @@ import { fileURLToPath } from 'node:url';
  */
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const LANGUAGES = ['en', 'fr', 'es', 'ja', 'pl'];
+// Read off disk rather than listed here, so a bundle added without being
+// mentioned in this file is still held to key parity rather than skipped.
+const LANGUAGES = fs
+  .readdirSync(path.join(root, 'src/i18n'))
+  .filter((name) => name.endsWith('.json'))
+  .map((name) => name.replace(/\.json$/, ''))
+  .sort();
 
 const load = (code) =>
   JSON.parse(fs.readFileSync(path.join(root, 'src/i18n', `${code}.json`), 'utf8'));
@@ -160,4 +166,25 @@ test('the newsletter preview can show a YouTube thumbnail', () => {
     imgSrc[1].includes('i.ytimg.com'),
     'a video block sends a real thumbnail, so the preview needs it'
   );
+});
+
+test('every bundle declares its own writing direction', () => {
+  // dir is what i18n.js puts on <html>, and the whole right-to-left layout
+  // hangs off it. A bundle that omitted it would silently render Arabic in a
+  // left-to-right page and look merely "a bit wrong" rather than broken.
+  for (const code of LANGUAGES) {
+    const meta = load(code).meta;
+    assert.equal(meta.code, code, `${code}.json says it is ${meta.code}`);
+    assert.ok(['ltr', 'rtl'].includes(meta.dir), `${code} has no usable dir`);
+    assert.ok(meta.name, `${code} has no name for the language picker`);
+    assert.ok(meta.locale, `${code} has no locale for date formatting`);
+  }
+});
+
+test('the site languages and the locale bundles agree', async () => {
+  // Two lists that must match: the server's languages and the bundles on disk.
+  // A language in one and not the other is a shelf nobody can read, or a
+  // picker entry that 404s.
+  const { default: config } = await import('../config.js');
+  assert.deepEqual([...config.languages].sort(), LANGUAGES);
 });

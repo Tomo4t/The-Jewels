@@ -120,7 +120,7 @@ export const config = {
   },
 
   // Content rules
-  languages: ['en', 'ja', 'pl', 'es', 'fr'],
+  languages: ['en', 'ja', 'pl', 'es', 'fr', 'ar'],
   defaultLanguage: 'en',
   comment: {
     maxLength: 2000,

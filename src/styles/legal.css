@@ -74,7 +74,7 @@ html.dark .legal-section h2 {
 
 .legal-section ul {
   margin: 0 0 var(--space-3);
-  padding-left: 1.3rem;
+  padding-inline-start: 1.3rem;
 }
 
 .legal-section li {
