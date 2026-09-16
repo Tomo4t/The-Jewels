@@ -157,14 +157,23 @@ function buildDrawer() {
         ${value('drawer-language-value')}
         ${CHEVRON}
       </button>
-      <ul class="drawer-sub" id="drawer-languages" hidden>
-        ${LANGUAGES.map(
-          (code) =>
-            `<li><button type="button" class="drawer-sub-option" data-lang="${code}">${escapeHTML(
-              LANGUAGE_NAMES[code]
-            )}</button></li>`
-        ).join('')}
-      </ul>
+      <!-- Three elements for one list, and each one is doing a job: the outer
+           grid animates between 0fr and 1fr (height: auto cannot be
+           transitioned), the middle clips what is sticking out of a row that is
+           currently zero tall, and the list itself holds the spacing that would
+           otherwise keep the collapsed state a few pixels open. -->
+      <div class="drawer-sub-wrap" id="drawer-languages" inert>
+        <div class="drawer-sub-clip">
+          <ul class="drawer-sub">
+            ${LANGUAGES.map(
+              (code) =>
+                `<li><button type="button" class="drawer-sub-option" data-lang="${code}">${escapeHTML(
+                  LANGUAGE_NAMES[code]
+                )}</button></li>`
+            ).join('')}
+          </ul>
+        </div>
+      </div>
 
       <!-- The bar's own marks rather than flat pictures of them: the sun takes
            a bite out of itself to become a moon, and the speaker keeps its
@@ -228,8 +237,13 @@ function buildDrawer() {
   const languageRow = $('#drawer-language');
   const languageList = $('#drawer-languages');
   languageRow?.addEventListener('click', () => {
-    const open = languageList.hidden;
-    languageList.hidden = !open;
+    const open = !languageList.classList.contains('is-open');
+    languageList.classList.toggle('is-open', open);
+    // A collapsed list is zero pixels tall but its buttons are still buttons.
+    // inert takes them out of the tab order without a display change, which
+    // would end the transition before it started.
+    if (open) languageList.removeAttribute('inert');
+    else languageList.setAttribute('inert', '');
     languageRow.setAttribute('aria-expanded', String(open));
   });
 

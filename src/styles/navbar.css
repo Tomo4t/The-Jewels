@@ -1031,6 +1031,29 @@ html.dark .drawer-row:hover .theme-mark {
   font-weight: 700;
 }
 
+/* height: auto is not animatable, so the row itself is: a grid that goes from
+   0fr to 1fr, with the list clipped inside it on the way. */
+.drawer-sub-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 240ms ease;
+}
+
+.drawer-sub-wrap.is-open {
+  grid-template-rows: 1fr;
+}
+
+.drawer-sub-clip {
+  overflow: hidden;
+  min-height: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer-sub-wrap {
+    transition: none;
+  }
+}
+
 .drawer-sub {
   display: flex;
   flex-direction: column;
