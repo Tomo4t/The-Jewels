@@ -148,6 +148,15 @@ h3 {
   outline: none;
 }
 
+/* The `hidden` attribute is only a UA rule -- `display: none` from the browser's
+   own stylesheet, which any author `display` beats. So every element with a
+   display of its own stayed on screen after `el.hidden = true`, which is how
+   the language list in the phone menu shipped permanently open. It is a whole
+   class of bug and it is cheaper to close it here than to remember it. */
+[hidden] {
+  display: none !important;
+}
+
 /* --- buttons and forms --------------------------------------------------- */
 
 .button {
