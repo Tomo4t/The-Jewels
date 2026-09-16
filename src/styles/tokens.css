@@ -1,4 +1,213 @@
 /*
+ * Every colour that differs between the themes is registered below.
+ *
+ * An unregistered custom property changes in one step, and so does everything
+ * built on it -- which is why the labels, the values and the icons all snapped
+ * to their new colour while the surfaces behind them were still four hundred
+ * milliseconds from arriving. A registered <color> can be interpolated, so the
+ * token itself animates on the root and every element reading it follows,
+ * with no per-element transition anywhere.
+ */
+
+@property --color-accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #d4af37;
+}
+
+@property --color-accent-contrast {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #2c1e00;
+}
+
+@property --color-bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #fdf9ef;
+}
+
+@property --color-border {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #e0d5bd;
+}
+
+@property --color-danger {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #b3261e;
+}
+
+@property --color-danger-soft {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #fdecea;
+}
+
+@property --color-dropdown-bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #f1e7c8;
+}
+
+@property --color-dropdown-border {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #b48e2c;
+}
+
+@property --color-dropdown-hover {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #dfc167;
+}
+
+@property --color-focus {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #1f6feb;
+}
+
+@property --color-focus-backdrop {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #17120a;
+}
+
+@property --color-focus-ink {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #d6cec2;
+}
+
+@property --color-footer-bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #eae1d0;
+}
+
+@property --color-footer-link {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #80520f;
+}
+
+@property --color-footer-link-hover {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #1c625b;
+}
+
+@property --color-footer-text {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #6b562d;
+}
+
+@property --color-link {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #7a5400;
+}
+
+@property --color-link-hover {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #5a3d00;
+}
+
+@property --color-navbar {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #b18e3c;
+}
+
+@property --color-selection {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #d8882c;
+}
+
+@property --color-success {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #1b6b33;
+}
+
+@property --color-success-soft {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #e8f5ec;
+}
+
+@property --color-surface {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #f5f0e6;
+}
+
+@property --color-surface-raised {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #fffdf8;
+}
+
+@property --color-text {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #2c1e00;
+}
+
+@property --color-text-muted {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #7a5f30;
+}
+
+@property --color-title-bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #d4af37;
+}
+
+@property --color-title-text {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #2c1e00;
+}
+
+@property --color-updates-heading {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #1a1200;
+}
+
+@property --color-updates-text {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #2c1e00;
+}
+
+@property --color-warning {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #8a6100;
+}
+
+@property --color-warning-soft {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #fdf3d8;
+}
+
+@property --theme-mark-ink {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #141414;
+}
+
+/*
  * Every icon on the site is a black PNG recoloured with `brightness(0)
  * invert(N)`. N is registered here rather than baked into the filter string,
  * because an UNREGISTERED custom property changes in a single step -- and so
@@ -77,6 +286,8 @@
   --icon-ink: 0.08;
   --icon-ink-hover: 0.22;
   --icon-ink-muted: 0.45;
+
+  --theme-mark-ink: #141414;
 
   --color-icon: brightness(0) invert(var(--icon-ink));
   --color-icon-hover: brightness(0) invert(var(--icon-ink-hover));
@@ -166,6 +377,7 @@ html.dark {
   --color-title-bg: #38275c;
   --color-title-text: #ffffff;
 
+  --theme-mark-ink: #ffffff;
   --icon-ink: 0.95;
   --icon-ink-hover: 0.75;
   --icon-ink-muted: 0.45;

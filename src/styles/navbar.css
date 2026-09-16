@@ -105,14 +105,11 @@ body::-webkit-scrollbar {
   height: var(--nav-icon);
   overflow: visible;
   /* The other bar icons are PNGs recoloured with a filter; this one is real
-     markup, so it takes the same colour directly. */
-  color: #fff;
+     markup, so it takes the same colour directly -- from a registered token, so
+     it can be interpolated rather than swapped in one step. */
+  color: var(--theme-mark-ink);
   transform: rotate(0deg);
   transition: transform 500ms cubic-bezier(0.34, 1.3, 0.5, 1);
-}
-
-html:not(.dark) .theme-mark {
-  color: #141414;
 }
 
 .icon-btn:hover .theme-mark {
@@ -320,9 +317,39 @@ html.theme-changing *::after {
    drawn in currentColor, and they were snapping on their own. */
 html.theme-changing {
   transition:
-    background-color var(--theme-swap) var(--theme-ease),
-    border-color var(--theme-swap) var(--theme-ease),
-    color var(--theme-swap) var(--theme-ease),
+    --color-accent var(--theme-swap) var(--theme-ease),
+    --color-accent-contrast var(--theme-swap) var(--theme-ease),
+    --color-bg var(--theme-swap) var(--theme-ease),
+    --color-border var(--theme-swap) var(--theme-ease),
+    --color-danger var(--theme-swap) var(--theme-ease),
+    --color-danger-soft var(--theme-swap) var(--theme-ease),
+    --color-dropdown-bg var(--theme-swap) var(--theme-ease),
+    --color-dropdown-border var(--theme-swap) var(--theme-ease),
+    --color-dropdown-hover var(--theme-swap) var(--theme-ease),
+    --color-focus var(--theme-swap) var(--theme-ease),
+    --color-focus-backdrop var(--theme-swap) var(--theme-ease),
+    --color-focus-ink var(--theme-swap) var(--theme-ease),
+    --color-footer-bg var(--theme-swap) var(--theme-ease),
+    --color-footer-link var(--theme-swap) var(--theme-ease),
+    --color-footer-link-hover var(--theme-swap) var(--theme-ease),
+    --color-footer-text var(--theme-swap) var(--theme-ease),
+    --color-link var(--theme-swap) var(--theme-ease),
+    --color-link-hover var(--theme-swap) var(--theme-ease),
+    --color-navbar var(--theme-swap) var(--theme-ease),
+    --color-selection var(--theme-swap) var(--theme-ease),
+    --color-success var(--theme-swap) var(--theme-ease),
+    --color-success-soft var(--theme-swap) var(--theme-ease),
+    --color-surface var(--theme-swap) var(--theme-ease),
+    --color-surface-raised var(--theme-swap) var(--theme-ease),
+    --color-text var(--theme-swap) var(--theme-ease),
+    --color-text-muted var(--theme-swap) var(--theme-ease),
+    --color-title-bg var(--theme-swap) var(--theme-ease),
+    --color-title-text var(--theme-swap) var(--theme-ease),
+    --color-updates-heading var(--theme-swap) var(--theme-ease),
+    --color-updates-text var(--theme-swap) var(--theme-ease),
+    --color-warning var(--theme-swap) var(--theme-ease),
+    --color-warning-soft var(--theme-swap) var(--theme-ease),
+    --theme-mark-ink var(--theme-swap) var(--theme-ease),
     --icon-ink var(--theme-swap) var(--theme-ease),
     --icon-ink-hover var(--theme-swap) var(--theme-ease),
     --icon-ink-muted var(--theme-swap) var(--theme-ease),
@@ -336,15 +363,11 @@ html.theme-changing {
    shorthand replaces, so the sun kept its spin and changed colour in one frame
    in the middle of it. The colour is back alongside the motion. */
 html.theme-changing .theme-mark {
-  transition:
-    transform 500ms cubic-bezier(0.34, 1.3, 0.5, 1),
-    color var(--theme-swap) var(--theme-ease);
+  transition: transform 500ms cubic-bezier(0.34, 1.3, 0.5, 1);
 }
 
 html.theme-changing .theme-orb {
-  transition:
-    transform 400ms cubic-bezier(0.34, 1.3, 0.5, 1),
-    fill var(--theme-swap) var(--theme-ease);
+  transition: transform 400ms cubic-bezier(0.34, 1.3, 0.5, 1);
 }
 
 html.theme-changing .theme-bite {
@@ -354,8 +377,7 @@ html.theme-changing .theme-bite {
 html.theme-changing .theme-rays {
   transition:
     opacity 250ms ease 100ms,
-    transform 400ms cubic-bezier(0.5, 0, 0.3, 1),
-    stroke var(--theme-swap) var(--theme-ease);
+    transform 400ms cubic-bezier(0.5, 0, 0.3, 1);
 }
 
 html.theme-changing .gradient-layer {
