@@ -112,6 +112,10 @@ test('no handler reads event.currentTarget after awaiting', () => {
     let awaited = false;
     let depth = null;
     lines.forEach((line, index) => {
+      // Prose is not code. A comment saying "before the await" was enough to
+      // arm this and then flag the very line it was explaining, which made the
+      // test fire at the fix rather than the bug.
+      if (/^\s*(\/\/|\*|\/\*)/.test(line)) return;
       if (/addEventListener\(\s*'[^']+',\s*async/.test(line)) {
         awaited = false;
         depth = 0;

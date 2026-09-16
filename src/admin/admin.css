@@ -786,3 +786,144 @@
     height: calc(700px * var(--preview-scale));
   }
 }
+
+/* --- social queue -----------------------------------------------------------
+   Two halves: a grid of which accounts exist, and the drafts waiting to go up.
+   The grid is a real <table> because that is what it is -- platforms down,
+   languages across -- and a table is the only version of it a screen reader
+   can read the headings of. */
+
+.social-targets-scroll {
+  overflow-x: auto;
+  margin: var(--space-2) 0 var(--space-3);
+}
+
+.social-targets {
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.social-targets th,
+.social-targets td {
+  padding: 0.4rem 0.6rem;
+  text-align: center;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.social-targets thead th {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.social-targets tbody th {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: left;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.social-targets tbody th img {
+  filter: var(--icon-filter-content);
+}
+
+.social-tick {
+  display: inline-flex;
+  margin: 0;
+  cursor: pointer;
+}
+
+.social-tick input {
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.social-draft {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+  margin: var(--space-4) 0 var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.social-chapter {
+  margin-top: var(--space-3);
+}
+
+.social-chapter h4 {
+  margin: 0 0 var(--space-2);
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.social-posts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.social-post {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+/* Done is still visible -- you want to see that Instagram went up -- but it
+   stops competing with the ones that have not. */
+.social-post.is-posted,
+.social-post.is-skipped {
+  opacity: 0.6;
+}
+
+.social-post-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.social-post-head img {
+  filter: var(--icon-filter-content);
+}
+
+.social-post-where {
+  font-weight: 600;
+}
+
+.social-post-lang,
+.social-post-when {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.social-body {
+  width: 100%;
+  resize: vertical;
+  font: inherit;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.social-post-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}

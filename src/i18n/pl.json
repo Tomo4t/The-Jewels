@@ -179,7 +179,8 @@
       "moderation": "Moderacja",
       "users": "Użytkownicy",
       "settings": "Ustawienia",
-      "newsletter": "Newsletter"
+      "newsletter": "Newsletter",
+      "social": "Social"
     },
     "uploadChapter": "Wyślij rozdział",
     "chapterTitle": "Tytuł rozdziału",
@@ -339,7 +340,28 @@
     "muteWhich": "Jak długo {username} nie ma móc komentować?",
     "removeKeep": "Zachowaj komentarze",
     "removePurge": "Wymaż wszystko",
-    "removeHint": "Wymazania nie można cofnąć. Zachowane komentarze zostaną podpisane „Usunięte konto”."
+    "removeHint": "Wymazania nie można cofnąć. Zachowane komentarze zostaną podpisane „Usunięte konto”.",
+    "social": {
+      "title": "Social media",
+      "where": "Gdzie publikujesz",
+      "whereHint": "Zaznacz każde konto, które naprawdę prowadzisz. Rozdział zostanie przygotowany tylko dla nich i tylko w języku danego konta.",
+      "saveTargets": "Zapisz konta",
+      "targetsSaved": "Konta zapisane.",
+      "generate": "Przygotuj posty dla rozdziału",
+      "generateGo": "Przygotuj",
+      "generated": "Przygotowano {count}.",
+      "nothingNew": "Nie ma nic nowego do przygotowania.",
+      "queue": "Do opublikowania",
+      "empty": "Nic nie czeka. Przygotuj rozdział powyżej.",
+      "copy": "Kopiuj",
+      "copied": "Skopiowano.",
+      "markPosted": "Oznacz jako opublikowane",
+      "markTodo": "Jeszcze nieopublikowane",
+      "skip": "Pomiń",
+      "posted": "Opublikowane",
+      "skipped": "Pominięte",
+      "chapterLabel": "Rozdział {n}"
+    }
   },
   "errors": {
     "notFound": "Nie znaleziono strony",
