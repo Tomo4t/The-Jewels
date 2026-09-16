@@ -1,3 +1,37 @@
+/*
+ * Every icon on the site is a black PNG recoloured with `brightness(0)
+ * invert(N)`. N is registered here rather than baked into the filter string,
+ * because an UNREGISTERED custom property changes in a single step -- and so
+ * does anything built on it. That is why every icon used to jump from
+ * near-black to near-white in one frame while the surface behind it was still
+ * four hundred milliseconds from getting there, which is what read as a flash.
+ * A registered <number> can be interpolated, and the filter reading it is
+ * rebuilt each frame.
+ */
+@property --icon-ink {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0.08;
+}
+
+@property --icon-ink-hover {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0.22;
+}
+
+@property --icon-ink-muted {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0.45;
+}
+
+@property --icon-ink-content {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0.35;
+}
+
 /* ==========================================================================
    Design tokens
    The single source of truth for colour, spacing and motion.
@@ -38,11 +72,18 @@
   --color-title-text: #2c1e00;
 
   /* --- icons ------------------------------------------------------------ */
-  --color-icon: brightness(0) invert(0.08);
-  --color-icon-hover: brightness(0) invert(0.22);
-  --color-sound-muted: brightness(0) invert(0.45);
+  /* Built from the registered numbers above, so the filter is rebuilt from an
+     animating value each frame instead of being swapped in one step. */
+  --icon-ink: 0.08;
+  --icon-ink-hover: 0.22;
+  --icon-ink-muted: 0.45;
+
+  --color-icon: brightness(0) invert(var(--icon-ink));
+  --color-icon-hover: brightness(0) invert(var(--icon-ink-hover));
+  --color-sound-muted: brightness(0) invert(var(--icon-ink-muted));
   /* Icons drawn on page backgrounds rather than on the coloured navbar. */
-  --icon-filter-content: brightness(0) invert(0.35);
+  --icon-ink-content: 0.35;
+  --icon-filter-content: brightness(0) invert(var(--icon-ink-content));
 
   /* --- dropdowns -------------------------------------------------------- */
   --color-dropdown-bg: #f1e7c8;
@@ -125,10 +166,10 @@ html.dark {
   --color-title-bg: #38275c;
   --color-title-text: #ffffff;
 
-  --color-icon: brightness(0) invert(0.95);
-  --color-icon-hover: brightness(0) invert(0.75);
-  --color-sound-muted: brightness(0) invert(0.45);
-  --icon-filter-content: brightness(0) invert(0.85);
+  --icon-ink: 0.95;
+  --icon-ink-hover: 0.75;
+  --icon-ink-muted: 0.45;
+  --icon-ink-content: 0.85;
 
   --color-dropdown-bg: #3a2e4e;
   --color-dropdown-border: #654f80;
