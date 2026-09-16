@@ -78,7 +78,9 @@
     "exitFocus": "Leave focus mode",
     "focusEntered": "Focus mode on. Press Escape to leave.",
     "focusLeft": "Focus mode off.",
-    "zoom": "Zoom"
+    "zoom": "Zoom",
+    "notTranslated": "This chapter has not been translated into {language} yet.",
+    "readIn": "Read it in {language}"
   },
   "contact": {
     "title": "All official socials for the creator"

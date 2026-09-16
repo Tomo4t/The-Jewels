@@ -78,7 +78,9 @@
     "exitFocus": "Quitter le mode lecture",
     "focusEntered": "Mode lecture activé. Appuyez sur Échap pour quitter.",
     "focusLeft": "Mode lecture désactivé.",
-    "zoom": "Zoom"
+    "zoom": "Zoom",
+    "notTranslated": "Ce chapitre n’est pas encore traduit en {language}.",
+    "readIn": "Le lire en {language}"
   },
   "contact": {
     "title": "Tous les réseaux officiels du créateur"

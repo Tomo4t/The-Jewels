@@ -78,7 +78,9 @@
     "exitFocus": "Salir del modo enfoque",
     "focusEntered": "Modo enfoque activado. Pulsa Esc para salir.",
     "focusLeft": "Modo enfoque desactivado.",
-    "zoom": "Zoom"
+    "zoom": "Zoom",
+    "notTranslated": "Este capítulo todavía no está traducido al {language}.",
+    "readIn": "Leerlo en {language}"
   },
   "contact": {
     "title": "Todas las redes oficiales del creador"

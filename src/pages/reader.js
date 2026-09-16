@@ -1,5 +1,5 @@
 import { escapeHTML, announce, prefersReducedMotion } from '../lib/dom.js';
-import { t, currentLanguage, formatDateTime } from '../lib/i18n.js';
+import { t, currentLanguage, formatDateTime, LANGUAGES, LANGUAGE_NAMES } from '../lib/i18n.js';
 import { read, write, writeJSON, KEYS } from '../lib/store.js';
 import { play } from '../lib/sound.js';
 import { syncHash, buildHash } from '../router.js';
@@ -50,6 +50,29 @@ export function title(params) {
   return state?.chapter?.title || `${t('chapters.chapter', { n: params.chapter || 1 })}`;
 }
 
+/**
+ * Which languages this chapter number does exist in.
+ *
+ * Only ever called on the way to an error page, so four extra requests are
+ * four requests nobody is waiting on in the normal case -- and they turn "this
+ * page is missing" into "it is in English and Polish", which is the difference
+ * between a dead end and a door.
+ */
+async function languagesWithChapter(number, except) {
+  const others = LANGUAGES.filter((code) => code !== except);
+  const found = await Promise.all(
+    others.map(async (code) => {
+      try {
+        const { chapters } = await api.chapters(code);
+        return chapters.some((chapter) => Number(chapter.number) === number) ? code : null;
+      } catch {
+        return null;
+      }
+    })
+  );
+  return found.filter(Boolean);
+}
+
 export async function render(params) {
   const lang = params.lang && params.lang.length === 2 ? params.lang : currentLanguage();
   const number = Number(params.chapter) || 1;
@@ -64,10 +87,32 @@ export async function render(params) {
     const notOut = err instanceof ApiError && err.code === 'not_released_yet';
     const when = notOut && err.details?.releaseAt ? formatDateTime(err.details.releaseAt) : null;
 
+    // Missing here is not the same as missing everywhere. Switching the site
+    // to a language a chapter has not been translated into used to land on a
+    // flat "not found", which reads as the site being broken rather than the
+    // chapter simply not existing yet in that language.
+    const elsewhere = notOut ? [] : await languagesWithChapter(number, lang);
+
+    const heading = elsewhere.length
+      ? t('reader.notTranslated', { language: LANGUAGE_NAMES[lang] || lang })
+      : t(notOut ? 'reader.notOutYet' : 'reader.notFound');
+
     return `
       <div class="reader-missing">
-        <h2>${escapeHTML(notOut ? t('reader.notOutYet') : t('reader.notFound'))}</h2>
+        <h2>${escapeHTML(heading)}</h2>
         ${when ? `<p>${escapeHTML(t('reader.outOn', { date: when }))}</p>` : ''}
+        ${elsewhere
+          .map(
+            (code) =>
+              `<a class="button button--primary" href="${buildHash('reader', {
+                lang: code,
+                chapter: number,
+                page: 0,
+              })}">${escapeHTML(
+                t('reader.readIn', { language: LANGUAGE_NAMES[code] || code })
+              )}</a>`
+          )
+          .join('')}
         <a class="button" href="${buildHash('chapters')}">${escapeHTML(t('reader.backToChapters'))}</a>
       </div>
     `;

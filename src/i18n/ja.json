@@ -78,7 +78,9 @@
     "exitFocus": "集中モードを終了",
     "focusEntered": "集中モードをオンにしました。Esc キーで終了します。",
     "focusLeft": "集中モードをオフにしました。",
-    "zoom": "表示の大きさ"
+    "zoom": "表示の大きさ",
+    "notTranslated": "この章はまだ {language} に翻訳されていません。",
+    "readIn": "{language} で読む"
   },
   "contact": {
     "title": "作者の公式SNS一覧"

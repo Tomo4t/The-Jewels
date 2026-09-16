@@ -307,6 +307,19 @@ h3 {
   text-align: center;
 }
 
+/* A chapter missing in one language can be offered in several others, so this
+   holds more than one button now and they need somewhere to sit. */
+.reader-missing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.reader-missing h2 {
+  margin-bottom: var(--space-2);
+}
+
 .empty-illustration {
   width: 72px;
   opacity: 0.35;

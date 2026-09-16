@@ -78,7 +78,9 @@
     "exitFocus": "Wyjdź z trybu skupienia",
     "focusEntered": "Tryb skupienia włączony. Naciśnij Esc, aby wyjść.",
     "focusLeft": "Tryb skupienia wyłączony.",
-    "zoom": "Powiększenie"
+    "zoom": "Powiększenie",
+    "notTranslated": "Ten rozdział nie został jeszcze przetłumaczony na {language}.",
+    "readIn": "Przeczytaj w {language}"
   },
   "contact": {
     "title": "Wszystkie oficjalne profile twórcy"

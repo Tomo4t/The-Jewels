@@ -148,7 +148,19 @@ export function initRouter(target) {
     navigate(trigger.dataset.route, params);
   });
 
-  document.addEventListener('languagechange', render);
+  document.addEventListener('languagechange', (event) => {
+    // The reader carries its language in its own URL, because a chapter is a
+    // different set of pages in each one. Re-rendering the same URL would have
+    // translated the buttons around the comic and left the comic itself in the
+    // language you just switched away from.
+    const { name, params } = parseHash();
+    const next = event.detail?.lang;
+    if (name === 'reader' && next && params.lang !== next) {
+      navigate('reader', { ...params, lang: next }, { replace: true });
+      return;
+    }
+    render();
+  });
 
   render();
 }
