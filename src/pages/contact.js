@@ -8,6 +8,7 @@ const SOCIALS = [
   { name: 'VGen', href: 'https://vgen.co/Tomo_4t', icon: 'vgen.svg' },
   { name: 'Tellonym', href: 'https://tellonym.me/tomo_4t', icon: 'tellonym.svg' },
   { name: 'Twitch', href: 'https://www.twitch.tv/tomo_4t', icon: 'twitch.svg' },
+  { name: 'Pinterest', href: 'https://pinterest.com/Tomo_4t', icon: 'pinterest.svg' },
 ];
 
 export const title = () => t('nav.contact');
