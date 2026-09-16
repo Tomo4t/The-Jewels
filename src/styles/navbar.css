@@ -214,16 +214,20 @@ footer,
 }
 
 .navbar {
-  /* Three columns with equal side tracks, so the title centres on the bar
-     itself rather than on whatever space the icon groups happen to leave. A
-     `1fr` track floors at its own content, so the wider side sets both and the
-     middle stays put. */
+  /* Three columns with equal side tracks, so the title sits on the bar's own
+     centre rather than midway between the last icon on the left and the first
+     on the right -- the two groups are different widths, so those are two
+     different places, and the one people read as centred is the bar's.
+     Both side tracks are `1fr`, which floors at its own content, so the wider
+     side sets them both and the middle column lands in the middle. The middle
+     is minmax(0, auto) rather than auto so a long title gives up width and
+     ellipses instead of pushing the bar wider than the screen. */
   /* Every icon in the bar reads this, so they stay the same size as each other
      at every breakpoint. */
   --nav-icon: 2rem;
 
-  display: flex;
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: 1fr minmax(0, auto) 1fr;
   align-items: center;
   background-color: var(--color-navbar);
   padding: 0.625rem 1.25rem;
@@ -236,19 +240,14 @@ footer,
   display: flex;
   align-items: center;
   gap: 0.875rem;
-  flex: 0 0 auto;
+  min-width: 0;
 }
 
-/* The title takes the whole gap between the two icon groups and centres inside
-   it, so it sits midway between the last navigation icon and the first action
-   icon rather than on the bar's own centre -- the groups are different widths,
-   so those are two different places. */
 .nav-title {
-  flex: 1 1 auto;
-  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 0;
 }
 
 .nav-left {
@@ -326,14 +325,14 @@ html.theme-changing .comment {
    `is-muted` was being set on the button by the navbar script and there was no
    rule anywhere that reacted to it, so switching sound off changed nothing on
    screen. --color-sound-muted existed in the tokens and was never referenced. */
-#sound-toggle img {
+.sound-btn img {
   transition:
     transform var(--transition-fast),
     filter var(--transition-base),
     opacity var(--transition-base);
 }
 
-#sound-toggle.is-muted img {
+.sound-btn.is-muted img {
   filter: var(--color-sound-muted);
   opacity: 0.7;
 }
@@ -363,7 +362,7 @@ html.theme-changing .comment {
     opacity var(--transition-fast);
 }
 
-#sound-toggle.is-muted .sound-slash {
+.sound-btn.is-muted .sound-slash {
   transform: rotate(-45deg) scaleX(1);
   opacity: 1;
 }
@@ -393,7 +392,7 @@ html.theme-changing .comment {
   }
 }
 
-#sound-toggle.is-shaking .sound-icon {
+.sound-btn.is-shaking .sound-icon {
   animation: soundShake 0.36s ease;
 }
 
@@ -413,7 +412,7 @@ html.theme-changing .comment {
   }
 }
 
-#sound-toggle.is-animating .sound-icon {
+.sound-btn.is-animating .sound-icon {
   animation: soundPop 0.32s ease;
 }
 
@@ -950,6 +949,26 @@ html.drawer-open {
   width: 1.15rem;
   height: 1.15rem;
   filter: var(--color-icon);
+}
+
+/* The theme mark sizes itself from --nav-icon, which only exists on the bar. */
+.drawer-icon .theme-mark {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+/* The slash carries a halo in the bar's gold so it reads against it. In here
+   the chip is the page's own background, so the halo has to be that instead. */
+.drawer-icon .sound-slash {
+  box-shadow: 0 0 0 1.5px var(--color-bg);
+}
+
+.drawer-row:hover .theme-mark {
+  transform: rotate(0deg) scale(1.1);
+}
+
+html.dark .drawer-row:hover .theme-mark {
+  transform: rotate(-90deg) scale(1.1);
 }
 
 .drawer-label {

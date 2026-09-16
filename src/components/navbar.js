@@ -34,9 +34,13 @@ let initialised = false;
  * putting it behind a tap there would be hiding things for no reason.
  *
  * The rows are two kinds and are not pretending to be one. Above the rule are
- * places you go, each with a chevron. Below it are settings, which show what
- * they are currently set to and change in place -- a chevron there would
- * promise a page that does not exist.
+ * places you go. Below it are settings, which show what they are currently set
+ * to and change in place.
+ *
+ * Only one row carries a chevron: Language, where it points down when the list
+ * is open and right when it is closed, so it is saying something. On a row that
+ * opens a page it would be on every row, and a mark that is on everything
+ * distinguishes nothing.
  */
 const DRAWER_LINKS = [
   { href: '#home', icon: 'home.svg', key: 'nav.home' },
@@ -46,6 +50,31 @@ const DRAWER_LINKS = [
 ];
 
 const drawerOpen = () => document.documentElement.classList.contains('drawer-open');
+
+/**
+ * One press, wherever it came from. The animation replays on the button that
+ * was actually pressed -- the other copy is off screen, and playing it there
+ * would be a frame budget spent on nobody.
+ *
+ * Removing the classes and forcing a reflow before adding them back is what
+ * makes a repeated press replay the animation instead of being ignored as a
+ * no-op class change.
+ */
+function pressSound(button) {
+  const on = toggleSound();
+  updateNavbar();
+  if (on) play('click');
+  if (!button) return;
+
+  button.classList.remove('is-animating', 'is-shaking');
+  void button.offsetWidth;
+  button.classList.add(on ? 'is-animating' : 'is-shaking');
+  button.addEventListener(
+    'animationend',
+    () => button.classList.remove('is-animating', 'is-shaking'),
+    { once: true }
+  );
+}
 
 function setDrawer(open) {
   const drawer = $('#nav-drawer');
@@ -100,7 +129,6 @@ function buildDrawer() {
           <span class="drawer-eyebrow" id="drawer-continue-label"></span>
           <span class="drawer-strong" id="drawer-continue-chapter"></span>
         </span>
-        ${CHEVRON}
       </a>
 
       ${DRAWER_LINKS.map((link) =>
@@ -108,7 +136,6 @@ function buildDrawer() {
           href: link.href,
           icon: link.icon,
           label: `<span data-i18n="${link.key}">${escapeHTML(t(link.key))}</span>`,
-          extra: CHEVRON,
         })
       ).join('')}
 
@@ -117,7 +144,6 @@ function buildDrawer() {
         id: 'drawer-account',
         icon: 'account.svg',
         label: '<span id="drawer-account-label"></span>',
-        extra: CHEVRON,
       })}
     </div>
 
@@ -140,21 +166,49 @@ function buildDrawer() {
         ).join('')}
       </ul>
 
-      ${row({
-        tag: 'button',
-        id: 'drawer-theme',
-        icon: 'sun.svg',
-        label: `<span data-i18n="nav.themeName">${escapeHTML(t('nav.themeName'))}</span>`,
-        extra: value('drawer-theme-value'),
-      })}
+      <!-- The bar's own marks rather than flat pictures of them: the sun takes
+           a bite out of itself to become a moon, and the speaker keeps its
+           slash and its shake. The mask needs an id of its own -- two elements
+           answering to the same one is not markup, it is a coincidence. -->
+      <button type="button" class="drawer-row" id="drawer-theme" aria-pressed="false">
+        <span class="drawer-icon" aria-hidden="true">
+          <svg class="theme-mark" viewBox="0 0 24 24" focusable="false">
+            <mask id="theme-mark-mask-drawer">
+              <rect x="0" y="0" width="24" height="24" fill="#fff" />
+              <circle class="theme-bite" cx="26" cy="8" r="7" fill="#000" />
+            </mask>
+            <circle class="theme-orb" cx="12" cy="12" r="5.5"
+                    mask="url(#theme-mark-mask-drawer)" />
+            <g class="theme-rays" stroke-linecap="round">
+              <line x1="12" y1="1.6" x2="12" y2="4" />
+              <line x1="12" y1="20" x2="12" y2="22.4" />
+              <line x1="1.6" y1="12" x2="4" y2="12" />
+              <line x1="20" y1="12" x2="22.4" y2="12" />
+              <line x1="4.6" y1="4.6" x2="6.3" y2="6.3" />
+              <line x1="17.7" y1="17.7" x2="19.4" y2="19.4" />
+              <line x1="4.6" y1="19.4" x2="6.3" y2="17.7" />
+              <line x1="17.7" y1="6.3" x2="19.4" y2="4.6" />
+            </g>
+          </svg>
+        </span>
+        <span class="drawer-label" data-i18n="nav.themeName">${escapeHTML(
+          t('nav.themeName')
+        )}</span>
+        ${value('drawer-theme-value')}
+      </button>
 
-      ${row({
-        tag: 'button',
-        id: 'drawer-sound',
-        icon: 'sound.svg',
-        label: `<span data-i18n="nav.soundName">${escapeHTML(t('nav.soundName'))}</span>`,
-        extra: value('drawer-sound-value'),
-      })}
+      <button type="button" class="drawer-row sound-btn" id="drawer-sound" aria-pressed="true">
+        <span class="drawer-icon" aria-hidden="true">
+          <span class="sound-icon">
+            <img src="/images/sound.svg" alt="">
+            <span class="sound-slash"></span>
+          </span>
+        </span>
+        <span class="drawer-label" data-i18n="nav.soundName">${escapeHTML(
+          t('nav.soundName')
+        )}</span>
+        ${value('drawer-sound-value')}
+      </button>
     </div>
 
     <div class="drawer-rule" aria-hidden="true"></div>
@@ -191,11 +245,7 @@ function buildDrawer() {
     updateNavbar();
   });
 
-  $('#drawer-sound')?.addEventListener('click', () => {
-    const on = toggleSound();
-    updateNavbar();
-    if (on) play('click');
-  });
+  $('#drawer-sound')?.addEventListener('click', (event) => pressSound(event.currentTarget));
 }
 
 /** The parts of the drawer that depend on state. */
@@ -223,7 +273,9 @@ function updateDrawer() {
   const on = soundEnabled();
   const soundValue = $('#drawer-sound-value');
   if (soundValue) soundValue.textContent = t(on ? 'nav.on' : 'nav.off');
-  $('#drawer-sound')?.setAttribute('aria-pressed', String(on));
+  const drawerSound = $('#drawer-sound');
+  drawerSound?.classList.toggle('is-muted', !on);
+  drawerSound?.setAttribute('aria-pressed', String(on));
 
   const languageValue = $('#drawer-language-value');
   if (languageValue) languageValue.textContent = LANGUAGE_NAMES[currentLanguage()] || '';
@@ -304,22 +356,7 @@ export function initNavbar() {
     updateNavbar();
   });
 
-  soundButton?.addEventListener('click', () => {
-    const on = toggleSound();
-    updateNavbar();
-    if (on) play('click');
-
-    // Restart the animation on every press. Removing the class and forcing a
-    // reflow before re-adding it is what makes a repeated click replay it
-    // instead of being ignored as a no-op class change.
-    soundButton.classList.remove('is-animating', 'is-shaking');
-    void soundButton.offsetWidth;
-    soundButton.classList.add(on ? 'is-animating' : 'is-shaking');
-  });
-
-  soundButton?.addEventListener('animationend', () => {
-    soundButton.classList.remove('is-animating', 'is-shaking');
-  });
+  soundButton?.addEventListener('click', () => pressSound(soundButton));
 
   // --- sign in / out ---
   // Signing out is a profile-page action now; the navbar icon is pure
