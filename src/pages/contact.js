@@ -9,6 +9,7 @@ const SOCIALS = [
   { name: 'Tellonym', href: 'https://tellonym.me/tomo_4t', icon: 'tellonym.svg' },
   { name: 'Twitch', href: 'https://www.twitch.tv/tomo_4t', icon: 'twitch.svg' },
   { name: 'Pinterest', href: 'https://pinterest.com/Tomo_4t', icon: 'pinterest.svg' },
+  { name: 'TikTok', href: 'https://www.tiktok.com/@Tomo_4t', icon: 'tiktok.svg' },
 ];
 
 export const title = () => t('nav.contact');
