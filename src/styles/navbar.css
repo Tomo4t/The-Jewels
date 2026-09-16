@@ -293,28 +293,15 @@ body {
    long it took -- which is what read as a flash rather than a dim.
    Still scoped to the class the theme module holds for the length of the swap,
    so ordinary navigation never waits on a colour transition. */
-html.theme-changing,
-html.theme-changing *,
-html.theme-changing *::before,
-html.theme-changing *::after {
-  transition:
-    background-color var(--theme-swap) var(--theme-ease),
-    border-color var(--theme-swap) var(--theme-ease),
-    color var(--theme-swap) var(--theme-ease),
-    fill var(--theme-swap) var(--theme-ease),
-    stroke var(--theme-swap) var(--theme-ease),
-    filter var(--theme-swap) var(--theme-ease),
-    box-shadow var(--theme-swap) var(--theme-ease);
-}
-
-/* The icon filters are rebuilt from these numbers, so animating them on the
-   root is what carries every icon across with the surface behind it -- they
-   inherit, so one transition here moves all of them. Without this the filters
-   changed in a single frame and the icons flashed white against a bar that was
-   still light.
-   The `*` above does not match pseudo-elements, which is a separate version of
-   the same bug: the two bars of the drawer's close X are ::before and ::after
-   drawn in currentColor, and they were snapping on their own. */
+/* The only theme transition on the site.
+   Every colour the two themes disagree about is a registered token, so it is
+   the TOKEN that animates here, once, on the root. Tokens inherit, so every
+   element reading one follows it across without a transition of its own -- and
+   that includes text, borders, surfaces, the filters the icons are recoloured
+   with, and pseudo-elements, which a `*` selector never reaches anyway.
+   There used to be a per-element rule here as well. It did more harm than good
+   once the tokens moved: an element transitioning `color` toward a value that
+   was itself still moving eased twice and arrived late. */
 html.theme-changing {
   transition:
     --color-accent var(--theme-swap) var(--theme-ease),
