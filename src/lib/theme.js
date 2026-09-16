@@ -18,9 +18,11 @@ export function applyTheme(theme) {
 
   // Colour transitions are enabled only while the theme is actually changing,
   // so they never slow down a normal page load or route change.
+  // Held a little longer than the swap itself (--theme-swap is 420ms), because
+  // taking the class off mid-transition is what made the last few frames snap.
   root.classList.add('theme-changing');
   clearTimeout(applyTheme.settle);
-  applyTheme.settle = setTimeout(() => root.classList.remove('theme-changing'), 400);
+  applyTheme.settle = setTimeout(() => root.classList.remove('theme-changing'), 560);
 
   root.classList.toggle('dark', dark);
   root.style.colorScheme = dark ? 'dark' : 'light';

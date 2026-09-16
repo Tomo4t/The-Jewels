@@ -189,24 +189,6 @@ body {
   color: var(--color-text);
 }
 
-/* Smooth transition for theme toggle */
-body {
-  transition:
-    background-color 0.4s ease,
-    color 0.4s ease;
-}
-
-.navbar,
-.nav-title,
-.dropdown-menu,
-footer,
-.button-accent {
-  transition:
-    background-color 0.4s ease,
-    color 0.4s ease,
-    filter 0.4s ease;
-}
-
 .icon-btn img {
   transition:
     transform 0.2s ease,
@@ -307,17 +289,55 @@ footer,
    changes colour in a single frame, which reads as the toggle not animating at
    all. Scoped to a class the theme module adds for the length of the swap, so
    ordinary navigation is never held behind a transition. */
+/* The whole page moves together, at one speed.
+   It was seven hand-picked selectors at 240ms, with body and the bar on a
+   separate always-on 400ms rule. So a few things glided, most of the page
+   flipped in a single frame, and the parts that did glide did not agree on how
+   long it took -- which is what read as a flash rather than a dim.
+   Still scoped to the class the theme module holds for the length of the swap,
+   so ordinary navigation never waits on a colour transition. */
 html.theme-changing,
-html.theme-changing body,
-html.theme-changing .navbar,
-html.theme-changing .dropdown-menu,
-html.theme-changing .auth-card,
-html.theme-changing .account-section,
-html.theme-changing .comment {
+html.theme-changing * {
   transition:
-    background-color var(--transition-base),
-    border-color var(--transition-base),
-    color var(--transition-base);
+    background-color var(--theme-swap) var(--theme-ease),
+    border-color var(--theme-swap) var(--theme-ease),
+    color var(--theme-swap) var(--theme-ease),
+    fill var(--theme-swap) var(--theme-ease),
+    stroke var(--theme-swap) var(--theme-ease),
+    filter var(--theme-swap) var(--theme-ease),
+    box-shadow var(--theme-swap) var(--theme-ease);
+}
+
+/* `transition` is a shorthand, so the rule above replaces whatever it lands on
+   -- including the two bits of motion that are the point of the toggle. Both
+   are restated at a specificity it cannot reach. */
+html.theme-changing .theme-mark {
+  transition: transform 500ms cubic-bezier(0.34, 1.3, 0.5, 1);
+}
+
+html.theme-changing .theme-orb {
+  transition: transform 400ms cubic-bezier(0.34, 1.3, 0.5, 1);
+}
+
+html.theme-changing .theme-bite {
+  transition: transform 450ms cubic-bezier(0.5, 0, 0.3, 1);
+}
+
+html.theme-changing .theme-rays {
+  transition:
+    opacity 250ms ease 100ms,
+    transform 400ms cubic-bezier(0.5, 0, 0.3, 1);
+}
+
+html.theme-changing .gradient-layer {
+  transition: opacity 1s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.theme-changing,
+  html.theme-changing * {
+    transition: none;
+  }
 }
 
 /* Sound toggle.

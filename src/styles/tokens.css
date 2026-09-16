@@ -82,6 +82,10 @@
   --transition-fast: 140ms ease;
   --transition-base: 240ms ease;
 
+  /* One number for the theme swap, because the whole page has to agree on it. */
+  --theme-swap: 420ms;
+  --theme-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
