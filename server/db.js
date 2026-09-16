@@ -75,23 +75,6 @@ CREATE TABLE IF NOT EXISTS newsletters (
   created_by INTEGER REFERENCES users(id) ON DELETE SET NULL
 );
 
-CREATE TABLE IF NOT EXISTS social_posts (
-  id         INTEGER PRIMARY KEY AUTOINCREMENT,
-  lang       TEXT    NOT NULL,
-  platform   TEXT    NOT NULL,
-  chapter    INTEGER NOT NULL,
-  body       TEXT    NOT NULL DEFAULT '',
-  status     TEXT    NOT NULL DEFAULT 'todo'
-                     CHECK (status IN ('todo', 'posted', 'skipped')),
-  created_at TEXT    NOT NULL DEFAULT (datetime('now')),
-  posted_at  TEXT,
-
-  -- One row per place a chapter gets announced. Generating is therefore safe to
-  -- run again: a second pass over a chapter that already has rows writes
-  -- nothing rather than doubling the queue, the same way announcements works.
-  UNIQUE (lang, platform, chapter)
-);
-
 CREATE TABLE IF NOT EXISTS push_subscriptions (
   endpoint   TEXT    PRIMARY KEY,
   user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

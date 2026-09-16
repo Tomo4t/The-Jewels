@@ -179,8 +179,7 @@
       "moderation": "Moderación",
       "users": "Usuarios",
       "settings": "Ajustes",
-      "newsletter": "Boletín",
-      "social": "Redes"
+      "newsletter": "Boletín"
     },
     "uploadChapter": "Subir capítulo",
     "chapterTitle": "Título del capítulo",
@@ -340,34 +339,7 @@
     "muteWhich": "¿Cuánto tiempo no podrá comentar {username}?",
     "removeKeep": "Conservar sus comentarios",
     "removePurge": "Borrarlo todo",
-    "removeHint": "Borrar no se puede deshacer. Conservar los comentarios los deja firmados como «Cuenta eliminada».",
-    "social": {
-      "title": "Redes",
-      "where": "Dónde publicas",
-      "whereHint": "Marca cada cuenta que lleves de verdad. Un capítulo solo se prepara para esas, y solo en el idioma en que publica esa cuenta.",
-      "saveTargets": "Guardar cuentas",
-      "targetsSaved": "Cuentas guardadas.",
-      "generate": "Preparar publicaciones del capítulo",
-      "generateGo": "Prepararlas",
-      "generated": "{count} preparadas.",
-      "nothingNew": "Nada nuevo que preparar.",
-      "queue": "Por publicar",
-      "empty": "Nada pendiente. Prepara un capítulo arriba.",
-      "copy": "Copiar",
-      "copied": "Copiado.",
-      "markPosted": "Marcar publicado",
-      "markTodo": "Aún sin publicar",
-      "skip": "Omitir",
-      "posted": "Publicado",
-      "skipped": "Omitido",
-      "chapterLabel": "Capítulo {n}",
-      "remove": "Quitar",
-      "removed": "Quitado.",
-      "removeHint": "Omitir lo deja fuera si vuelves a generar. Quitar lo borra de la lista, y volver a generar el capítulo lo trae de nuevo.",
-      "clearDone": "Borrar los terminados",
-      "clearDoneConfirm": "¿Quitar {count} publicaciones terminadas de la lista?",
-      "cleared": "{count} borradas."
-    }
+    "removeHint": "Borrar no se puede deshacer. Conservar los comentarios los deja firmados como «Cuenta eliminada»."
   },
   "errors": {
     "notFound": "Página no encontrada",

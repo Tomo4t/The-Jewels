@@ -179,8 +179,7 @@
       "moderation": "Moderation",
       "users": "Users",
       "settings": "Settings",
-      "newsletter": "Newsletter",
-      "social": "Social"
+      "newsletter": "Newsletter"
     },
     "uploadChapter": "Upload chapter",
     "chapterTitle": "Chapter title",
@@ -340,34 +339,7 @@
     "muteWhich": "How long should {username} be unable to comment?",
     "removeKeep": "Keep their comments",
     "removePurge": "Erase everything",
-    "removeHint": "Erasing cannot be undone. Keeping their comments leaves them signed \"Deleted account\".",
-    "social": {
-      "title": "Social",
-      "where": "Where you post",
-      "whereHint": "Tick every account you actually run. A chapter is only drafted for the ones you tick, and only in the language that account posts in.",
-      "saveTargets": "Save accounts",
-      "targetsSaved": "Accounts saved.",
-      "generate": "Draft posts for chapter",
-      "generateGo": "Draft them",
-      "generated": "{count} drafted.",
-      "nothingNew": "Nothing new to draft.",
-      "queue": "To post",
-      "empty": "Nothing waiting. Draft a chapter above.",
-      "copy": "Copy",
-      "copied": "Copied.",
-      "markPosted": "Mark posted",
-      "markTodo": "Not posted yet",
-      "skip": "Skip",
-      "posted": "Posted",
-      "skipped": "Skipped",
-      "chapterLabel": "Chapter {n}",
-      "remove": "Remove",
-      "removed": "Removed.",
-      "removeHint": "Skip keeps it out of a re-draft. Remove takes it off the list, and drafting the chapter again brings it back fresh.",
-      "clearDone": "Clear the finished ones",
-      "clearDoneConfirm": "Remove {count} finished posts from the list?",
-      "cleared": "{count} cleared."
-    }
+    "removeHint": "Erasing cannot be undone. Keeping their comments leaves them signed \"Deleted account\"."
   },
   "errors": {
     "notFound": "Page not found",

@@ -179,8 +179,7 @@
       "moderation": "Modération",
       "users": "Utilisateurs",
       "settings": "Réglages",
-      "newsletter": "Infolettre",
-      "social": "Réseaux"
+      "newsletter": "Infolettre"
     },
     "uploadChapter": "Téléverser un chapitre",
     "chapterTitle": "Titre du chapitre",
@@ -340,34 +339,7 @@
     "muteWhich": "Pendant combien de temps {username} ne pourra-t-il pas commenter ?",
     "removeKeep": "Garder ses commentaires",
     "removePurge": "Tout effacer",
-    "removeHint": "L’effacement est irréversible. Garder les commentaires les laisse signés « Compte supprimé ».",
-    "social": {
-      "title": "Réseaux",
-      "where": "Où vous publiez",
-      "whereHint": "Cochez chaque compte que vous tenez vraiment. Un chapitre n’est préparé que pour ceux-là, et seulement dans la langue de ce compte.",
-      "saveTargets": "Enregistrer les comptes",
-      "targetsSaved": "Comptes enregistrés.",
-      "generate": "Préparer les posts du chapitre",
-      "generateGo": "Préparer",
-      "generated": "{count} préparés.",
-      "nothingNew": "Rien de nouveau à préparer.",
-      "queue": "À publier",
-      "empty": "Rien en attente. Préparez un chapitre ci-dessus.",
-      "copy": "Copier",
-      "copied": "Copié.",
-      "markPosted": "Marquer publié",
-      "markTodo": "Pas encore publié",
-      "skip": "Passer",
-      "posted": "Publié",
-      "skipped": "Passé",
-      "chapterLabel": "Chapitre {n}",
-      "remove": "Retirer",
-      "removed": "Retiré.",
-      "removeHint": "Ignorer l'exclut d'un nouveau brouillon. Retirer l'enlève de la liste, et redemander les brouillons du chapitre le fait revenir à neuf.",
-      "clearDone": "Effacer les terminés",
-      "clearDoneConfirm": "Retirer {count} publications terminées de la liste ?",
-      "cleared": "{count} effacées."
-    }
+    "removeHint": "L’effacement est irréversible. Garder les commentaires les laisse signés « Compte supprimé »."
   },
   "errors": {
     "notFound": "Page introuvable",

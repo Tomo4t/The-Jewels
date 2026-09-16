@@ -179,8 +179,7 @@
       "moderation": "モデレーション",
       "users": "ユーザー",
       "settings": "設定",
-      "newsletter": "ニュースレター",
-      "social": "SNS"
+      "newsletter": "ニュースレター"
     },
     "uploadChapter": "章をアップロード",
     "chapterTitle": "章タイトル",
@@ -340,34 +339,7 @@
     "muteWhich": "{username} がコメントできない期間は？",
     "removeKeep": "コメントは残す",
     "removePurge": "すべて消去する",
-    "removeHint": "消去は取り消せません。コメントを残すと「削除されたアカウント」として表示されます。",
-    "social": {
-      "title": "SNS",
-      "where": "投稿先",
-      "whereHint": "実際に運用しているアカウントだけにチェックを入れてください。チェックしたアカウントの言語でのみ下書きが作られます。",
-      "saveTargets": "アカウントを保存",
-      "targetsSaved": "アカウントを保存しました。",
-      "generate": "下書きを作るチャプター",
-      "generateGo": "下書きを作る",
-      "generated": "{count} 件作成しました。",
-      "nothingNew": "新しく作るものはありません。",
-      "queue": "投稿待ち",
-      "empty": "待機中のものはありません。上でチャプターを選んでください。",
-      "copy": "コピー",
-      "copied": "コピーしました。",
-      "markPosted": "投稿済みにする",
-      "markTodo": "まだ投稿していない",
-      "skip": "見送る",
-      "posted": "投稿済み",
-      "skipped": "見送り",
-      "chapterLabel": "第{n}話",
-      "remove": "削除",
-      "removed": "削除しました。",
-      "removeHint": "「スキップ」は再作成しても戻りません。「削除」は一覧から消えますが、その話数をもう一度下書きすると新しく作られます。",
-      "clearDone": "完了したものを消す",
-      "clearDoneConfirm": "完了した投稿 {count} 件を一覧から削除しますか？",
-      "cleared": "{count} 件を削除しました。"
-    }
+    "removeHint": "消去は取り消せません。コメントを残すと「削除されたアカウント」として表示されます。"
   },
   "errors": {
     "notFound": "ページが見つかりません",

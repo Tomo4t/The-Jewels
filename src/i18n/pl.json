@@ -179,8 +179,7 @@
       "moderation": "Moderacja",
       "users": "Użytkownicy",
       "settings": "Ustawienia",
-      "newsletter": "Newsletter",
-      "social": "Social"
+      "newsletter": "Newsletter"
     },
     "uploadChapter": "Wyślij rozdział",
     "chapterTitle": "Tytuł rozdziału",
@@ -340,34 +339,7 @@
     "muteWhich": "Jak długo {username} nie ma móc komentować?",
     "removeKeep": "Zachowaj komentarze",
     "removePurge": "Wymaż wszystko",
-    "removeHint": "Wymazania nie można cofnąć. Zachowane komentarze zostaną podpisane „Usunięte konto”.",
-    "social": {
-      "title": "Social media",
-      "where": "Gdzie publikujesz",
-      "whereHint": "Zaznacz każde konto, które naprawdę prowadzisz. Rozdział zostanie przygotowany tylko dla nich i tylko w języku danego konta.",
-      "saveTargets": "Zapisz konta",
-      "targetsSaved": "Konta zapisane.",
-      "generate": "Przygotuj posty dla rozdziału",
-      "generateGo": "Przygotuj",
-      "generated": "Przygotowano {count}.",
-      "nothingNew": "Nie ma nic nowego do przygotowania.",
-      "queue": "Do opublikowania",
-      "empty": "Nic nie czeka. Przygotuj rozdział powyżej.",
-      "copy": "Kopiuj",
-      "copied": "Skopiowano.",
-      "markPosted": "Oznacz jako opublikowane",
-      "markTodo": "Jeszcze nieopublikowane",
-      "skip": "Pomiń",
-      "posted": "Opublikowane",
-      "skipped": "Pominięte",
-      "chapterLabel": "Rozdział {n}",
-      "remove": "Usuń",
-      "removed": "Usunięto.",
-      "removeHint": "Pominięcie nie wraca przy ponownym tworzeniu. Usunięcie znika z listy, a ponowne przygotowanie rozdziału tworzy je od nowa.",
-      "clearDone": "Wyczyść zakończone",
-      "clearDoneConfirm": "Usunąć {count} zakończonych postów z listy?",
-      "cleared": "Usunięto {count}."
-    }
+    "removeHint": "Wymazania nie można cofnąć. Zachowane komentarze zostaną podpisane „Usunięte konto”."
   },
   "errors": {
     "notFound": "Nie znaleziono strony",

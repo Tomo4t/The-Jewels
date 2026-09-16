@@ -232,15 +232,6 @@ export const api = {
     request('/api/notify/push', { method: 'POST', body: { subscription } }),
   unsubscribePush: (endpoint) =>
     request('/api/notify/push', { method: 'DELETE', body: { endpoint } }),
-  adminSocial: () => request('/api/admin/social/'),
-  saveSocialTargets: (targets) =>
-    request('/api/admin/social/targets', { method: 'PUT', body: { targets } }),
-  generateSocial: (chapter) =>
-    request('/api/admin/social/generate', { method: 'POST', body: { chapter } }),
-  updateSocialPost: (id, patch) =>
-    request(`/api/admin/social/${id}`, { method: 'PUT', body: patch }),
-  removeSocialPost: (id) => request(`/api/admin/social/${id}`, { method: 'DELETE' }),
-  clearSocialDone: () => request('/api/admin/social/done', { method: 'DELETE' }),
   adminNewsletters: () => request('/api/admin/newsletters/'),
   createNewsletter: () => request('/api/admin/newsletters/', { method: 'POST' }),
   saveNewsletter: (id, draft) =>
