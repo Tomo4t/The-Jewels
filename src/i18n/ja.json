@@ -360,7 +360,13 @@
       "skip": "見送る",
       "posted": "投稿済み",
       "skipped": "見送り",
-      "chapterLabel": "第{n}話"
+      "chapterLabel": "第{n}話",
+      "remove": "削除",
+      "removed": "削除しました。",
+      "removeHint": "「スキップ」は再作成しても戻りません。「削除」は一覧から消えますが、その話数をもう一度下書きすると新しく作られます。",
+      "clearDone": "完了したものを消す",
+      "clearDoneConfirm": "完了した投稿 {count} 件を一覧から削除しますか？",
+      "cleared": "{count} 件を削除しました。"
     }
   },
   "errors": {

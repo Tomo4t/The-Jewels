@@ -360,7 +360,13 @@
       "skip": "Passer",
       "posted": "Publié",
       "skipped": "Passé",
-      "chapterLabel": "Chapitre {n}"
+      "chapterLabel": "Chapitre {n}",
+      "remove": "Retirer",
+      "removed": "Retiré.",
+      "removeHint": "Ignorer l'exclut d'un nouveau brouillon. Retirer l'enlève de la liste, et redemander les brouillons du chapitre le fait revenir à neuf.",
+      "clearDone": "Effacer les terminés",
+      "clearDoneConfirm": "Retirer {count} publications terminées de la liste ?",
+      "cleared": "{count} effacées."
     }
   },
   "errors": {

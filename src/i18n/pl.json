@@ -360,7 +360,13 @@
       "skip": "Pomiń",
       "posted": "Opublikowane",
       "skipped": "Pominięte",
-      "chapterLabel": "Rozdział {n}"
+      "chapterLabel": "Rozdział {n}",
+      "remove": "Usuń",
+      "removed": "Usunięto.",
+      "removeHint": "Pominięcie nie wraca przy ponownym tworzeniu. Usunięcie znika z listy, a ponowne przygotowanie rozdziału tworzy je od nowa.",
+      "clearDone": "Wyczyść zakończone",
+      "clearDoneConfirm": "Usunąć {count} zakończonych postów z listy?",
+      "cleared": "Usunięto {count}."
     }
   },
   "errors": {

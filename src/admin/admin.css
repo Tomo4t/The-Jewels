@@ -927,3 +927,22 @@
   flex-wrap: wrap;
   gap: var(--space-2);
 }
+
+.social-queue-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* Last in the row and quiet until you go for it, so the one destructive
+   control on the card is never the one your thumb lands on first. */
+.social-remove {
+  margin-left: auto;
+  color: var(--color-text-muted);
+}
+
+.social-remove:hover {
+  color: var(--color-danger);
+}

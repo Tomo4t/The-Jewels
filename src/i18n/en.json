@@ -360,7 +360,13 @@
       "skip": "Skip",
       "posted": "Posted",
       "skipped": "Skipped",
-      "chapterLabel": "Chapter {n}"
+      "chapterLabel": "Chapter {n}",
+      "remove": "Remove",
+      "removed": "Removed.",
+      "removeHint": "Skip keeps it out of a re-draft. Remove takes it off the list, and drafting the chapter again brings it back fresh.",
+      "clearDone": "Clear the finished ones",
+      "clearDoneConfirm": "Remove {count} finished posts from the list?",
+      "cleared": "{count} cleared."
     }
   },
   "errors": {

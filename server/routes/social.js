@@ -9,6 +9,8 @@ import {
   generateFor,
   queue,
   updatePost,
+  removePost,
+  clearDone,
 } from '../services/social.js';
 import config from '../config.js';
 
@@ -68,6 +70,27 @@ router.put(
     const row = updatePost(Number(req.params.id), parsed.data, req.user.id);
     if (!row) throw ApiError.notFound('not_found', 'That post is gone.');
     res.json({ post: row });
+  })
+);
+
+// Registered before '/:id' so the bare-ish path is not read as an id: DELETE
+// /done clears the finished ones, DELETE /:id removes exactly one.
+router.delete(
+  '/done',
+  requireRole('admin'),
+  asyncRoute(async (req, res) => {
+    res.json({ removed: clearDone(req.user.id), queue: queue() });
+  })
+);
+
+router.delete(
+  '/:id',
+  requireRole('admin'),
+  asyncRoute(async (req, res) => {
+    if (!removePost(Number(req.params.id), req.user.id)) {
+      throw ApiError.notFound('not_found', 'That post is gone.');
+    }
+    res.json({ queue: queue() });
   })
 );
 

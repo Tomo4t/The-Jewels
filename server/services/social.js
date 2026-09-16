@@ -143,6 +143,32 @@ function post(id) {
   return db.prepare(`SELECT ${COLUMNS} FROM social_posts WHERE id = ?`).get(id);
 }
 
+/**
+ * Removing is not the same as skipping. Skip means "not this one, on purpose",
+ * and it survives a re-draft -- generating the chapter again will not bring a
+ * skipped post back. Remove means "this should not be here at all", and a
+ * re-draft WILL bring it back, as a fresh draft. Both are wanted: one is a
+ * decision you are recording, the other is a mistake you are undoing.
+ */
+export function removePost(id, actorId) {
+  const gone = db.prepare('DELETE FROM social_posts WHERE id = ?').run(id).changes;
+  if (gone) audit(actorId, 'social.removed', 'social_post', String(id), {});
+  return gone > 0;
+}
+
+/**
+ * The queue is a working list, not an archive -- after a few chapters the
+ * finished cards are the only thing standing between you and the ones you
+ * still have to post.
+ */
+export function clearDone(actorId) {
+  const gone = db
+    .prepare("DELETE FROM social_posts WHERE status IN ('posted','skipped')")
+    .run().changes;
+  if (gone) audit(actorId, 'social.cleared', 'social_post', 'done', { count: gone });
+  return gone;
+}
+
 export function updatePost(id, { body, status }, actorId) {
   const row = db.prepare('SELECT * FROM social_posts WHERE id = ?').get(id);
   if (!row) return null;

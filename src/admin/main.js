@@ -1878,7 +1878,13 @@ async function renderSocial(panel) {
         </button>
       </div>
 
-      <h3>${escapeHTML(t('admin.social.queue'))} <span class="count" id="social-count"></span></h3>
+      <div class="social-queue-head">
+        <h3>${escapeHTML(t('admin.social.queue'))} <span class="count" id="social-count"></span></h3>
+        <button type="button" class="button button--quiet" id="social-clear" hidden>
+          ${escapeHTML(t('admin.social.clearDone'))}
+        </button>
+      </div>
+      <p class="field-hint">${escapeHTML(t('admin.social.removeHint'))}</p>
       <div id="social-queue"></div>
     </section>`;
 
@@ -1893,6 +1899,7 @@ async function renderSocial(panel) {
     const host = panel.querySelector('#social-queue');
     const left = posts.filter((post) => post.status === 'todo').length;
     panel.querySelector('#social-count').textContent = left ? String(left) : '';
+    panel.querySelector('#social-clear').hidden = posts.length === left;
 
     if (!posts.length) {
       host.innerHTML = `<p class="empty-note">${escapeHTML(t('admin.social.empty'))}</p>`;
@@ -1964,6 +1971,10 @@ async function renderSocial(panel) {
                          ${escapeHTML(t('admin.social.skip'))}
                        </button>`
                 }
+                <button type="button" class="button button--quiet social-remove"
+                        data-remove="${post.id}">
+                  ${escapeHTML(t('admin.social.remove'))}
+                </button>
               </div>
             </li>`
             )
@@ -2016,6 +2027,27 @@ async function renderSocial(panel) {
       })
     );
 
+    panel.querySelectorAll('[data-remove]').forEach((button) =>
+      button.addEventListener('click', async (event) => {
+        // Held before the first await, or dispatch is over and this is null.
+        const pressed = event.currentTarget;
+        const id = Number(pressed.dataset.remove);
+        pressed.disabled = true;
+        try {
+          // No dialog for a single card: the chapter's own draft button puts it
+          // straight back, so the worst case is retyping an edit rather than
+          // losing a decision.
+          const { queue: rest } = await api.removeSocialPost(id);
+          posts = rest;
+          drawQueue();
+          toast(t('admin.social.removed'));
+        } catch (err) {
+          fail(err);
+          pressed.disabled = false;
+        }
+      })
+    );
+
     panel.querySelectorAll('[data-status]').forEach((button) =>
       button.addEventListener('click', async (event) => {
         // Held before the await: dispatch is over by the time this resumes and
@@ -2047,6 +2079,32 @@ async function renderSocial(panel) {
     try {
       await api.saveSocialTargets(wanted);
       toastSuccess(t('admin.social.targetsSaved'));
+    } catch (err) {
+      fail(err);
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  panel.querySelector('#social-clear').addEventListener('click', async (event) => {
+    const button = event.currentTarget;
+    const done = posts.filter((post) => post.status !== 'todo').length;
+
+    // This one does ask. It is several cards at once, some of them possibly
+    // rewritten by hand, and nothing on screen would tell you what went.
+    const goAhead = await confirmDialog({
+      title: t('admin.social.clearDoneConfirm', { count: done }),
+      confirmLabel: t('admin.social.clearDone'),
+      danger: true,
+    });
+    if (!goAhead) return;
+
+    button.disabled = true;
+    try {
+      const { removed, queue: rest } = await api.clearSocialDone();
+      posts = rest;
+      drawQueue();
+      toast(t('admin.social.cleared', { count: removed }));
     } catch (err) {
       fail(err);
     } finally {

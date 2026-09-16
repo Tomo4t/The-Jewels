@@ -360,7 +360,13 @@
       "skip": "Omitir",
       "posted": "Publicado",
       "skipped": "Omitido",
-      "chapterLabel": "Capítulo {n}"
+      "chapterLabel": "Capítulo {n}",
+      "remove": "Quitar",
+      "removed": "Quitado.",
+      "removeHint": "Omitir lo deja fuera si vuelves a generar. Quitar lo borra de la lista, y volver a generar el capítulo lo trae de nuevo.",
+      "clearDone": "Borrar los terminados",
+      "clearDoneConfirm": "¿Quitar {count} publicaciones terminadas de la lista?",
+      "cleared": "{count} borradas."
     }
   },
   "errors": {

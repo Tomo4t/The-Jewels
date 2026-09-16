@@ -1956,4 +1956,58 @@ describe('the social queue', () => {
     });
     assert.equal(status, 400);
   });
+
+  test('removing one takes it off the list, and a re-draft brings it back', async () => {
+    const { body: before } = await admin('/api/admin/social/');
+    const id = before.queue[0].id;
+
+    const gone = await admin(`/api/admin/social/${id}`, { method: 'DELETE' });
+    assert.equal(gone.status, 200);
+    assert.equal(gone.body.queue.length, 0);
+
+    // The difference from skipping: a removed post is a mistake undone, so the
+    // chapter's own draft button is allowed to put it back.
+    const again = await admin('/api/admin/social/generate', {
+      method: 'POST',
+      body: json({ chapter: 1 }),
+    });
+    assert.equal(again.body.written, 1);
+    assert.equal(again.body.queue.length, 1);
+  });
+
+  test('a skipped post is not resurrected by drafting again', async () => {
+    const { body: before } = await admin('/api/admin/social/');
+    await admin(`/api/admin/social/${before.queue[0].id}`, {
+      method: 'PUT',
+      body: json({ status: 'skipped' }),
+    });
+    const { body } = await admin('/api/admin/social/generate', {
+      method: 'POST',
+      body: json({ chapter: 1 }),
+    });
+    assert.equal(body.written, 0, 'skipping is a decision, not a gap to be refilled');
+    assert.equal(body.queue[0].status, 'skipped');
+  });
+
+  test('clearing the finished ones leaves the unfinished alone', async () => {
+    // One skipped from the test above; add a fresh todo alongside it.
+    await admin('/api/admin/social/targets', {
+      method: 'PUT',
+      body: json({ targets: ['en:instagram', 'en:twitter'] }),
+    });
+    await admin('/api/admin/social/generate', { method: 'POST', body: json({ chapter: 1 }) });
+
+    const { status, body } = await admin('/api/admin/social/done', { method: 'DELETE' });
+    assert.equal(status, 200);
+    assert.equal(body.removed, 1);
+    assert.deepEqual(
+      body.queue.map((post) => post.status),
+      ['todo']
+    );
+  });
+
+  test('removing something already gone says so rather than pretending', async () => {
+    const { status } = await admin('/api/admin/social/999999', { method: 'DELETE' });
+    assert.equal(status, 404);
+  });
 });
