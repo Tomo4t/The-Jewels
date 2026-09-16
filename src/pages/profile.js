@@ -1,5 +1,5 @@
 import { escapeHTML } from '../lib/dom.js';
-import { t, formatDate } from '../lib/i18n.js';
+import { t, formatDate, LANGUAGE_NAMES } from '../lib/i18n.js';
 import { buildHash, navigate } from '../router.js';
 import session from '../lib/session.js';
 import api, { ApiError } from '../lib/api.js';
@@ -402,6 +402,33 @@ const urlBase64ToUint8Array = (base64) => {
   return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
 };
 
+/**
+ * Which languages this reader wants mail in.
+ *
+ * Shown ticked when the reader has expressed no preference, because that is
+ * what no preference means here -- everything. Presenting it as all-unticked
+ * would read as "you are getting nothing", which is the opposite of true.
+ */
+const languageRow = (state) => {
+  const chosen = new Set(state.languages?.length ? state.languages : state.allLanguages);
+  return `
+    <div class="notify-row">
+      <span class="notify-name">${escapeHTML(t('notify.languages'))}</span>
+      <div class="notify-langs">
+        ${(state.allLanguages || [])
+          .map(
+            (code) => `
+          <label class="switch-label">
+            <input type="checkbox" data-mail-lang="${code}" ${chosen.has(code) ? 'checked' : ''}>
+            <span>${escapeHTML(LANGUAGE_NAMES[code] || code)}</span>
+          </label>`
+          )
+          .join('')}
+      </div>
+      <p class="field-hint">${escapeHTML(t('notify.languagesHint'))}</p>
+    </div>`;
+};
+
 const toggleRow = (id, label, hint, on, { disabled = false, note = '' } = {}) => `
   <div class="notify-row">
     <label class="switch-label">
@@ -445,12 +472,29 @@ async function renderNotifications(host, user) {
       <div class="notify-list">
         ${toggleRow('newsletter', t('notify.newsletter'), t('notify.newsletterHint'), state.preferences.newsletter, { disabled: !confirmed })}
         ${toggleRow('release', t('notify.release'), t('notify.releaseHint'), state.preferences.release, { disabled: !confirmed })}
+        ${languageRow(state)}
         ${toggleRow('push', t('notify.push'), t('notify.pushHint'), state.push.devices > 0, {
           disabled: !pushSupported() || !state.push.configured || permission === 'denied',
           note: pushNote,
         })}
       </div>
     </section>`;
+
+  host.querySelectorAll('[data-mail-lang]').forEach((input) =>
+    input.addEventListener('change', async () => {
+      const picked = [...host.querySelectorAll('[data-mail-lang]')]
+        .filter((box) => box.checked)
+        .map((box) => box.dataset.mailLang);
+      try {
+        // Not redrawn afterwards on purpose: a redraw mid-tick would move the
+        // boxes under the reader's finger while they are still choosing.
+        state.languages = (await api.setMailLanguages(picked)).languages;
+        toastSuccess(t('notify.languagesSaved'));
+      } catch (err) {
+        toastError(err instanceof ApiError ? err.message : t('common.error'));
+      }
+    })
+  );
 
   host.querySelectorAll('[data-notify]').forEach((input) => {
     input.addEventListener('change', async (event) => {

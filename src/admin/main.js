@@ -1447,7 +1447,11 @@ function blockEditor(block, index, chapters) {
 }
 
 async function renderNewsletter(panel) {
-  const { newsletters, subscribers, dailyLimit } = await api.adminNewsletters();
+  const { newsletters, subscribers, subscribersByLanguage, languages, dailyLimit } =
+    await api.adminNewsletters();
+
+  // How many people this particular draft would actually reach.
+  const reach = (lang) => subscribersByLanguage?.[lang || 'all'] ?? subscribers;
   const { chapters } = await api.adminChapters();
 
   let current = newsletters.find((n) => n.status === 'draft') || null;
@@ -1524,6 +1528,24 @@ async function renderNewsletter(panel) {
                  value="${escapeHTML(current.subject || '')}">
         </label>
 
+        <label class="field">
+          <span>${escapeHTML(t('admin.news.language'))}</span>
+          <select id="news-lang" ${sent ? 'disabled' : ''}>
+            <option value="" ${current.lang ? '' : 'selected'}>
+              ${escapeHTML(t('admin.news.anyLanguage'))} (${reach('')})
+            </option>
+            ${(languages || [])
+              .map(
+                (code) =>
+                  `<option value="${code}" ${code === current.lang ? 'selected' : ''}>${escapeHTML(
+                    LANGUAGE_NAMES[code] || code
+                  )} (${reach(code)})</option>`
+              )
+              .join('')}
+          </select>
+        </label>
+        <p class="field-hint">${escapeHTML(t('admin.news.languageHint'))}</p>
+
         <ol class="block-list" id="block-list"></ol>
 
         ${
@@ -1545,7 +1567,7 @@ async function renderNewsletter(panel) {
                    ${escapeHTML(t('admin.news.sendTest'))}
                  </button>
                  <button type="button" class="button button--danger" id="news-send">
-                   ${escapeHTML(t('admin.news.sendToAll', { count: subscribers }))}
+                   ${escapeHTML(t('admin.news.sendToAll', { count: reach(current.lang) }))}
                  </button>
                </div>`
         }
@@ -1676,6 +1698,14 @@ async function renderNewsletter(panel) {
       schedulePreview();
     });
 
+    panel.querySelector('#news-lang')?.addEventListener('change', (event) => {
+      current.lang = event.target.value;
+      // Redrawn rather than patched: the send button carries the recipient
+      // count, and a count that does not follow the language it is counting is
+      // worse than no count at all.
+      drawEditor();
+    });
+
     panel.querySelectorAll('[data-add]').forEach((button) =>
       button.addEventListener('click', () => {
         current.blocks.push(blockDefaults[button.dataset.add]());
@@ -1725,8 +1755,8 @@ async function renderNewsletter(panel) {
       // dialogs made it return false every time, which turned the send button
       // into one that did nothing at all and said nothing about why.
       const goAhead = await confirmDialog({
-        title: t('admin.news.confirmSend', { count: subscribers }),
-        confirmLabel: t('admin.news.sendToAll', { count: subscribers }),
+        title: t('admin.news.confirmSend', { count: reach(current.lang) }),
+        confirmLabel: t('admin.news.sendToAll', { count: reach(current.lang) }),
         danger: true,
       });
       if (!goAhead) return;

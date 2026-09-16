@@ -41,8 +41,17 @@ export function setPreference(userId, kind, on, actorId = null) {
  * may well belong to somebody else who never asked for any of this, and sending
  * to it is how a site earns a spam complaint it deserves.
  */
-export function subscribersFor(kind) {
+export function subscribersFor(kind, lang = null) {
   if (!KINDS.includes(kind)) throw new Error(`Unknown notification kind: ${kind}`);
+
+  // An empty mail_langs is "no preference", so those readers match every
+  // language. The commas around both sides are what stop 'es' matching inside
+  // a longer code; it is a LIKE rather than a join table because the list is
+  // five entries long and will never be queried on its own.
+  const byLanguage = lang
+    ? `AND (mail_langs = '' OR ',' || mail_langs || ',' LIKE '%,' || @lang || ',%')`
+    : '';
+
   return db
     .prepare(
       `SELECT id, email, display_name AS displayName
@@ -52,9 +61,37 @@ export function subscribersFor(kind) {
           AND email_verified_at IS NOT NULL
           AND deleted_at IS NULL
           AND status != 'banned'
+          ${byLanguage}
         ORDER BY id`
     )
-    .all();
+    .all(lang ? { lang } : {});
+}
+
+// --- which languages ------------------------------------------------------
+
+/**
+ * The languages a reader wants to hear about, or an empty array meaning "any".
+ *
+ * This governs release announcements as well as the newsletter, and that is the
+ * point: a chapter shipping in five languages used to mail every subscriber
+ * five times, because the announcement loop ran per language over a recipient
+ * list that had no language in it.
+ */
+export function mailLanguages(userId) {
+  const row = db.prepare('SELECT mail_langs FROM users WHERE id = ?').get(userId);
+  return String(row?.mail_langs || '')
+    .split(',')
+    .filter(Boolean);
+}
+
+export function setMailLanguages(userId, langs, actorId = null) {
+  const clean = [...new Set((langs || []).filter((code) => config.languages.includes(code)))];
+  // Every language is the same as no preference, and storing it as no
+  // preference means a reader who later gets a sixth language still gets it.
+  const value = clean.length === config.languages.length ? '' : clean.sort().join(',');
+  db.prepare('UPDATE users SET mail_langs = ? WHERE id = ?').run(value, userId);
+  audit(actorId ?? userId, 'notify.languages', 'user', userId, { langs: value || 'all' });
+  return mailLanguages(userId);
 }
 
 // --- leaving ---------------------------------------------------------------

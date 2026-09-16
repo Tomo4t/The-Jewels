@@ -245,6 +245,15 @@ addColumn('email_tokens', 'purpose', "TEXT NOT NULL DEFAULT 'verify'");
 // asked for mail must never receive any.
 addColumn('users', 'newsletter_opt_in', 'INTEGER NOT NULL DEFAULT 0');
 addColumn('users', 'release_opt_in', 'INTEGER NOT NULL DEFAULT 0');
+// Which languages a reader wants mail about, comma separated. Empty means all
+// of them, which is deliberate: the column arrives after people have already
+// subscribed, and a stricter default would quietly stop their mail. It also
+// keeps somebody from unsubscribing by accident -- ticking nothing is read as
+// no preference rather than as "send me nothing".
+addColumn('users', 'mail_langs', "TEXT NOT NULL DEFAULT ''");
+// A newsletter is written in one language. Empty means it is not tied to one
+// and goes to every subscriber, which is what every existing draft was.
+addColumn('newsletters', 'lang', "TEXT NOT NULL DEFAULT ''");
 // A mute is separate from a ban on purpose: a banned account cannot sign in at
 // all, whereas a muted reader keeps their account and can still read -- they
 // simply cannot post. One nullable timestamp rather than a flag plus a date,

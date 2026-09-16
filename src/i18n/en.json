@@ -83,7 +83,8 @@
     "readIn": "Read it in {language}"
   },
   "contact": {
-    "title": "All official socials for the creator"
+    "title": "All official socials for the creator",
+    "email": "Or write to me at"
   },
   "legal": {
     "privacy": {
@@ -314,7 +315,11 @@
       "fileLabel": "Link text",
       "videoUrl": "YouTube link",
       "videoTitle": "Button text",
-      "videoHint": "Emails cannot play video — no client runs an embed. This sends the real thumbnail with a play button that opens YouTube."
+      "videoHint": "Emails cannot play video — no client runs an embed. This sends the real thumbnail with a play button that opens YouTube.",
+      "language": "Written in",
+      "anyLanguage": "Everyone, any language",
+      "languageHint": "This decides who gets it: readers who said they read this language, plus readers who never picked one.",
+      "noReaders": "Nobody is signed up for that language yet."
     },
     "push": {
       "title": "Push notifications",
@@ -439,6 +444,9 @@
     "on": "On",
     "off": "Off",
     "unsubscribed": "You have been unsubscribed.",
-    "unsubscribeFailed": "That unsubscribe link is not valid any more. You can switch it off here instead."
+    "unsubscribeFailed": "That unsubscribe link is not valid any more. You can switch it off here instead.",
+    "languages": "Languages you want mail in",
+    "languagesHint": "Tick the ones you read. Leave them all ticked and you get everything — a chapter that comes out in five languages still only earns you one email.",
+    "languagesSaved": "Saved."
   }
 }

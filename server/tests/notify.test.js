@@ -43,6 +43,8 @@ const {
   preferencesFor,
   setPreference,
   subscribersFor,
+  mailLanguages,
+  setMailLanguages,
   unsubscribeToken,
   readUnsubscribeToken,
   enqueue,
@@ -336,4 +338,66 @@ test('links in comments become links, and nothing else does', async () => {
 
   // And off by default, so nothing starts linkifying where it was not asked for.
   assert.doesNotMatch(textToHTML('https://tomojw.com'), /<a /);
+});
+
+// --- which languages a reader wants mail in --------------------------------
+
+const readyReader = async (username) => {
+  const user = await createUser({ username, password: 'a-long-enough-password' });
+  await setEmail(user.id, `${username}@example.com`);
+  confirm(user.id);
+  setPreference(user.id, 'newsletter', true);
+  setPreference(user.id, 'release', true);
+  return user;
+};
+
+test('a reader with no preference is on every language', async () => {
+  const user = await readyReader('nopreference');
+  assert.deepEqual(mailLanguages(user.id), [], 'empty is the no-preference marker');
+  for (const lang of ['en', 'fr', 'ja']) {
+    assert.ok(
+      subscribersFor('newsletter', lang).some((r) => r.id === user.id),
+      `should still be counted for ${lang}`
+    );
+  }
+});
+
+test('picking languages narrows who a send reaches', async () => {
+  const french = await readyReader('frenchonly');
+  setMailLanguages(french.id, ['fr']);
+
+  assert.deepEqual(mailLanguages(french.id), ['fr']);
+  assert.ok(subscribersFor('newsletter', 'fr').some((r) => r.id === french.id));
+  assert.ok(
+    !subscribersFor('newsletter', 'en').some((r) => r.id === french.id),
+    'otherwise picking a language does nothing at all'
+  );
+  // 'es' must not match inside a longer list by accident.
+  setMailLanguages(french.id, ['es']);
+  assert.ok(!subscribersFor('newsletter', 'en').some((r) => r.id === french.id));
+});
+
+test('ticking every language is stored as no preference', async () => {
+  const user = await readyReader('allofthem');
+  setMailLanguages(user.id, ['en', 'ja', 'pl', 'es', 'fr']);
+  assert.deepEqual(
+    mailLanguages(user.id),
+    [],
+    'so that a language added later is included rather than silently excluded'
+  );
+});
+
+test('an unknown language code is dropped rather than stored', async () => {
+  const user = await readyReader('madeuplang');
+  setMailLanguages(user.id, ['fr', 'xx']);
+  assert.deepEqual(mailLanguages(user.id), ['fr']);
+});
+
+test('a chapter in one language does not mail readers of another', async () => {
+  const japanese = await readyReader('japaneseonly');
+  setMailLanguages(japanese.id, ['ja']);
+
+  const forEnglish = subscribersFor('release', 'en').map((r) => r.id);
+  assert.ok(!forEnglish.includes(japanese.id));
+  assert.ok(subscribersFor('release', 'ja').some((r) => r.id === japanese.id));
 });

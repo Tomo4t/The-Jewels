@@ -83,7 +83,8 @@
     "readIn": "Leerlo en {language}"
   },
   "contact": {
-    "title": "Todas las redes oficiales del creador"
+    "title": "Todas las redes oficiales del creador",
+    "email": "O escríbeme a"
   },
   "legal": {
     "privacy": {
@@ -314,7 +315,11 @@
       "fileLabel": "Texto del enlace",
       "videoUrl": "Enlace de YouTube",
       "videoTitle": "Texto del botón",
-      "videoHint": "Los correos no pueden reproducir vídeo — ningún cliente ejecuta un embed. Esto envía la miniatura real con un botón que abre YouTube."
+      "videoHint": "Los correos no pueden reproducir vídeo — ningún cliente ejecuta un embed. Esto envía la miniatura real con un botón que abre YouTube.",
+      "language": "Escrito en",
+      "anyLanguage": "Todos, cualquier idioma",
+      "languageHint": "Esto decide quién lo recibe: los lectores que leen este idioma, más los que no eligieron ninguno.",
+      "noReaders": "Todavía no hay nadie suscrito a ese idioma."
     },
     "push": {
       "title": "Notificaciones push",
@@ -439,6 +444,9 @@
     "on": "Activado",
     "off": "Desactivado",
     "unsubscribed": "Te has dado de baja.",
-    "unsubscribeFailed": "Ese enlace de baja ya no es válido. Puedes desactivarlo aquí."
+    "unsubscribeFailed": "Ese enlace de baja ya no es válido. Puedes desactivarlo aquí.",
+    "languages": "Idiomas en los que quieres recibir correos",
+    "languagesHint": "Marca los que lees. Si los dejas todos marcados lo recibes todo — un capítulo que sale en cinco idiomas solo te trae un correo.",
+    "languagesSaved": "Guardado."
   }
 }

@@ -83,7 +83,8 @@
     "readIn": "Le lire en {language}"
   },
   "contact": {
-    "title": "Tous les réseaux officiels du créateur"
+    "title": "Tous les réseaux officiels du créateur",
+    "email": "Ou écrivez-moi à"
   },
   "legal": {
     "privacy": {
@@ -314,7 +315,11 @@
       "fileLabel": "Texte du lien",
       "videoUrl": "Lien YouTube",
       "videoTitle": "Texte du bouton",
-      "videoHint": "Les e-mails ne peuvent pas lire de vidéo — aucun client n’exécute d’intégration. Ceci envoie la vraie miniature avec un bouton qui ouvre YouTube."
+      "videoHint": "Les e-mails ne peuvent pas lire de vidéo — aucun client n’exécute d’intégration. Ceci envoie la vraie miniature avec un bouton qui ouvre YouTube.",
+      "language": "Rédigée en",
+      "anyLanguage": "Tout le monde, toutes langues",
+      "languageHint": "Cela décide qui la reçoit : les lecteurs qui lisent cette langue, plus ceux qui n'en ont choisi aucune.",
+      "noReaders": "Personne n'est encore inscrit pour cette langue."
     },
     "push": {
       "title": "Notifications push",
@@ -439,6 +444,9 @@
     "on": "Activé",
     "off": "Désactivé",
     "unsubscribed": "Vous êtes désinscrit.",
-    "unsubscribeFailed": "Ce lien de désinscription n’est plus valide. Vous pouvez désactiver l’option ici."
+    "unsubscribeFailed": "Ce lien de désinscription n’est plus valide. Vous pouvez désactiver l’option ici.",
+    "languages": "Langues dans lesquelles vous voulez recevoir les e-mails",
+    "languagesHint": "Cochez celles que vous lisez. Tout laisser coché revient à tout recevoir — un chapitre publié en cinq langues ne vous vaut qu'un seul e-mail.",
+    "languagesSaved": "Enregistré."
   }
 }

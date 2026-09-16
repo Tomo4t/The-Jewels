@@ -83,7 +83,8 @@
     "readIn": "Przeczytaj w {language}"
   },
   "contact": {
-    "title": "Wszystkie oficjalne profile twórcy"
+    "title": "Wszystkie oficjalne profile twórcy",
+    "email": "Albo napisz do mnie na"
   },
   "legal": {
     "privacy": {
@@ -314,7 +315,11 @@
       "fileLabel": "Tekst linku",
       "videoUrl": "Link YouTube",
       "videoTitle": "Tekst przycisku",
-      "videoHint": "E-maile nie odtwarzają wideo — żaden klient nie uruchomi osadzenia. Wysyłamy prawdziwą miniaturę z przyciskiem otwierającym YouTube."
+      "videoHint": "E-maile nie odtwarzają wideo — żaden klient nie uruchomi osadzenia. Wysyłamy prawdziwą miniaturę z przyciskiem otwierającym YouTube.",
+      "language": "Napisany w",
+      "anyLanguage": "Wszyscy, dowolny język",
+      "languageHint": "To decyduje, kto go dostanie: czytelnicy, którzy czytają w tym języku, oraz ci, którzy nie wybrali żadnego.",
+      "noReaders": "Nikt nie zapisał się jeszcze na ten język."
     },
     "push": {
       "title": "Powiadomienia push",
@@ -439,6 +444,9 @@
     "on": "Włączone",
     "off": "Wyłączone",
     "unsubscribed": "Subskrypcja została anulowana.",
-    "unsubscribeFailed": "Ten link rezygnacji nie jest już ważny. Możesz wyłączyć to tutaj."
+    "unsubscribeFailed": "Ten link rezygnacji nie jest już ważny. Możesz wyłączyć to tutaj.",
+    "languages": "Języki, w których chcesz dostawać maile",
+    "languagesHint": "Zaznacz te, które czytasz. Zostaw wszystkie zaznaczone, a dostaniesz wszystko — rozdział wydany w pięciu językach i tak oznacza jednego maila.",
+    "languagesSaved": "Zapisano."
   }
 }

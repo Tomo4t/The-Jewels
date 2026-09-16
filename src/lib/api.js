@@ -228,6 +228,8 @@ export const api = {
   adminSettings: () => request('/api/admin/settings'),
   notifications: () => request('/api/notify/'),
   setNotification: (kind, on) => request('/api/notify/', { method: 'PUT', body: { kind, on } }),
+  setMailLanguages: (languages) =>
+    request('/api/notify/languages', { method: 'PUT', body: { languages } }),
   subscribePush: (subscription) =>
     request('/api/notify/push', { method: 'POST', body: { subscription } }),
   unsubscribePush: (endpoint) =>

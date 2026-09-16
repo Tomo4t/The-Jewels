@@ -710,3 +710,20 @@ html.dark .button--google:hover:not(:disabled) {
 .notify-row .field-hint.is-warn {
   color: var(--color-warning, #a4611c);
 }
+
+/* The language ticks sit under the two switches and read as one group, not as
+   three more switches -- they answer "which", where the ones above answer
+   "whether". */
+
+.notify-langs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin: 0.4rem 0 0;
+}
+
+.notify-langs .switch-label {
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 400;
+}

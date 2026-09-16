@@ -104,10 +104,14 @@ const recordAnnouncement = db.prepare(
  * dedupe key means even a torn write could not.
  */
 export async function announceNewChapters({ silent = false } = {}) {
-  const readers = subscribersFor('release');
   let announced = 0;
 
   for (const lang of LANGUAGES) {
+    // Asked per language rather than once up front. It used to be hoisted out
+    // of this loop, which meant a chapter published in five languages mailed
+    // every subscriber five times over -- the same chapter, five announcements.
+    const readers = subscribersFor('release', lang);
+
     let chapters = [];
     try {
       chapters = await listChapters(lang);

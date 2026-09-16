@@ -60,6 +60,13 @@ const BLOCK = z.discriminatedUnion('type', [
 const DRAFT = z.object({
   subject: z.string().max(200).default(''),
   blocks: z.array(BLOCK).max(80).default([]),
+  // '' is a real choice, not a missing one: a newsletter that is not about a
+  // particular language -- a site notice, a hiatus -- goes to everybody.
+  lang: z
+    .string()
+    .max(8)
+    .refine((code) => code === '' || config.languages.includes(code), 'unknown language')
+    .default(''),
 });
 
 const rowToDraft = (row) =>
@@ -67,6 +74,7 @@ const rowToDraft = (row) =>
     id: row.id,
     subject: row.subject,
     blocks: JSON.parse(row.blocks || '[]'),
+    lang: row.lang || '',
     status: row.status,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -83,9 +91,19 @@ router.get(
   requireRole('admin'),
   asyncRoute(async (_req, res) => {
     const rows = db.prepare('SELECT * FROM newsletters ORDER BY id DESC LIMIT 50').all();
+    // One count per language plus the unfiltered total, because "send to 40
+    // subscribers" on a French newsletter that reaches six of them is a lie the
+    // button tells you right before you press it.
+    const subscribers = { all: subscribersFor('newsletter').length };
+    for (const code of config.languages) {
+      subscribers[code] = subscribersFor('newsletter', code).length;
+    }
+
     res.json({
       newsletters: rows.map(rowToDraft),
-      subscribers: subscribersFor('newsletter').length,
+      subscribers: subscribers.all,
+      subscribersByLanguage: subscribers,
+      languages: config.languages,
       dailyLimit: config.mail.dailyLimit,
     });
   })
@@ -124,8 +142,10 @@ router.put(
     }
 
     db.prepare(
-      `UPDATE newsletters SET subject = ?, blocks = ?, updated_at = datetime('now') WHERE id = ?`
-    ).run(parsed.data.subject, JSON.stringify(parsed.data.blocks), row.id);
+      `UPDATE newsletters SET subject = ?, blocks = ?, lang = ?,
+                              updated_at = datetime('now')
+        WHERE id = ?`
+    ).run(parsed.data.subject, JSON.stringify(parsed.data.blocks), parsed.data.lang, row.id);
     res.json(rowToDraft(findDraft(row.id)));
   })
 );
@@ -233,7 +253,14 @@ router.post(
       throw ApiError.badRequest('empty', 'There is nothing in it yet.');
     }
 
-    const readers = subscribersFor('newsletter');
+    // A draft with no language still goes to everybody; one written in French
+    // goes to the readers who said they read French, and to the readers who
+    // never expressed a preference at all.
+    const readers = subscribersFor('newsletter', draft.lang || null);
+    if (!readers.length) {
+      throw ApiError.badRequest('no_readers', 'Nobody is signed up for that language yet.');
+    }
+
     const queued = enqueue(
       readers.map((reader) => {
         const mail = newsletterEmail({

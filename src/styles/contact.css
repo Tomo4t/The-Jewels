@@ -61,3 +61,25 @@ html.dark {
 .contact-container h1 {
   font-size: 1.35rem;
 }
+
+/* --- the address ----------------------------------------------------------
+   Under the icons rather than among them: it is the one way to reach him that
+   is not a social account, and it reads as a sentence rather than a badge. */
+
+.contact-email {
+  margin: 2rem 0 0;
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+}
+
+.contact-email a {
+  color: var(--color-accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+.contact-email a:hover,
+.contact-email a:focus-visible {
+  border-bottom-color: currentColor;
+}

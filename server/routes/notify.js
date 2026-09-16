@@ -5,8 +5,10 @@ import { requireAuth } from '../middleware/auth.js';
 import { findById } from '../services/users.js';
 import {
   KINDS,
+  mailLanguages,
   preferencesFor,
   readUnsubscribeToken,
+  setMailLanguages,
   setPreference,
 } from '../services/notifications.js';
 import {
@@ -23,6 +25,8 @@ const router = Router();
 
 const state = (userId) => ({
   preferences: preferencesFor(userId),
+  languages: mailLanguages(userId),
+  allLanguages: config.languages,
   push: {
     configured: pushConfigured(),
     publicKey: pushConfigured() ? pushSummary().publicKey : null,
@@ -63,6 +67,28 @@ router.put(
     }
 
     setPreference(req.user.id, kind, on);
+    res.json(state(req.user.id));
+  })
+);
+
+/**
+ * Which languages this reader wants mail about.
+ *
+ * Deliberately not gated on a confirmed address the way the switches above are.
+ * This narrows what somebody receives rather than starting anything, so there
+ * is nobody to protect from it -- and a reader halfway through confirming
+ * should still be able to say "French only" before the first mail arrives.
+ */
+router.put(
+  '/languages',
+  requireAuth,
+  asyncRoute(async (req, res) => {
+    const parsed = z
+      .object({ languages: z.array(z.string().max(8)).max(20) })
+      .safeParse(req.body ?? {});
+    if (!parsed.success) throw ApiError.badRequest('invalid', 'That is not a language list.');
+
+    setMailLanguages(req.user.id, parsed.data.languages);
     res.json(state(req.user.id));
   })
 );

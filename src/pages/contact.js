@@ -1,6 +1,13 @@
 import { escapeHTML } from '../lib/dom.js';
 import { t } from '../lib/i18n.js';
 
+/**
+ * Spelled out rather than only hidden behind a mailto:, because the address is
+ * the point -- somebody reading on a phone with no mail client set up still
+ * needs to be able to write it down.
+ */
+const EMAIL = 'contact@tomojw.com';
+
 const SOCIALS = [
   { name: 'Instagram', href: 'https://instagram.com/Tomo_4t', icon: 'instagram.svg' },
   { name: 'Twitter', href: 'https://twitter.com/Tomo_4t', icon: 'twitter.svg' },
@@ -31,6 +38,10 @@ export function render() {
             </li>`
         ).join('')}
       </ul>
+      <p class="contact-email">
+        <span data-i18n="contact.email">${escapeHTML(t('contact.email'))}</span>
+        <a href="mailto:${EMAIL}" data-sound="ui">${EMAIL}</a>
+      </p>
     </div>
   `;
 }
