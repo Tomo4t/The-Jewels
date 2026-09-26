@@ -120,6 +120,9 @@ router.post(
     }
 
     const screening = await screenComment(body, { user: req.user, lang, chapter });
+    // The people who run the queue do not wait in it -- the same exemption an
+    // edit gets below. Only the hold is lifted: a flag is still recorded.
+    if (screening.status === 'pending' && isModerator(req.user)) screening.status = 'visible';
     const row = comments.insert({
       lang,
       chapter,
