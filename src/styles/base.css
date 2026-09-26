@@ -439,15 +439,13 @@ h3 {
 
    What logical properties cannot flip is a shape. An arrow is a picture of a
    direction, and a chevron drawn out of two borders is the same. Those read as
-   backwards in a right-to-left page unless they are mirrored, so the three
+   backwards in a right-to-left page unless they are mirrored, so the two
    custom properties below do it in one place rather than by restating every
    hover and active state. */
 
 [dir='rtl'] {
   --chevron-flip: -1;
   --drawer-side: -1;
-  --arrow-back: 1;
-  --arrow-forward: -1;
 }
 
 /* Latin runs inside Arabic text -- a username, a chapter title left in English,

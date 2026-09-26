@@ -318,6 +318,10 @@ function navButtons(onPrev, onNext, { visible = true } = {}) {
 
   const nav = document.createElement('div');
   nav.className = 'navbtns';
+  // The pages are laid out left to right in every interface language, so the
+  // buttons under them are too -- in an Arabic page the flex row would
+  // otherwise put "previous" on the right, under the page it does not go to.
+  nav.dir = 'ltr';
   nav.innerHTML = `
     <button type="button" id="prev-btn" class="navbtnL"
             title="${escapeHTML(t('reader.previousPage'))}"

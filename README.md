@@ -9,7 +9,7 @@ an admin panel for publishing chapters.
 - **Content** — chapters and updates are plain files on disk, so the site can
   still be served by any static host if the server is ever taken away.
 
-Languages: English, 日本語, Polski, Español, Français.
+Languages: English, 日本語, Polski, Español, Français, العربية.
 
 ---
 
