@@ -87,6 +87,11 @@ const json = (payload) => JSON.stringify(payload);
 
 before(async () => {
   const { default: app } = await import('../app.js');
+  // example.com publishes a null MX (RFC 7505), so a live lookup rightly calls
+  // it undeliverable. The suite's addresses are placeholders, not a test of
+  // DNS, so the domain is answered from the cache instead of the network.
+  const { _cache } = await import('../services/deliverability.js');
+  _cache.set('example.com', { at: Date.now(), result: { ok: true } });
   await new Promise((resolve) => {
     server = app.listen(0, resolve);
   });
@@ -334,6 +339,15 @@ describe('comments and moderation', () => {
       body: json({ body: 'Hijacked.' }),
     });
     assert.equal(status, 403);
+  });
+
+  test('a moderator comment skips the queue', async () => {
+    const { status, body } = await asAdmin('/api/comments', {
+      method: 'POST',
+      body: json({ lang: 'en', chapter: 1, body: 'Straight from the author.' }),
+    });
+    assert.equal(status, 201);
+    assert.equal(body.pending, false);
   });
 
   test('comments on a chapter that does not exist are refused', async () => {
