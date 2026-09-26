@@ -2,7 +2,7 @@
   "meta": {
     "code": "ar",
     "name": "العربية",
-    "dir": "rtl",
+    "dir": "ltr",
     "locale": "ar-u-nu-latn"
   },
   "site": {
